@@ -27,6 +27,9 @@ function LinearCalendar() {
   const today = new Date()
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [lastImportInfo, setLastImportInfo] = useState<{fileName: string, importDate: string} | null>(null)
+  const [isCalDAVLoading, setIsCalDAVLoading] = useState(false)
+  const [calDAVCredentials, setCalDAVCredentials] = useState({ username: '', password: '' })
+  const [showCalDAVForm, setShowCalDAVForm] = useState(false)
   const todayRef = useRef<HTMLDivElement>(null)
   
   const STORAGE_KEY = 'linear-calendar-events'
@@ -331,6 +334,58 @@ function LinearCalendar() {
     setEvents([])
     setLastImportInfo(null)
   }
+
+  const handleCalDAVImport = async () => {
+    if (!calDAVCredentials.username || !calDAVCredentials.password) {
+      alert('Please enter both username and app-specific password')
+      return
+    }
+
+    setIsCalDAVLoading(true)
+    
+    try {
+      // Use localhost for development, environment variable for production
+      const proxyUrl = process.env.NODE_ENV === 'production' 
+        ? process.env.REACT_APP_CALDAV_PROXY_URL || 'https://your-railway-app.railway.app'
+        : 'http://localhost:3001'
+      
+      const response = await fetch(
+        `${proxyUrl}/api/calendar?username=${encodeURIComponent(calDAVCredentials.username)}&password=${encodeURIComponent(calDAVCredentials.password)}`
+      )
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch calendar data')
+      }
+      
+      if (data.success) {
+        // Convert the events to our format (they should already be in the right format)
+        const calDAVEvents = data.events.map((event: any) => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end)
+        }))
+        
+        setEvents(calDAVEvents)
+        saveEventsToStorage(calDAVEvents, `CalDAV Live Import`)
+        
+        // Hide the form after successful import
+        setShowCalDAVForm(false)
+        setCalDAVCredentials({ username: '', password: '' })
+        
+        console.log(`Successfully imported ${data.count} events from ${data.calendars?.length || 0} calendars`)
+      } else {
+        throw new Error(data.error || 'Unknown error occurred')
+      }
+      
+    } catch (error) {
+      console.error('CalDAV Import Error:', error)
+      alert(`Failed to import calendar: ${error.message}`)
+    } finally {
+      setIsCalDAVLoading(false)
+    }
+  }
   
   const getEventsForDate = (date: Date): CalendarEvent[] => {
     return events.filter(event => {
@@ -539,11 +594,77 @@ function LinearCalendar() {
         Linear Calendar {currentYear}
       </h1>
       
-      <div className="mb-6 no-print">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Import Apple Calendar</h2>
-          <p className="text-sm text-gray-600 mb-3">
-            Export your calendar from Apple Calendar as an ICS file and upload it here to see your events.
+      <div className="mb-6 no-print space-y-4">
+        {/* Live Calendar Import */}
+        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <h2 className="text-lg font-semibold mb-2 text-green-800">🔗 Live Calendar Import</h2>
+          <p className="text-sm text-green-700 mb-3">
+            Connect directly to your Apple Calendar for real-time updates (requires app-specific password).
+          </p>
+          
+          {!showCalDAVForm ? (
+            <button
+              onClick={() => setShowCalDAVForm(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Connect to Apple Calendar
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-green-700 mb-1">
+                  Apple ID Email
+                </label>
+                <input
+                  type="email"
+                  value={calDAVCredentials.username}
+                  onChange={(e) => setCalDAVCredentials(prev => ({ ...prev, username: e.target.value }))}
+                  placeholder="your@icloud.com"
+                  className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-green-700 mb-1">
+                  App-Specific Password
+                </label>
+                <input
+                  type="password"
+                  value={calDAVCredentials.password}
+                  onChange={(e) => setCalDAVCredentials(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="xxxx-xxxx-xxxx-xxxx"
+                  className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <p className="text-xs text-green-600 mt-1">
+                  Generate at: appleid.apple.com → Security → App-Specific Passwords
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleCalDAVImport}
+                  disabled={isCalDAVLoading}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  {isCalDAVLoading ? 'Connecting...' : 'Import Calendar'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCalDAVForm(false)
+                    setCalDAVCredentials({ username: '', password: '' })
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* File Upload Import */}
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h2 className="text-lg font-semibold mb-2 text-blue-800">📁 File Import</h2>
+          <p className="text-sm text-blue-700 mb-3">
+            Export your calendar as an ICS file and upload it here (one-time import).
           </p>
           <input
             type="file"
@@ -551,8 +672,12 @@ function LinearCalendar() {
             onChange={handleFileUpload}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
-          {events.length > 0 && (
-            <div className="mt-2 space-y-1">
+        </div>
+
+        {/* Import Status */}
+        {events.length > 0 && (
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div className="space-y-1">
               <p className="text-sm text-green-600">
                 ✅ Loaded {events.length} events from your calendar
               </p>
@@ -568,8 +693,8 @@ function LinearCalendar() {
                 Clear stored calendar data
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       
       <div className="day-list">

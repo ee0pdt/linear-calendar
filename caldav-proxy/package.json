@@ -1,0 +1,24 @@
+{
+  "name": "linear-calendar-caldav-proxy",
+  "version": "1.0.0",
+  "description": "CalDAV proxy server for Apple Calendar integration",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "tsdav": "^2.0.3",
+    "ical": "^0.8.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["caldav", "calendar", "proxy", "apple", "icloud"],
+  "author": "Linear Calendar",
+  "license": "MIT"
+}
