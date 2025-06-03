@@ -11,6 +11,7 @@ interface CalendarEvent {
   end: Date
   allDay: boolean
   rrule?: string
+  isRecurring?: boolean
 }
 
 interface RecurrenceRule {
@@ -253,6 +254,8 @@ function LinearCalendar() {
             const recurringEvents = expandRecurringEvent(currentEvent as CalendarEvent, currentYear)
             events.push(...recurringEvents)
           } else {
+            // Mark as non-recurring event
+            currentEvent.isRecurring = false
             events.push(currentEvent as CalendarEvent)
           }
         }
@@ -300,12 +303,25 @@ function LinearCalendar() {
     if (file && file.name.endsWith('.ics')) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        const content = e.target?.result as string
-        const parsedEvents = parseICSFile(content)
-        setEvents(parsedEvents)
-        saveEventsToStorage(parsedEvents, file.name)
+        try {
+          const content = e.target?.result as string
+          console.log('ICS file loaded, parsing...', { fileSize: content.length, fileName: file.name })
+          const parsedEvents = parseICSFile(content)
+          console.log('Parsed events:', parsedEvents.length, parsedEvents)
+          setEvents(parsedEvents)
+          saveEventsToStorage(parsedEvents, file.name)
+        } catch (error) {
+          console.error('Error parsing ICS file:', error)
+          alert('Error importing calendar file. Please check the browser console for details.')
+        }
+      }
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error)
+        alert('Error reading the file. Please try again.')
       }
       reader.readAsText(file)
+    } else {
+      alert('Please select a valid .ics calendar file.')
     }
   }
   
@@ -423,7 +439,8 @@ function LinearCalendar() {
           ...baseEvent,
           start: new Date(currentDate),
           end: baseEvent.end ? new Date(currentDate.getTime() + eventDuration) : undefined as any,
-          rrule: undefined // Remove rrule from individual instances
+          rrule: undefined, // Remove rrule from individual instances
+          isRecurring: true // Mark as recurring event instance
         }
         
         events.push(newEvent)
@@ -469,7 +486,9 @@ function LinearCalendar() {
         const parsedEvents = JSON.parse(savedEvents).map((event: any) => ({
           ...event,
           start: new Date(event.start),
-          end: event.end ? new Date(event.end) : undefined
+          end: event.end ? new Date(event.end) : undefined,
+          // Ensure isRecurring field exists, default to false if not set
+          isRecurring: event.isRecurring ?? false
         }))
         setEvents(parsedEvents)
       } catch (error) {
@@ -640,30 +659,42 @@ function LinearCalendar() {
                                   <div key={i}>
                                     {event.allDay ? (
                                       <span 
-                                        className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-help"
+                                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-help ${
+                                          event.isRecurring 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : 'bg-purple-100 text-purple-800 border-2 border-purple-300'
+                                        }`}
                                         title={event.title.length > 15 ? event.title : undefined}
                                       >
                                         {(() => {
                                           const dayProgress = getEventDisplayForDate(event, date)
                                           const emoji = getEventEmoji(event.title)
                                           const title = event.title.length > 12 ? `${event.title.substring(0, 12)}...` : event.title
-                                          return dayProgress ? `${dayProgress} ${title} ${emoji}` : `${title} ${emoji}`
+                                          const recurringIndicator = event.isRecurring ? '' : '★ '
+                                          return dayProgress 
+                                            ? `${recurringIndicator}${dayProgress} ${title} ${emoji}` 
+                                            : `${recurringIndicator}${title} ${emoji}`
                                         })()}
                                       </span>
                                     ) : (
                                       <div 
-                                        className="text-blue-700 cursor-help"
+                                        className={`cursor-help ${
+                                          event.isRecurring ? 'text-blue-700' : 'text-purple-700'
+                                        }`}
                                         title={event.title.length > 22 ? event.title : undefined}
                                       >
+                                        {!event.isRecurring && (
+                                          <span className="text-purple-600 font-medium mr-1">★</span>
+                                        )}
                                         {timeDisplay && (
                                           <span className="font-medium mr-1">
                                             {timeDisplay}
                                           </span>
                                         )}
-                                        <span className="text-blue-600">
+                                        <span className={event.isRecurring ? 'text-blue-600' : 'text-purple-600'}>
                                           {(() => {
                                             const emoji = getEventEmoji(event.title)
-                                            const title = event.title.length > 22 ? `${event.title.substring(0, 22)}...` : event.title
+                                            const title = event.title.length > 20 ? `${event.title.substring(0, 20)}...` : event.title
                                             return `${title} ${emoji}`
                                           })()}
                                         </span>
