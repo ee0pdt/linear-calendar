@@ -14,6 +14,21 @@ code {
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+/* Screen-only styles for better web experience */
+.weekend-highlight {
+  background: #f8fafc;
+  font-style: italic;
+}
+
+.holiday-highlight {
+  /* School holidays now use pill badges only */
+}
+
+.holiday-weekend-highlight {
+  background: #f8fafc;
+  font-style: italic;
+}
+
 /* Print-specific styles for linear calendar */
 @media print {
   @page {
@@ -114,22 +129,27 @@ code {
     font-weight: normal !important;
   }
   
-  /* Weekend highlighting for print */
+  /* Override screen styles for print - weekend highlighting */
   .weekend-highlight {
     background: #f8f8f8 !important;
     font-style: italic !important;
+    border-left: none !important;
+    padding-left: 1.2pt !important;
   }
   
-  /* School holiday highlighting for print */
+  /* Override screen styles for print - school holiday highlighting */
   .holiday-highlight {
+    background: none !important;
     border-left: 1.5pt solid #999 !important;
+    padding-left: 1.2pt !important;
   }
   
-  /* Weekend + School holiday combination */
+  /* Override screen styles for print - weekend + school holiday combination */
   .holiday-weekend-highlight {
     background: #f8f8f8 !important;
     font-style: italic !important;
     border-left: 1.5pt solid #999 !important;
+    padding-left: 1.2pt !important;
   }
   
   /* Past days - ticked appearance */

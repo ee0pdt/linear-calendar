@@ -1,301 +1,159 @@
-Welcome to your new TanStack app! 
+# Linear Calendar
 
-# Getting Started
+A specialized calendar application designed for visual time management and ADHD planning needs. Displays all 365 days of the year in a linear, vertical format - perfect for understanding time progression and planning ahead.
 
-To run this application:
+![Linear Calendar Preview](https://via.placeholder.com/800x400/4f46e5/ffffff?text=Linear+Calendar+Preview)
+
+## ✨ Features
+
+### 📅 **Linear Time Visualization**
+- **All 365 days** displayed vertically in chronological order
+- **Month separators** with clear visual hierarchy
+- **Day counter** showing progress through the year (Day X of 365)
+- **Past days auto-ticked** with green checkboxes for visual progress
+
+### 🖨️ **Print-Optimized Design**
+- **4 A4 pages** - optimized layout for wall mounting
+- **Compact styling** with readable fonts designed for printing
+- **Print-friendly colors** that work in black and white
+- **Physical checkbox spaces** for crossing off days manually
+
+### 📱 **Apple Calendar Integration**
+- **Import ICS files** from Apple Calendar, Google Calendar, or any calendar app
+- **Multi-day event support** with day-by-day progress tracking
+- **Time display** for scheduled events (hidden for all-day events)
+- **Smart event parsing** handles both timed and all-day events
+
+### 🏫 **Built-in UK School Holidays**
+- **2025 school term dates** pre-loaded for UK/Oxfordshire
+- **Visual indicators** distinguish school holidays from regular days
+- **Weekend highlighting** with italic styling
+
+### 🎯 **ADHD-Friendly Features**
+- **"Jump to Today" button** for quick navigation
+- **Visual time orientation** helps with time blindness
+- **Progress tracking** through completed (past) days
+- **Clear visual hierarchy** reduces cognitive load
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/linear-calendar.git
+cd linear-calendar
+
+# Install dependencies
 npm install
-npm run start  
+
+# Start development server
+npm run dev
 ```
 
-# Building For Production
+The application will be available at `http://localhost:3000`
 
-To build this application for production:
+### Building for Production
 
 ```bash
+# Build for production
 npm run build
+
+# Preview production build
+npm run serve
 ```
 
-## Testing
+## 📖 How to Use
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+### 1. **View Your Calendar**
+- Scroll through all 365 days of the year
+- Past days are automatically marked as completed
+- Current day is highlighted (on screen only)
+
+### 2. **Import Your Events**
+- Export your calendar as an ICS file from Apple Calendar, Google Calendar, etc.
+- Click "Choose File" at the top and select your ICS file
+- Events will appear inline with their dates and times
+
+### 3. **Print Your Calendar**
+- Press `Ctrl+P` (or `Cmd+P` on Mac)
+- Calendar automatically formats for 4 A4 pages
+- Print and mount on your wall for physical planning
+
+### 4. **Navigate Quickly**
+- Use the floating blue button to "Jump to Today"
+- Smooth scroll keeps you oriented in time
+
+## 🎨 Visual Indicators
+
+| Element | Screen Appearance | Print Appearance | Meaning |
+|---------|------------------|------------------|---------|
+| **Past Days** | Faded with green ✓ | Green checkbox | Days that have passed |
+| **Today** | Yellow highlight | Normal (no highlight) | Current day |
+| **Weekends** | Italic text | Italic text | Saturday/Sunday |
+| **School Holidays** | Left border + 📚 | Left border | UK school break periods |
+| **Events** | Blue text with times | Calendar icon only | Your imported calendar events |
+
+## 🛠️ Technical Stack
+
+- **React 19** - Modern React with latest features
+- **TypeScript** - Type-safe development
+- **TanStack Router** - File-based routing system
+- **Tailwind CSS v4** - Utility-first styling
+- **Vite** - Fast build tool and dev server
+- **Vitest** - Testing framework
+
+## 📂 Project Structure
+
+```
+src/
+├── components/          # Reusable components
+├── routes/             # File-based routing
+│   ├── __root.tsx     # Root layout
+│   └── index.tsx      # Main calendar component
+├── styles.css         # Global styles and print CSS
+└── main.tsx           # Application entry point
+```
+
+## 🎯 Why Linear Calendar?
+
+Traditional calendar views (month grids) can be challenging for people with ADHD or time management difficulties. This linear approach provides:
+
+- **Clear time progression** - see exactly where you are in the year
+- **Reduced cognitive load** - simple, consistent layout
+- **Physical interaction** - print and physically cross off days
+- **Progress visualization** - see how much of the year has passed
+- **Context preservation** - events show in relation to the full year
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Commands
 
 ```bash
-npm run test
+npm run dev        # Start development server
+npm run build      # Build for production  
+npm run test       # Run tests
+npm run lint       # Run ESLint
+npm run format     # Run Prettier
+npm run check      # Auto-fix with Prettier and ESLint
 ```
 
-## Styling
+## 📝 License
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+This project is open source and available under the [MIT License](LICENSE).
 
+## 🙏 Acknowledgments
 
-## Linting & Formatting
+- Built with [Claude Code](https://claude.ai/code) for rapid development
+- Designed specifically for ADHD and time management needs
+- Inspired by the need for better time visualization tools
 
+---
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+**Made with ❤️ for better time management and planning**

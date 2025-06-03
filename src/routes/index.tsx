@@ -10,6 +10,15 @@ interface CalendarEvent {
   start: Date
   end: Date
   allDay: boolean
+  rrule?: string
+}
+
+interface RecurrenceRule {
+  freq: string
+  interval?: number
+  until?: Date
+  count?: number
+  byDay?: string[]
 }
 
 function LinearCalendar() {
@@ -67,35 +76,34 @@ function LinearCalendar() {
     return day === 0 || day === 6 // Sunday = 0, Saturday = 6
   }
   
+  const schoolHolidays = [
+    // Christmas holidays (late Dec 2024 into Jan 2025)
+    { start: [1, 1], end: [1, 6], name: "Christmas Holiday" },
+    
+    // February half term
+    { start: [2, 17], end: [2, 21], name: "February Half Term" },
+    
+    // Easter holidays
+    { start: [4, 7], end: [4, 21], name: "Easter Holiday" },
+    
+    // May half term  
+    { start: [5, 26], end: [5, 30], name: "May Half Term" },
+    
+    // Summer holidays
+    { start: [7, 21], end: [9, 1], name: "Summer Holiday" },
+    
+    // October half term
+    { start: [10, 27], end: [10, 31], name: "October Half Term" },
+    
+    // Christmas holidays (end of year)
+    { start: [12, 22], end: [12, 31], name: "Christmas Holiday" }
+  ]
+
   const isSchoolHoliday = (date: Date) => {
     const month = date.getMonth() + 1 // 1-12
     const day = date.getDate()
     
-    // 2025 UK School Holiday periods (approximate - Oxfordshire pattern)
-    const holidays = [
-      // Christmas holidays (late Dec 2024 into Jan 2025)
-      { start: [1, 1], end: [1, 6] }, // New Year period
-      
-      // February half term
-      { start: [2, 17], end: [2, 21] },
-      
-      // Easter holidays
-      { start: [4, 7], end: [4, 21] },
-      
-      // May half term  
-      { start: [5, 26], end: [5, 30] },
-      
-      // Summer holidays
-      { start: [7, 21], end: [9, 1] },
-      
-      // October half term
-      { start: [10, 27], end: [10, 31] },
-      
-      // Christmas holidays (end of year)
-      { start: [12, 22], end: [12, 31] }
-    ]
-    
-    return holidays.some(holiday => {
+    return schoolHolidays.some(holiday => {
       const [startMonth, startDay] = holiday.start
       const [endMonth, endDay] = holiday.end
       
@@ -107,6 +115,43 @@ function LinearCalendar() {
                (month > startMonth && month < endMonth)
       }
     })
+  }
+
+  const getSchoolHolidayInfo = (date: Date) => {
+    const month = date.getMonth() + 1 // 1-12
+    const day = date.getDate()
+    
+    for (const holiday of schoolHolidays) {
+      const [startMonth, startDay] = holiday.start
+      const [endMonth, endDay] = holiday.end
+      
+      let isInHoliday = false
+      if (startMonth === endMonth) {
+        isInHoliday = month === startMonth && day >= startDay && day <= endDay
+      } else {
+        isInHoliday = (month === startMonth && day >= startDay) || 
+                      (month === endMonth && day <= endDay) ||
+                      (month > startMonth && month < endMonth)
+      }
+      
+      if (isInHoliday) {
+        // Calculate the day number and total days
+        const startDate = new Date(currentYear, startMonth - 1, startDay)
+        const endDate = new Date(currentYear, endMonth - 1, endDay)
+        const currentDate = new Date(currentYear, month - 1, day)
+        
+        const dayNumber = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        const totalDays = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+        
+        return {
+          name: holiday.name,
+          dayNumber,
+          totalDays
+        }
+      }
+    }
+    
+    return null
   }
   
   const parseICSFile = (icsContent: string): CalendarEvent[] => {
@@ -136,7 +181,14 @@ function LinearCalendar() {
                            currentEvent.end.getMinutes() === 0)
           
           currentEvent.allDay = isAllDay
-          events.push(currentEvent as CalendarEvent)
+          
+          // Handle recurring events
+          if (currentEvent.rrule) {
+            const recurringEvents = expandRecurringEvent(currentEvent as CalendarEvent, currentYear)
+            events.push(...recurringEvents)
+          } else {
+            events.push(currentEvent as CalendarEvent)
+          }
         }
         inEvent = false
       } else if (inEvent) {
@@ -149,6 +201,8 @@ function LinearCalendar() {
         } else if (line.startsWith('DTEND')) {
           const dateStr = line.split(':')[1]
           currentEvent.end = parseICSDate(dateStr)
+        } else if (line.startsWith('RRULE:')) {
+          currentEvent.rrule = line.substring(6)
         }
       }
     }
@@ -212,8 +266,6 @@ function LinearCalendar() {
   }
   
   const getEventDisplayForDate = (event: CalendarEvent, date: Date): string => {
-    console.log('Event:', event.title, 'AllDay:', event.allDay, 'Start:', event.start, 'End:', event.end)
-    
     if (!event.allDay) {
       // Timed events show the time
       return event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
@@ -247,6 +299,90 @@ function LinearCalendar() {
       const dayNumber = Math.ceil((checkDate.getTime() - eventStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
       return `Day ${dayNumber}/${totalDays}`
     }
+  }
+  
+  const parseRRule = (rrule: string): RecurrenceRule => {
+    const parts = rrule.split(';')
+    const rule: RecurrenceRule = { freq: '' }
+    
+    for (const part of parts) {
+      const [key, value] = part.split('=')
+      switch (key) {
+        case 'FREQ':
+          rule.freq = value
+          break
+        case 'INTERVAL':
+          rule.interval = parseInt(value)
+          break
+        case 'UNTIL':
+          rule.until = parseICSDate(value)
+          break
+        case 'COUNT':
+          rule.count = parseInt(value)
+          break
+        case 'BYDAY':
+          rule.byDay = value.split(',')
+          break
+      }
+    }
+    
+    return rule
+  }
+  
+  const expandRecurringEvent = (baseEvent: CalendarEvent, year: number): CalendarEvent[] => {
+    const events: CalendarEvent[] = []
+    const rule = parseRRule(baseEvent.rrule!)
+    
+    const yearStart = new Date(year, 0, 1)
+    const yearEnd = new Date(year, 11, 31)
+    
+    let currentDate = new Date(baseEvent.start)
+    let count = 0
+    const maxOccurrences = rule.count || 365 // Prevent infinite loops
+    
+    while (currentDate <= yearEnd && count < maxOccurrences) {
+      // Only include events that fall within the current year
+      if (currentDate >= yearStart) {
+        const eventDuration = baseEvent.end ? baseEvent.end.getTime() - baseEvent.start.getTime() : 0
+        
+        const newEvent: CalendarEvent = {
+          ...baseEvent,
+          start: new Date(currentDate),
+          end: baseEvent.end ? new Date(currentDate.getTime() + eventDuration) : undefined as any,
+          rrule: undefined // Remove rrule from individual instances
+        }
+        
+        events.push(newEvent)
+      }
+      
+      // Calculate next occurrence based on frequency
+      switch (rule.freq) {
+        case 'DAILY':
+          currentDate.setDate(currentDate.getDate() + (rule.interval || 1))
+          break
+        case 'WEEKLY':
+          currentDate.setDate(currentDate.getDate() + 7 * (rule.interval || 1))
+          break
+        case 'MONTHLY':
+          currentDate.setMonth(currentDate.getMonth() + (rule.interval || 1))
+          break
+        case 'YEARLY':
+          currentDate.setFullYear(currentDate.getFullYear() + (rule.interval || 1))
+          break
+        default:
+          // Unknown frequency, break to prevent infinite loop
+          break
+      }
+      
+      count++
+      
+      // Check if we've reached the UNTIL date
+      if (rule.until && currentDate > rule.until) {
+        break
+      }
+    }
+    
+    return events
   }
   
   const scrollToToday = () => {
@@ -289,6 +425,7 @@ function LinearCalendar() {
           const isMonthStart = isFirstOfMonth(date)
           const isWeekendDay = isWeekend(date)
           const isHoliday = isSchoolHoliday(date)
+          const holidayInfo = getSchoolHolidayInfo(date)
           const isPast = isPastDay(date)
           const dayEvents = getEventsForDate(date)
           const monthNumber = date.getMonth() + 1
@@ -318,13 +455,18 @@ function LinearCalendar() {
                   <div className={`w-6 h-6 border-2 day-checkbox ${isPast ? 'bg-green-200 border-green-400' : 'border-gray-400'}`}>
                     {isPast && <span className="text-green-700 text-sm font-bold flex items-center justify-center h-full">✓</span>}
                   </div>
+                  
                   <div className="font-medium">
                     {dayName}
                   </div>
-                  <div className="text-gray-600">
-                    {monthName} {dayNumber}
-                    {isHoliday && <span className="text-[8px] ml-1">📚</span>}
-                    {dayEvents.length > 0 && <span className="text-[8px] ml-1">📅</span>}
+                  <div className="text-gray-600 flex items-center space-x-2">
+                    <span>{monthName} {dayNumber}</span>
+                    {dayEvents.length > 0 && <span className="text-[8px]">📅</span>}
+                    {holidayInfo && (
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
+                        {holidayInfo.name} Day {holidayInfo.dayNumber}/{holidayInfo.totalDays}
+                      </span>
+                    )}
                   </div>
                   {isTodayDate && (
                     <div className="bg-red-500 text-white px-2 py-1 rounded text-sm no-print">
