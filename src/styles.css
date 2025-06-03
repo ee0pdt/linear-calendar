@@ -1,0 +1,184 @@
+@import 'tailwindcss';
+
+body {
+  @apply m-0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Print-specific styles for linear calendar */
+@media print {
+  @page {
+    size: A4;
+    margin: 0.08in 0.08in 0.02in 0.08in; /* top right bottom left */
+  }
+
+  body {
+    font-size: 5pt !important;
+    line-height: 0.65 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Calendar container optimizations */
+  .linear-calendar-container {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 100vh !important;
+  }
+
+  /* Title styling - readable */
+  h1 {
+    font-size: 12pt !important;
+    margin: 0 0 6pt 0 !important;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  /* Day list container */
+  .day-list {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Month headers - fine-tuned compact */
+  .month-header {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    padding: 0.8pt 1.2pt !important;
+    font-size: 7pt !important;
+    margin: 1.2pt 0 0 0 !important;
+    break-inside: avoid;
+    break-after: avoid;
+  }
+
+  /* Let content flow naturally - no forced page breaks */
+
+  /* Day entries - fine-tuned compact */
+  .day-entry {
+    padding: 0.3pt 1.2pt !important;
+    border-bottom: 0.25pt solid #ddd !important;
+    font-size: 6.2pt !important;
+    break-inside: avoid;
+    line-height: 0.95 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    min-height: 7pt !important;
+  }
+
+  /* Checkbox styling for print - readable size */
+  .day-checkbox {
+    width: 6pt !important;
+    height: 6pt !important;
+    border: 0.5pt solid #000 !important;
+    background: white !important;
+    flex-shrink: 0 !important;
+    margin-right: 2.5pt !important;
+  }
+
+  /* Day content layout */
+  .day-entry > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2pt !important;
+  }
+
+  .day-entry > div:first-child > div {
+    margin: 0 !important;
+  }
+
+  /* Day counter - readable size */
+  .day-entry > div:last-child {
+    font-size: 5pt !important;
+    color: #666 !important;
+  }
+
+  /* Remove today highlight for print */
+  .today-highlight {
+    background: none !important;
+    font-weight: normal !important;
+  }
+  
+  /* Weekend highlighting for print */
+  .weekend-highlight {
+    background: #f8f8f8 !important;
+    font-style: italic !important;
+  }
+  
+  /* School holiday highlighting for print */
+  .holiday-highlight {
+    border-left: 1.5pt solid #999 !important;
+  }
+  
+  /* Weekend + School holiday combination */
+  .holiday-weekend-highlight {
+    background: #f8f8f8 !important;
+    font-style: italic !important;
+    border-left: 1.5pt solid #999 !important;
+  }
+  
+  /* Past days - ticked appearance */
+  .past-day {
+    opacity: 0.7 !important;
+    background: #f9f9f9 !important;
+  }
+  
+  /* Past day checkboxes */
+  .past-day .day-checkbox {
+    background: #e0f2e0 !important;
+    border: 1pt solid #4a5f4a !important;
+  }
+
+  /* Hide elements that shouldn't print */
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  /* Remove hover states and transitions */
+  .day-entry:hover {
+    background: none !important;
+  }
+
+  /* Ensure no extra margins/padding */
+  .space-y-1 > div {
+    margin: 0 !important;
+  }
+
+  /* Force full page usage and eliminate all margins */
+  html,
+  body,
+  #app,
+  .linear-calendar-container {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Eliminate any potential spacing issues */
+  .linear-calendar-container > * {
+    margin-bottom: 0 !important;
+  }
+  
+  .linear-calendar-container > *:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
