@@ -158,6 +158,68 @@ function LinearCalendar() {
     return null
   }
   
+  const getEventEmoji = (title: string): string => {
+    const lowerTitle = title.toLowerCase()
+    
+    // People - specific names first (most specific matches)
+    if (lowerTitle.includes('nadine')) return '👩'
+    
+    // Religious & Spiritual
+    if (lowerTitle.includes('church') || lowerTitle.includes('service') || lowerTitle.includes('mass')) return '⛪'
+    if (lowerTitle.includes('prayer') || lowerTitle.includes('worship')) return '🙏'
+    
+    // Travel & Vacation
+    if (lowerTitle.includes('vacation') || lowerTitle.includes('holiday') || lowerTitle.includes('trip')) return '🏖️'
+    if (lowerTitle.includes('flight') || lowerTitle.includes('plane')) return '✈️'
+    if (lowerTitle.includes('hotel') || lowerTitle.includes('accommodation')) return '🏨'
+    
+    // Exercise & Sports
+    if (lowerTitle.includes('swim') || lowerTitle.includes('pool')) return '🏊'
+    if (lowerTitle.includes('gym') || lowerTitle.includes('workout') || lowerTitle.includes('fitness')) return '💪'
+    if (lowerTitle.includes('pilates') || lowerTitle.includes('yoga')) return '🧘'
+    if (lowerTitle.includes('run') || lowerTitle.includes('jog')) return '🏃'
+    if (lowerTitle.includes('bike') || lowerTitle.includes('cycle')) return '🚴'
+    if (lowerTitle.includes('tennis')) return '🎾'
+    if (lowerTitle.includes('football') || lowerTitle.includes('soccer')) return '⚽'
+    if (lowerTitle.includes('golf')) return '⛳'
+    
+    // Medical & Health
+    if (lowerTitle.includes('doctor') || lowerTitle.includes('appointment') || lowerTitle.includes('medical')) return '👩‍⚕️'
+    if (lowerTitle.includes('dentist') || lowerTitle.includes('dental')) return '🦷'
+    if (lowerTitle.includes('hospital') || lowerTitle.includes('surgery')) return '🏥'
+    if (lowerTitle.includes('therapy') || lowerTitle.includes('counseling')) return '💭'
+    
+    // Food & Social
+    if (lowerTitle.includes('dinner') || lowerTitle.includes('lunch') || lowerTitle.includes('breakfast')) return '🍽️'
+    if (lowerTitle.includes('party') || lowerTitle.includes('celebration')) return '🎉'
+    if (lowerTitle.includes('birthday')) return '🎂'
+    if (lowerTitle.includes('wedding')) return '💒'
+    if (lowerTitle.includes('date') || lowerTitle.includes('romantic')) return '💕'
+    
+    // Work & Business
+    if (lowerTitle.includes('conference') || lowerTitle.includes('summit')) return '🏢'
+    if (lowerTitle.includes('meeting') || lowerTitle.includes('workshop')) return '💼'
+    if (lowerTitle.includes('training') || lowerTitle.includes('course')) return '📚'
+    if (lowerTitle.includes('presentation') || lowerTitle.includes('demo')) return '📊'
+    
+    // Entertainment & Culture
+    if (lowerTitle.includes('movie') || lowerTitle.includes('cinema') || lowerTitle.includes('film')) return '🎬'
+    if (lowerTitle.includes('concert') || lowerTitle.includes('music')) return '🎵'
+    if (lowerTitle.includes('theater') || lowerTitle.includes('show')) return '🎭'
+    if (lowerTitle.includes('museum') || lowerTitle.includes('gallery')) return '🏛️'
+    if (lowerTitle.includes('festival')) return '🎪'
+    
+    // Family & Personal
+    if (lowerTitle.includes('family') || lowerTitle.includes('kids') || lowerTitle.includes('children')) return '👨‍👩‍👧‍👦'
+    if (lowerTitle.includes('school') || lowerTitle.includes('education')) return '🎓'
+    if (lowerTitle.includes('shopping') || lowerTitle.includes('mall')) return '🛍️'
+    if (lowerTitle.includes('cleaning') || lowerTitle.includes('chores')) return '🧹'
+    if (lowerTitle.includes('garden') || lowerTitle.includes('plant')) return '🌱'
+    
+    // Default
+    return '📅'
+  }
+  
   const parseICSFile = (icsContent: string): CalendarEvent[] => {
     const events: CalendarEvent[] = []
     const lines = icsContent.split('\n')
@@ -571,19 +633,42 @@ function LinearCalendar() {
                             Day {globalIndex + 1} of {yearDays.length}
                           </div>
                           {dayEvents.length > 0 && (
-                            <div className="mt-1 text-xs">
+                            <div className="mt-1 text-xs space-y-1">
                               {dayEvents.slice(0, 3).map((event, i) => {
                                 const timeDisplay = getEventDisplayForDate(event, date)
                                 return (
-                                  <div key={i} className="text-blue-700 mb-1">
-                                    {timeDisplay && (
-                                      <span className="font-medium mr-1">
-                                        {timeDisplay}
+                                  <div key={i}>
+                                    {event.allDay ? (
+                                      <span 
+                                        className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-help"
+                                        title={event.title.length > 15 ? event.title : undefined}
+                                      >
+                                        {(() => {
+                                          const dayProgress = getEventDisplayForDate(event, date)
+                                          const emoji = getEventEmoji(event.title)
+                                          const title = event.title.length > 12 ? `${event.title.substring(0, 12)}...` : event.title
+                                          return dayProgress ? `${dayProgress} ${title} ${emoji}` : `${title} ${emoji}`
+                                        })()}
                                       </span>
+                                    ) : (
+                                      <div 
+                                        className="text-blue-700 cursor-help"
+                                        title={event.title.length > 22 ? event.title : undefined}
+                                      >
+                                        {timeDisplay && (
+                                          <span className="font-medium mr-1">
+                                            {timeDisplay}
+                                          </span>
+                                        )}
+                                        <span className="text-blue-600">
+                                          {(() => {
+                                            const emoji = getEventEmoji(event.title)
+                                            const title = event.title.length > 22 ? `${event.title.substring(0, 22)}...` : event.title
+                                            return `${title} ${emoji}`
+                                          })()}
+                                        </span>
+                                      </div>
                                     )}
-                                    <span className="text-blue-600">
-                                      {event.title.length > 25 ? `${event.title.substring(0, 25)}...` : event.title}
-                                    </span>
                                   </div>
                                 )
                               })}
