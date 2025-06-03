@@ -70,7 +70,7 @@ code {
     padding: 0 !important;
   }
 
-  /* Month headers - fine-tuned compact */
+  /* Month headers - fine-tuned compact, remove sticky for print */
   .month-header {
     background: #f0f0f0 !important;
     color: #000 !important;
@@ -80,6 +80,9 @@ code {
     margin: 1.2pt 0 0 0 !important;
     break-inside: avoid;
     break-after: avoid;
+    position: static !important;
+    z-index: auto !important;
+    border-bottom: none !important;
   }
 
   /* Let content flow naturally - no forced page breaks */

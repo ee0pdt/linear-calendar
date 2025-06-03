@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 export const Route = createFileRoute('/')({
   component: LinearCalendar,
@@ -25,7 +25,11 @@ function LinearCalendar() {
   const currentYear = new Date().getFullYear()
   const today = new Date()
   const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [lastImportInfo, setLastImportInfo] = useState<{fileName: string, importDate: string} | null>(null)
   const todayRef = useRef<HTMLDivElement>(null)
+  
+  const STORAGE_KEY = 'linear-calendar-events'
+  const IMPORT_INFO_KEY = 'linear-calendar-import-info'
   
   // Generate all days of the year
   const generateYearDays = (year: number) => {
@@ -237,9 +241,17 @@ function LinearCalendar() {
         const content = e.target?.result as string
         const parsedEvents = parseICSFile(content)
         setEvents(parsedEvents)
+        saveEventsToStorage(parsedEvents, file.name)
       }
       reader.readAsText(file)
     }
+  }
+  
+  const clearStoredData = () => {
+    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(IMPORT_INFO_KEY)
+    setEvents([])
+    setLastImportInfo(null)
   }
   
   const getEventsForDate = (date: Date): CalendarEvent[] => {
@@ -385,6 +397,54 @@ function LinearCalendar() {
     return events
   }
   
+  // Load events from localStorage on component mount
+  useEffect(() => {
+    const savedEvents = localStorage.getItem(STORAGE_KEY)
+    const savedImportInfo = localStorage.getItem(IMPORT_INFO_KEY)
+    
+    if (savedEvents) {
+      try {
+        const parsedEvents = JSON.parse(savedEvents).map((event: any) => ({
+          ...event,
+          start: new Date(event.start),
+          end: event.end ? new Date(event.end) : undefined
+        }))
+        setEvents(parsedEvents)
+      } catch (error) {
+        console.error('Error loading saved events:', error)
+        // Clear corrupted data
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.removeItem(IMPORT_INFO_KEY)
+      }
+    }
+    
+    if (savedImportInfo) {
+      try {
+        setLastImportInfo(JSON.parse(savedImportInfo))
+      } catch (error) {
+        console.error('Error loading import info:', error)
+        localStorage.removeItem(IMPORT_INFO_KEY)
+      }
+    }
+  }, [])
+  
+  // Save events to localStorage whenever events change
+  const saveEventsToStorage = (eventList: CalendarEvent[], fileName: string) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(eventList))
+      const importInfo = {
+        fileName,
+        importDate: new Date().toLocaleString()
+      }
+      localStorage.setItem(IMPORT_INFO_KEY, JSON.stringify(importInfo))
+      setLastImportInfo(importInfo)
+    } catch (error) {
+      console.error('Error saving events to localStorage:', error)
+      // Handle storage quota exceeded or other errors
+      alert('Unable to save calendar data. Your browser storage may be full.')
+    }
+  }
+  
   const scrollToToday = () => {
     todayRef.current?.scrollIntoView({ 
       behavior: 'smooth', 
@@ -411,101 +471,136 @@ function LinearCalendar() {
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           {events.length > 0 && (
-            <p className="text-sm text-green-600 mt-2">
-              ✅ Loaded {events.length} events from your calendar
-            </p>
+            <div className="mt-2 space-y-1">
+              <p className="text-sm text-green-600">
+                ✅ Loaded {events.length} events from your calendar
+              </p>
+              {lastImportInfo && (
+                <p className="text-xs text-gray-500">
+                  Last imported: {lastImportInfo.fileName} on {lastImportInfo.importDate}
+                </p>
+              )}
+              <button
+                onClick={clearStoredData}
+                className="text-xs text-red-600 hover:text-red-800 underline"
+              >
+                Clear stored calendar data
+              </button>
+            </div>
           )}
         </div>
       </div>
       
-      <div className="space-y-1 day-list">
-        {yearDays.map((date, index) => {
-          const { dayName, dayNumber, monthName } = formatDate(date)
-          const isTodayDate = isToday(date)
-          const isMonthStart = isFirstOfMonth(date)
-          const isWeekendDay = isWeekend(date)
-          const isHoliday = isSchoolHoliday(date)
-          const holidayInfo = getSchoolHolidayInfo(date)
-          const isPast = isPastDay(date)
-          const dayEvents = getEventsForDate(date)
-          const monthNumber = date.getMonth() + 1
+      <div className="day-list">
+        {(() => {
+          // Group days by month for proper sticky header structure
+          const monthGroups: { [key: number]: Date[] } = {}
           
-          return (
-            <div key={index} ref={isTodayDate ? todayRef : null}>
-              {isMonthStart && (
+          yearDays.forEach(date => {
+            const month = date.getMonth() + 1
+            if (!monthGroups[month]) {
+              monthGroups[month] = []
+            }
+            monthGroups[month].push(date)
+          })
+          
+          return Object.entries(monthGroups).map(([monthNum, daysInMonth]) => {
+            const monthNumber = parseInt(monthNum)
+            const firstDay = daysInMonth[0]
+            const { monthName } = formatDate(firstDay)
+            
+            return (
+              <div key={monthNumber} className="month-container">
                 <div 
-                  className="bg-blue-100 text-blue-800 font-bold text-lg p-2 mt-4 first:mt-0 month-header"
+                  className="bg-blue-100 text-blue-800 font-bold text-lg p-2 mt-4 first:mt-0 month-header sticky top-0 z-10 border-b border-blue-200"
                   data-month={monthNumber}
                 >
                   {monthName} {currentYear}
                 </div>
-              )}
-              
-              <div
-                className={`
-                  flex items-center justify-between p-3 border-b border-gray-200 hover:bg-gray-50 day-entry
-                  ${isTodayDate ? 'bg-yellow-100 border-yellow-300 font-semibold today-highlight' : ''}
-                  ${isWeekendDay && !isHoliday ? 'weekend-highlight' : ''}
-                  ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight' : ''}
-                  ${isHoliday && !isWeekendDay ? 'holiday-highlight' : ''}
-                  ${isPast ? 'past-day' : ''}
-                `}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-6 h-6 border-2 day-checkbox ${isPast ? 'bg-green-200 border-green-400' : 'border-gray-400'}`}>
-                    {isPast && <span className="text-green-700 text-sm font-bold flex items-center justify-center h-full">✓</span>}
-                  </div>
-                  
-                  <div className="font-medium">
-                    {dayName}
-                  </div>
-                  <div className="text-gray-600 flex items-center space-x-2">
-                    <span>{monthName} {dayNumber}</span>
-                    {dayEvents.length > 0 && <span className="text-[8px]">📅</span>}
-                    {holidayInfo && (
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
-                        {holidayInfo.name} Day {holidayInfo.dayNumber}/{holidayInfo.totalDays}
-                      </span>
-                    )}
-                  </div>
-                  {isTodayDate && (
-                    <div className="bg-red-500 text-white px-2 py-1 rounded text-sm no-print">
-                      TODAY
-                    </div>
-                  )}
-                </div>
                 
-                <div className="text-right">
-                  <div className="text-gray-400 text-sm">
-                    Day {index + 1} of {yearDays.length}
-                  </div>
-                  {dayEvents.length > 0 && (
-                    <div className="mt-1 text-xs">
-                      {dayEvents.slice(0, 3).map((event, i) => {
-                        const timeDisplay = getEventDisplayForDate(event, date)
-                        return (
-                          <div key={i} className="text-blue-700 mb-1">
-                            {timeDisplay && (
-                              <span className="font-medium mr-1">
-                                {timeDisplay}
+                <div className="space-y-1">
+                  {daysInMonth.map((date, dayIndex) => {
+                    const { dayName, dayNumber, monthName: dayMonthName } = formatDate(date)
+                    const globalIndex = yearDays.findIndex(d => d.getTime() === date.getTime())
+                    const isTodayDate = isToday(date)
+                    const isWeekendDay = isWeekend(date)
+                    const isHoliday = isSchoolHoliday(date)
+                    const holidayInfo = getSchoolHolidayInfo(date)
+                    const isPast = isPastDay(date)
+                    const dayEvents = getEventsForDate(date)
+                    
+                    return (
+                      <div 
+                        key={dayIndex} 
+                        ref={isTodayDate ? todayRef : null}
+                        className={`
+                          flex items-center justify-between p-3 border-b border-gray-200 hover:bg-gray-50 day-entry
+                          ${isTodayDate ? 'bg-yellow-100 border-yellow-300 font-semibold today-highlight' : ''}
+                          ${isWeekendDay && !isHoliday ? 'weekend-highlight' : ''}
+                          ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight' : ''}
+                          ${isHoliday && !isWeekendDay ? 'holiday-highlight' : ''}
+                          ${isPast ? 'past-day' : ''}
+                        `}
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-6 h-6 border-2 day-checkbox ${isPast ? 'bg-green-200 border-green-400' : 'border-gray-400'}`}>
+                            {isPast && <span className="text-green-700 text-sm font-bold flex items-center justify-center h-full">✓</span>}
+                          </div>
+                          
+                          <div className="font-medium">
+                            {dayName}
+                          </div>
+                          <div className="text-gray-600 flex items-center space-x-2">
+                            <span>{dayMonthName} {dayNumber}</span>
+                            {dayEvents.length > 0 && <span className="text-[8px]">📅</span>}
+                            {holidayInfo && (
+                              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
+                                {holidayInfo.name} Day {holidayInfo.dayNumber}/{holidayInfo.totalDays}
                               </span>
                             )}
-                            <span className="text-blue-600">
-                              {event.title.length > 25 ? `${event.title.substring(0, 25)}...` : event.title}
-                            </span>
                           </div>
-                        )
-                      })}
-                      {dayEvents.length > 3 && (
-                        <div className="text-gray-500 text-xs">+{dayEvents.length - 3} more</div>
-                      )}
-                    </div>
-                  )}
+                          {isTodayDate && (
+                            <div className="bg-red-500 text-white px-2 py-1 rounded text-sm no-print">
+                              TODAY
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="text-right">
+                          <div className="text-gray-400 text-sm">
+                            Day {globalIndex + 1} of {yearDays.length}
+                          </div>
+                          {dayEvents.length > 0 && (
+                            <div className="mt-1 text-xs">
+                              {dayEvents.slice(0, 3).map((event, i) => {
+                                const timeDisplay = getEventDisplayForDate(event, date)
+                                return (
+                                  <div key={i} className="text-blue-700 mb-1">
+                                    {timeDisplay && (
+                                      <span className="font-medium mr-1">
+                                        {timeDisplay}
+                                      </span>
+                                    )}
+                                    <span className="text-blue-600">
+                                      {event.title.length > 25 ? `${event.title.substring(0, 25)}...` : event.title}
+                                    </span>
+                                  </div>
+                                )
+                              })}
+                              {dayEvents.length > 3 && (
+                                <div className="text-gray-500 text-xs">+{dayEvents.length - 3} more</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })
+        })()}
       </div>
       
       <div className="mt-8 text-center text-gray-500 calendar-footer no-print">
