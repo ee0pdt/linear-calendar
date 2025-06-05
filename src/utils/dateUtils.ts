@@ -71,7 +71,7 @@ export const isFirstOfMonth = (date: Date): boolean => {
 }
 
 /**
- * Checks if a date falls on a weekend
+ * Checks if a date is on a weekend (Saturday or Sunday)
  */
 export const isWeekend = (date: Date): boolean => {
   const day = date.getDay()

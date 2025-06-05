@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { routeTree } from '../../routeTree.gen'
+// Import the component directly instead of using router
+import { LinearCalendar } from '../../routes/index'
 
 // Mock the current date to be consistent in tests
 const MOCK_TODAY = new Date(2025, 5, 5) // June 5, 2025
@@ -11,61 +11,60 @@ beforeEach(() => {
 })
 
 describe('LinearCalendar Component', () => {
-  const router = createRouter({ routeTree })
+  it('renders the calendar header with correct information', () => {
+    render(<LinearCalendar />)
 
-  it('renders the calendar title with current year', () => {
-    render(<RouterProvider router={router} />)
-
-    expect(screen.getByText('Linear Calendar 2025')).toBeInTheDocument()
+    // Check for calendar header elements (year is split across elements)
+    expect(screen.getByText(/Linear Calendar\s+2025/)).toBeInTheDocument()
+    // Note: events count is not displayed when no events are loaded
   })
 
   it('renders import sections', () => {
-    render(<RouterProvider router={router} />)
+    render(<LinearCalendar />)
 
     expect(screen.getByText('🔗 Live Calendar Import')).toBeInTheDocument()
     expect(screen.getByText('📁 File Import')).toBeInTheDocument()
   })
 
   it('renders Connect to Apple Calendar button', () => {
-    render(<RouterProvider router={router} />)
+    render(<LinearCalendar />)
 
     expect(screen.getByText('Connect to Apple Calendar')).toBeInTheDocument()
   })
 
   it('renders file input for ICS upload', () => {
-    render(<RouterProvider router={router} />)
+    render(<LinearCalendar />)
 
-    const fileInput =
-      screen.getByRole('button', { name: /choose file/i }) ||
-      screen.getByLabelText(/choose file/i) ||
-      document.querySelector('input[type="file"]')
-
+    const fileInput = document.querySelector('input[type="file"]')
     expect(fileInput).toBeInTheDocument()
   })
 
-  it('renders the current year days', () => {
-    render(<RouterProvider router={router} />)
+  it('renders the calendar with months', () => {
+    render(<LinearCalendar />)
 
-    // Should render June 2025 header
-    expect(screen.getByText('June 2025')).toBeInTheDocument()
+    // Should render January (first month) header - use getAllBy since there are multiple instances
+    const januaryElements = screen.getAllByText('January')
+    expect(januaryElements.length).toBeGreaterThan(0)
 
-    // Should highlight today (June 5, 2025)
-    expect(screen.getByText('TODAY')).toBeInTheDocument()
+    // Should render the header with today's month
+    expect(screen.getByText('Today (Jun 5)')).toBeInTheDocument()
   })
 
-  it('renders jump to today button', () => {
-    render(<RouterProvider router={router} />)
+  it('renders jump to today buttons', () => {
+    render(<LinearCalendar />)
 
-    const jumpButton = screen.getByTitle('Jump to Today')
-    expect(jumpButton).toBeInTheDocument()
+    // There should be jump to today buttons (we use getAllBy since there are multiple)
+    const jumpButtons = screen.getAllByTitle('Jump to Today')
+    expect(jumpButtons.length).toBeGreaterThan(0)
   })
 
   it('displays correct day count', () => {
-    render(<RouterProvider router={router} />)
+    render(<LinearCalendar />)
 
-    // 2025 has 365 days (not a leap year)
-    expect(
-      screen.getByText('Linear Calendar for 2025 • 365 days total'),
-    ).toBeInTheDocument()
+    // Check for the header version (there are multiple instances)
+    const dayCountElements = screen.getAllByText(
+      'Linear Calendar for 2025 • 365 days total',
+    )
+    expect(dayCountElements.length).toBeGreaterThan(0)
   })
 })
