@@ -1,15 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
-import { ImportControls } from '../components/ImportControls'
-import { CalendarHeader } from '../components/CalendarHeader'
-import { CalendarGrid } from '../components/CalendarGrid'
 import { CalendarFooter } from '../components/CalendarFooter'
+import { CalendarGrid } from '../components/CalendarGrid'
+import { CalendarHeader } from '../components/CalendarHeader'
+import { ImportControls } from '../components/ImportControls'
+import { useEvents } from '../hooks/useEvents'
+import { useScrollToToday } from '../hooks/useScrollToToday'
 import { generateYearDays } from '../utils/dateUtils'
-import {
-  loadEventsFromStorage,
-  loadImportInfoFromStorage,
-} from '../utils/storageUtils'
-import type { CalendarEvent } from '../types'
 
 export const Route = createFileRoute('/')({
   component: LinearCalendar,
@@ -18,41 +14,10 @@ export const Route = createFileRoute('/')({
 export function LinearCalendar() {
   const currentYear = new Date().getFullYear()
   const today = new Date()
-  const [events, setEvents] = useState<Array<CalendarEvent>>([])
-  const [lastImportInfo, setLastImportInfo] = useState<{
-    fileName: string
-    importDate: string
-  } | null>(null)
-  const [isCalDAVLoading, setIsCalDAVLoading] = useState(false)
-  const [calDAVCredentials, setCalDAVCredentials] = useState({
-    username: '',
-    password: '',
-  })
-  const [showCalDAVForm, setShowCalDAVForm] = useState(false)
-  const todayRef = useRef<HTMLDivElement>(null)
 
-  // Jump to today function
-  const jumpToToday = () => {
-    if (todayRef.current) {
-      todayRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-    }
-  }
-
-  // Load stored data on component mount
-  useEffect(() => {
-    const storedEvents = loadEventsFromStorage()
-    if (storedEvents) {
-      setEvents(storedEvents)
-    }
-
-    const importInfo = loadImportInfoFromStorage()
-    if (importInfo) {
-      setLastImportInfo(importInfo)
-    }
-  }, [])
+  // Custom hooks for state management
+  const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
+  const { todayRef, jumpToToday } = useScrollToToday()
 
   const yearDays = generateYearDays(currentYear)
 
@@ -70,12 +35,6 @@ export function LinearCalendar() {
         setEvents={setEvents}
         lastImportInfo={lastImportInfo}
         setLastImportInfo={setLastImportInfo}
-        isCalDAVLoading={isCalDAVLoading}
-        setIsCalDAVLoading={setIsCalDAVLoading}
-        calDAVCredentials={calDAVCredentials}
-        setCalDAVCredentials={setCalDAVCredentials}
-        showCalDAVForm={showCalDAVForm}
-        setShowCalDAVForm={setShowCalDAVForm}
       />
 
       <CalendarGrid

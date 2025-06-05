@@ -1,31 +1,14 @@
 import { useRef } from 'react'
-import type { CalendarEvent } from '../types'
+import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { parseICSFile } from '../utils/icsParser'
 import { saveEventsToStorage } from '../utils/storageUtils'
-import { importFromCalDAV } from '../utils/caldavUtils'
+import type { CalendarEvent, ImportInfo } from '../types'
 
 interface ImportControlsProps {
   events: Array<CalendarEvent>
-  setEvents: (events: Array<CalendarEvent>) => void
-  lastImportInfo: {
-    fileName: string
-    importDate: string
-  } | null
-  setLastImportInfo: (
-    info: { fileName: string; importDate: string } | null,
-  ) => void
-  isCalDAVLoading: boolean
-  setIsCalDAVLoading: (loading: boolean) => void
-  calDAVCredentials: {
-    username: string
-    password: string
-  }
-  setCalDAVCredentials: (credentials: {
-    username: string
-    password: string
-  }) => void
-  showCalDAVForm: boolean
-  setShowCalDAVForm: (show: boolean) => void
+  setEvents: (events: Array<CalendarEvent>, fileName: string) => void
+  lastImportInfo: ImportInfo | null
+  setLastImportInfo: (info: ImportInfo | null) => void
 }
 
 export function ImportControls({
@@ -33,14 +16,18 @@ export function ImportControls({
   setEvents,
   lastImportInfo,
   setLastImportInfo,
-  isCalDAVLoading,
-  setIsCalDAVLoading,
-  calDAVCredentials,
-  setCalDAVCredentials,
-  showCalDAVForm,
-  setShowCalDAVForm,
 }: ImportControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Use CalDAV hook
+  const {
+    isCalDAVLoading,
+    calDAVCredentials,
+    setCalDAVCredentials,
+    showCalDAVForm,
+    setShowCalDAVForm,
+    handleCalDAVImport,
+  } = useCalDAVImport()
 
   const handleFileImport = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -52,11 +39,13 @@ export function ImportControls({
       const text = await file.text()
       const parsedEvents = parseICSFile(text, new Date().getFullYear())
 
-      setEvents([...events, ...parsedEvents])
+      setEvents([...events, ...parsedEvents], file.name)
 
-      const importInfo = {
+      const importInfo: ImportInfo = {
         fileName: file.name,
+        eventCount: parsedEvents.length,
         importDate: new Date().toLocaleString(),
+        type: 'file',
       }
       setLastImportInfo(importInfo)
 
@@ -79,7 +68,7 @@ export function ImportControls({
 
   const clearAllEvents = () => {
     if (confirm('Are you sure you want to clear all events?')) {
-      setEvents([])
+      setEvents([], 'Clear All')
       setLastImportInfo(null)
       localStorage.removeItem('linear-calendar-events')
       localStorage.removeItem('linear-calendar-import-info')
@@ -92,42 +81,37 @@ export function ImportControls({
       return
     }
 
-    setIsCalDAVLoading(true)
-    try {
-      const calDAVEvents = await importFromCalDAV({
-        username: calDAVCredentials.username,
-        password: calDAVCredentials.password,
-        serverUrl: 'https://caldav.icloud.com', // Default to iCloud
-      })
+    await handleCalDAVImport(
+      (calDAVEvents) => {
+        const allEvents = [...events, ...calDAVEvents]
+        setEvents(allEvents, 'CalDAV Import')
 
-      setEvents([...events, ...calDAVEvents])
+        const importInfo: ImportInfo = {
+          fileName: 'CalDAV Import',
+          eventCount: calDAVEvents.length,
+          importDate: new Date().toLocaleString(),
+          type: 'caldav',
+        }
+        setLastImportInfo(importInfo)
 
-      const importInfo = {
-        fileName: 'CalDAV Import',
-        importDate: new Date().toLocaleString(),
-      }
-      setLastImportInfo(importInfo)
-
-      // Save credentials and events
-      localStorage.setItem(
-        'linear-calendar-caldav-credentials',
-        JSON.stringify(calDAVCredentials),
-      )
-      saveEventsToStorage([...events, ...calDAVEvents], 'CalDAV Import')
-      localStorage.setItem(
-        'linear-calendar-import-info',
-        JSON.stringify(importInfo),
-      )
-
-      setShowCalDAVForm(false)
-    } catch (error) {
-      console.error('CalDAV connection error:', error)
-      alert(
-        'Failed to connect to CalDAV server. Please check your credentials.',
-      )
-    } finally {
-      setIsCalDAVLoading(false)
-    }
+        // Save credentials and events
+        localStorage.setItem(
+          'linear-calendar-caldav-credentials',
+          JSON.stringify(calDAVCredentials),
+        )
+        saveEventsToStorage(allEvents, 'CalDAV Import')
+        localStorage.setItem(
+          'linear-calendar-import-info',
+          JSON.stringify(importInfo),
+        )
+      },
+      (error) => {
+        console.error('CalDAV connection error:', error)
+        alert(
+          'Failed to connect to CalDAV server. Please check your credentials.',
+        )
+      },
+    )
   }
 
   return (
