@@ -19,19 +19,26 @@ export const generateYearDays = (year: number): Array<Date> => {
  * Formats a date into day name, day number, and month name
  */
 export const formatDate = (date: Date) => {
-  const dayNames = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ]
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+  // Helper for ordinal suffix
+  function getOrdinal(n: number) {
+    if (n > 3 && n < 21) return n + 'th'
+    switch (n % 10) {
+      case 1:
+        return n + 'st'
+      case 2:
+        return n + 'nd'
+      case 3:
+        return n + 'rd'
+      default:
+        return n + 'th'
+    }
+  }
   return {
     dayName: dayNames[date.getDay()],
     dayNumber: date.getDate(),
+    dayNumberOrdinal: getOrdinal(date.getDate()),
     monthName: MONTHS[date.getMonth()],
     fullDate: date,
   }

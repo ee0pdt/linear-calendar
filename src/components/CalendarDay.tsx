@@ -22,7 +22,7 @@ export function CalendarDay({
   isToday: isTodayProp,
   todayRef,
 }: CalendarDayProps) {
-  const { dayName, dayNumber, monthName } = formatDate(date)
+  const { dayName, dayNumberOrdinal, monthName } = formatDate(date)
   const isPast = isPastDay(date)
   const isFirstDay = isFirstOfMonth(date)
   const isWeekendDay = isWeekend(date)
@@ -44,7 +44,7 @@ export function CalendarDay({
     <div
       ref={isTodayProp ? todayRef : undefined}
       className={`day-entry flex items-center justify-between min-h-[3rem] border-b border-gray-200 transition-colors
-        ${isTodayProp ? 'today-highlight bg-yellow-100 border-l-8 border-blue-500 shadow-lg font-bold scale-[1.025] z-10 pl-24 pr-4 pt-4 pb-4' : 'pl-4 pr-4 pt-3 pb-3'}
+        ${isTodayProp ? 'today-highlight bg-gray-50 border-l-8 border-blue-500 shadow-lg font-bold z-10 pl-4 pr-4 pt-4 pb-4' : 'pl-4 pr-4 pt-3 pb-3'}
         ${isWeekendDay && !isHoliday ? 'weekend-highlight' : ''}
         ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight' : ''}
         ${isHoliday && !isWeekendDay ? 'holiday-highlight' : ''}
@@ -55,7 +55,7 @@ export function CalendarDay({
       {/* Absolutely positioned floating TODAY badge, flush left with a gap */}
       {isTodayProp && (
         <div
-          className="absolute -left-10 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print flex items-center z-20"
+          className="absolute -left-30 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print flex items-center z-20"
           style={{ pointerEvents: 'none' }}
         >
           <svg
@@ -78,11 +78,17 @@ export function CalendarDay({
       )}
       {/* Left column: day name, date, badges, TODAY */}
       <div className="flex items-center space-x-4">
-        <div className="font-medium">{dayName}</div>
-        <div className="text-gray-600 flex items-center space-x-2">
-          <span>
-            {monthName} {dayNumber}
+        <div className="text-gray-400 flex items-center space-x-2 font-normal">
+          <span
+            className="inline-block w-12 text-center rounded-full bg-gray-100 px-2 py-1 mr-2 text-sm font-normal"
+            style={{ minWidth: '48px' }}
+          >
+            {dayName}
           </span>
+          <span className="text-gray-800 font-bold text-lg">
+            {dayNumberOrdinal}
+          </span>
+          <span className="text-gray-700 font-medium">{monthName}</span>
           {holidayInfo && (
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
               {holidayInfo.name} Day {holidayInfo.dayNumber}/

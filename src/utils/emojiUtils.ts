@@ -9,11 +9,7 @@ export const getEventEmoji = (title: string): string => {
   if (lowerTitle.includes('nadine')) return '👩'
 
   // Religious & Spiritual (high priority)
-  if (
-    lowerTitle.includes('church') ||
-    lowerTitle.includes('service') ||
-    lowerTitle.includes('mass')
-  )
+  if (lowerTitle.includes('church') || lowerTitle.includes('service'))
     return '⛪'
   if (lowerTitle.includes('prayer') || lowerTitle.includes('worship'))
     return '🙏'

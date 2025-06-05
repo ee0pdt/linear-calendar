@@ -92,7 +92,7 @@ export const getEventDisplayForDate = (
     ) + 1
 
   if (totalDays === 1) {
-    return 'All day'
+    return ''
   }
 
   return `Day ${daysDiff + 1} of ${totalDays}`
