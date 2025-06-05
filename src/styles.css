@@ -14,6 +14,291 @@ code {
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+/* Calendar Header Styles */
+.calendar-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.header-content h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.header-stats {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.event-count {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.header-actions {
+  margin-top: 1rem;
+}
+
+.jump-today-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.jump-today-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Import Controls Styles */
+.import-section {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.import-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.import-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.import-group h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.connect-button {
+  background-color: #10b981;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.connect-button:hover {
+  background-color: #059669;
+}
+
+.caldav-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+}
+
+.caldav-form input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.caldav-form input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.import-button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.import-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.import-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.file-input-label {
+  background-color: #6b7280;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+  display: inline-block;
+}
+
+.file-input-label:hover {
+  background-color: #4b5563;
+}
+
+.clear-button {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.clear-button:hover {
+  background-color: #dc2626;
+}
+
+.import-info {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+/* Calendar Styles */
+.month-header {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: bold;
+  padding: 0.75rem 1rem;
+  font-size: 1.125rem;
+  margin: 1rem 0 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.day-entry {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 3rem;
+  transition: background-color 0.1s;
+}
+
+.day-entry:hover {
+  background: #f9fafb;
+}
+
+.day-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  flex-shrink: 0;
+  margin-right: 0.75rem;
+  border-radius: 0.125rem;
+}
+
+.day-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.day-date {
+  font-weight: 500;
+  color: #374151;
+}
+
+.holiday-badge {
+  background: #ddd6fe;
+  color: #5b21b6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.events-list {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.event-item {
+  color: #3b82f6;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.event-time {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.day-counter {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+/* State-based styles */
+.today-highlight {
+  background: #fef3c7 !important;
+  font-weight: 600;
+}
+
+.today-highlight .day-date {
+  color: #92400e;
+}
+
+.past-day {
+  opacity: 0.7;
+  background: #f9f9f9;
+}
+
+.past-day .day-checkbox {
+  background: #e0f2e0;
+  border: 1px solid #4a5f4a;
+}
+
 /* Screen-only styles for better web experience */
 .weekend-highlight {
   background: #f8fafc;
@@ -22,11 +307,15 @@ code {
 
 .holiday-highlight {
   /* School holidays now use pill badges only */
+  border-left: 3px solid #8b5cf6;
+  padding-left: 1rem;
 }
 
 .holiday-weekend-highlight {
   background: #f8fafc;
   font-style: italic;
+  border-left: 3px solid #8b5cf6;
+  padding-left: 1rem;
 }
 
 /* Print-specific styles for linear calendar */
@@ -131,7 +420,7 @@ code {
     background: none !important;
     font-weight: normal !important;
   }
-  
+
   /* Override screen styles for print - weekend highlighting */
   .weekend-highlight {
     background: #f8f8f8 !important;
@@ -139,14 +428,14 @@ code {
     border-left: none !important;
     padding-left: 1.2pt !important;
   }
-  
+
   /* Override screen styles for print - school holiday highlighting */
   .holiday-highlight {
     background: none !important;
     border-left: 1.5pt solid #999 !important;
     padding-left: 1.2pt !important;
   }
-  
+
   /* Override screen styles for print - weekend + school holiday combination */
   .holiday-weekend-highlight {
     background: #f8f8f8 !important;
@@ -154,13 +443,13 @@ code {
     border-left: 1.5pt solid #999 !important;
     padding-left: 1.2pt !important;
   }
-  
+
   /* Past days - ticked appearance */
   .past-day {
     opacity: 0.7 !important;
     background: #f9f9f9 !important;
   }
-  
+
   /* Past day checkboxes */
   .past-day .day-checkbox {
     background: #e0f2e0 !important;
@@ -194,12 +483,12 @@ code {
     margin: 0 !important;
     padding: 0 !important;
   }
-  
+
   /* Eliminate any potential spacing issues */
   .linear-calendar-container > * {
     margin-bottom: 0 !important;
   }
-  
+
   .linear-calendar-container > *:last-child {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;

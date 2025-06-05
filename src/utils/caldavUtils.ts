@@ -1,4 +1,4 @@
-import { PROXY_URL } from '../constants'
+// No import of PROXY_URL; use inline logic
 import type { CalDAVCredentials, CalendarEvent } from '../types'
 
 /**
@@ -7,31 +7,26 @@ import type { CalDAVCredentials, CalendarEvent } from '../types'
 export const importFromCalDAV = async (
   credentials: CalDAVCredentials,
 ): Promise<Array<CalendarEvent>> => {
-  const response = await fetch(`${PROXY_URL}/caldav`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      username: credentials.username,
-      password: credentials.password,
-      serverUrl: credentials.serverUrl || 'https://caldav.icloud.com',
-    }),
-  })
+  // Use localhost for development, env variable or fallback for production
+  const proxyUrl =
+    import.meta.env.MODE === 'development'
+      ? 'http://localhost:3001'
+      : import.meta.env.VITE_CALDAV_PROXY_URL ||
+        'https://caldav-proxy-production.up.railway.app'
 
+  const url = `${proxyUrl}/api/calendar?username=${encodeURIComponent(credentials.username)}&password=${encodeURIComponent(credentials.password)}`
+  const response = await fetch(url)
   const data = await response.json()
 
   if (data.success) {
     // Convert date strings back to Date objects
-    const calDAVEvents = data.events.map((event: any) => ({
+    return data.events.map((event: any) => ({
       ...event,
       start: new Date(event.start),
       end: new Date(event.end),
       allDay: event.allDay || false,
       isRecurring: event.isRecurring || false,
     }))
-
-    return calDAVEvents
   } else {
     throw new Error(data.error || 'Unknown error occurred')
   }
