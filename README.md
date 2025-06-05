@@ -1,4 +1,4 @@
-# Linear Calendar
+# Linear Calendar with Live Apple Calendar Integration
 
 A specialized calendar application designed for visual time management and ADHD planning needs. Displays all 365 days of the year in a linear, vertical format - perfect for understanding time progression and planning ahead.
 
@@ -19,10 +19,12 @@ A specialized calendar application designed for visual time management and ADHD 
 - **Physical checkbox spaces** for crossing off days manually
 
 ### 📱 **Apple Calendar Integration**
-- **Import ICS files** from Apple Calendar, Google Calendar, or any calendar app
+- **Live CalDAV integration** with Apple Calendar (via proxy server)
+- **ICS file import** as alternative to live connection
 - **Multi-day event support** with day-by-day progress tracking
 - **Time display** for scheduled events (hidden for all-day events)
 - **Smart event parsing** handles both timed and all-day events
+- **Visual distinction** between recurring and non-recurring events
 
 ### 🏫 **Built-in UK School Holidays**
 - **2025 school term dates** pre-loaded for UK/Oxfordshire
@@ -75,6 +77,14 @@ npm run serve
 - Current day is highlighted (on screen only)
 
 ### 2. **Import Your Events**
+
+#### Live Calendar Integration:
+- Generate an app-specific password at [appleid.apple.com](https://appleid.apple.com)
+- Click "Connect to Apple Calendar" in the app
+- Enter your Apple ID email and app-specific password
+- Your calendar will update automatically with real-time data
+
+#### ICS File Import (Alternative):
 - Export your calendar as an ICS file from Apple Calendar, Google Calendar, etc.
 - Click "Choose File" at the top and select your ICS file
 - Events will appear inline with their dates and times
@@ -106,17 +116,27 @@ npm run serve
 - **Tailwind CSS v4** - Utility-first styling
 - **Vite** - Fast build tool and dev server
 - **Vitest** - Testing framework
+- **Express.js** - CalDAV proxy server
+- **tsdav** - CalDAV client for Apple Calendar integration
 
 ## 📂 Project Structure
 
 ```
-src/
-├── components/          # Reusable components
-├── routes/             # File-based routing
-│   ├── __root.tsx     # Root layout
-│   └── index.tsx      # Main calendar component
-├── styles.css         # Global styles and print CSS
-└── main.tsx           # Application entry point
+/
+├── src/                       # React application
+│   ├── components/            # Reusable components
+│   ├── routes/                # File-based routing
+│   │   ├── __root.tsx         # Root layout
+│   │   └── index.tsx          # Main calendar component
+│   ├── styles.css             # Global styles and print CSS
+│   └── main.tsx               # Application entry point
+│
+├── caldav-proxy/              # CalDAV proxy server
+│   ├── server.js              # Express server for Apple Calendar integration
+│   ├── README.md              # Proxy documentation
+│   └── DEPLOYMENT.md          # Railway deployment guide
+│
+└── public/                    # Static assets
 ```
 
 ## 🎯 Why Linear Calendar?
