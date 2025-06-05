@@ -1,0 +1,65 @@
+import { parseICSDate } from './dateUtils'
+import type { CalendarEvent } from '../types'
+
+/**
+ * Parses an ICS file content and returns an array of calendar events
+ * Note: Recurrence handling is simplified for this version
+ */
+export const parseICSFile = (
+  icsContent: string,
+  year: number,
+): Array<CalendarEvent> => {
+  const events: Array<CalendarEvent> = []
+  const lines = icsContent.split('\n')
+  let currentEvent: Partial<CalendarEvent> = {}
+  let inEvent = false
+  let dtStartLine = ''
+
+  for (let line of lines) {
+    line = line.trim()
+
+    if (line === 'BEGIN:VEVENT') {
+      inEvent = true
+      currentEvent = {}
+      dtStartLine = ''
+    } else if (line === 'END:VEVENT' && inEvent) {
+      if (currentEvent.title && currentEvent.start) {
+        // Detect all-day events by checking if DTSTART has no time component
+        // or if it's midnight-to-midnight with end date being next day
+        const isAllDay =
+          !dtStartLine.includes('T') ||
+          (currentEvent.start.getHours() === 0 &&
+            currentEvent.start.getMinutes() === 0 &&
+            currentEvent.start.getSeconds() === 0 &&
+            currentEvent.end &&
+            currentEvent.end.getHours() === 0 &&
+            currentEvent.end.getMinutes() === 0)
+
+        currentEvent.allDay = isAllDay
+
+        // For now, skip recurring events - will be handled in next phase
+        if (!currentEvent.rrule) {
+          currentEvent.isRecurring = false
+          events.push(currentEvent as CalendarEvent)
+        }
+      }
+      inEvent = false
+    } else if (inEvent) {
+      if (line.startsWith('SUMMARY:')) {
+        currentEvent.title = line.substring(8)
+      } else if (line.startsWith('DTSTART')) {
+        dtStartLine = line
+        const dateStr = line.split(':')[1]
+        currentEvent.start = parseICSDate(dateStr)
+      } else if (line.startsWith('DTEND')) {
+        const dateStr = line.split(':')[1]
+        currentEvent.end = parseICSDate(dateStr)
+      } else if (line.startsWith('RRULE:')) {
+        currentEvent.rrule = line.substring(6)
+      }
+    }
+  }
+
+  // Filter events for current year
+  return events.filter((event) => event.start.getFullYear() === year)
+}
