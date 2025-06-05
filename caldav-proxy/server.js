@@ -11,7 +11,12 @@ const PORT = process.env.PORT || 3001
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173', 
+    'http://localhost:3001',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true
 }))
 app.use(express.json())
@@ -46,35 +51,49 @@ app.get('/api/calendar', async (req, res) => {
       defaultAccountType: 'caldav',
     })
 
-    console.log('CalDAV client created, fetching account info...')
+    console.log('CalDAV client created, fetching calendars...')
 
-    // Get account information
-    const account = await client.fetchPrincipalUrl()
-    console.log('Account info retrieved, fetching calendars...')
-
-    // Get calendars
+    // Get calendars directly - tsdav handles the principal URL internally
     const calendars = await client.fetchCalendars()
     console.log(`Found ${calendars.length} calendars`)
 
-    // Get current year for filtering
+    // Get current year for filtering plus wider range for recurring events
     const currentYear = new Date().getFullYear()
-    const yearStart = new Date(currentYear, 0, 1)
-    const yearEnd = new Date(currentYear, 11, 31)
-
+    // Fetch events from a wider range to ensure we get all relevant events
+    // This is especially important for recurring events that might start in previous years
+    const fetchStart = new Date(currentYear - 5, 0, 1) // 5 years back
+    const fetchEnd = new Date(currentYear + 1, 11, 31) // 1 year forward
+    
+    console.log(`Fetching events from ${fetchStart.toISOString()} to ${fetchEnd.toISOString()}`)
+    
     let allEvents = []
+    let fetchedCount = 0
+    let filteredCount = 0
 
     // Fetch events from each calendar
     for (const calendar of calendars) {
       try {
         console.log(`Fetching events from calendar: ${calendar.displayName}`)
         
-        const calendarObjects = await client.fetchCalendarObjects({
-          calendar: calendar,
-          timeRange: {
-            start: yearStart.toISOString(),
-            end: yearEnd.toISOString(),
-          },
-        })
+        // Get all objects without time filtering first to ensure we get all events
+        // We'll filter them client-side later to the current year
+        let calendarObjects
+        try {
+          calendarObjects = await client.fetchCalendarObjects({
+            calendar: calendar,
+            timeRange: {
+              start: fetchStart.toISOString(),
+              end: fetchEnd.toISOString(),
+            },
+          })
+        } catch (timeRangeError) {
+          console.warn(`Time range filtering failed, fetching all events for ${calendar.displayName}`)
+          // If time range filtering fails, try without timeRange
+          calendarObjects = await client.fetchCalendarObjects({
+            calendar: calendar,
+          })
+        }
+        fetchedCount += calendarObjects.length
 
         console.log(`Found ${calendarObjects.length} events in ${calendar.displayName}`)
 
@@ -86,20 +105,77 @@ app.get('/api/calendar', async (req, res) => {
             for (const key in parsed) {
               const event = parsed[key]
               if (event.type === 'VEVENT') {
-                // Convert to our CalendarEvent format
-                const calendarEvent = {
-                  title: event.summary || 'Untitled Event',
-                  start: new Date(event.start),
-                  end: event.end ? new Date(event.end) : new Date(event.start),
-                  allDay: !event.start.dateTime, // If no dateTime, it's all-day
-                  rrule: event.rrule ? event.rrule.toString() : undefined,
-                  isRecurring: !!event.rrule,
-                  calendarName: calendar.displayName
-                }
+                try {
+                  console.log(`Processing event: "${event.summary}" from ${calendar.displayName}`)
+                  
+                  // Debug log for event properties
+                  console.log(`Event details:`, {
+                    summary: event.summary,
+                    start: event.start,
+                    end: event.end,
+                    startType: typeof event.start,
+                    hasDateTime: event.start.hasOwnProperty('dateTime'),
+                    rrule: event.rrule
+                  })
+                  
+                  // Correctly detect all-day events by examining the event data
+                  // Apple Calendar marks all-day events with date-only values (no time component)
+                  // or with multi-day events where times are set to 00:00:00
+                  let isAllDay = false
+                  
+                  if (typeof event.start === 'string') {
+                    // If the start time is a simple string, check if it has time component
+                    isAllDay = !event.start.includes('T')
+                  } else if (event.start) {
+                    // Otherwise use the dateTime property presence as indicator
+                    isAllDay = !event.start.dateTime && event.start.hasOwnProperty('date')
+                  }
+                  
+                  // Also check for multi-day events where both start and end have 00:00:00 time component
+                  if (!isAllDay && event.end && event.start) {
+                    const startDate = new Date(event.start)
+                    const endDate = new Date(event.end)
+                    
+                    // Calculate duration in days
+                    const durationMs = endDate.getTime() - startDate.getTime()
+                    const durationDays = durationMs / (1000 * 60 * 60 * 24)
+                    
+                    // Check if both times are midnight and the duration is at least 1 full day
+                    const isMidnightStart = startDate.getHours() === 0 && 
+                                           startDate.getMinutes() === 0 && 
+                                           startDate.getSeconds() === 0
+                                           
+                    const isMidnightEnd = endDate.getHours() === 0 && 
+                                         endDate.getMinutes() === 0 && 
+                                         endDate.getSeconds() === 0
+                    
+                    if (isMidnightStart && isMidnightEnd && durationDays >= 1) {
+                      isAllDay = true
+                      console.log(`Detected multi-day all-day event: ${event.summary}, duration: ${durationDays} days`)
+                    }
+                  }
+                  
+                  // Create calendar event with proper format
+                  const calendarEvent = {
+                    title: event.summary || 'Untitled Event',
+                    start: new Date(event.start),
+                    end: event.end ? new Date(event.end) : new Date(event.start),
+                    allDay: isAllDay,
+                    rrule: event.rrule ? event.rrule.toString() : undefined,
+                    isRecurring: !!event.rrule,
+                    calendarName: calendar.displayName
+                  }
+                  
+                  console.log(`Processed event "${calendarEvent.title}": allDay=${calendarEvent.allDay}, start=${calendarEvent.start.toISOString()}`)
 
-                // Only include events from current year
-                if (calendarEvent.start.getFullYear() === currentYear) {
-                  allEvents.push(calendarEvent)
+                  // Only include events from current year
+                  if (calendarEvent.start.getFullYear() === currentYear) {
+                    allEvents.push(calendarEvent)
+                  } else {
+                    console.log(`Skipping event "${calendarEvent.title}" - not in current year: ${calendarEvent.start.getFullYear()}`)
+                  }
+                } catch (eventError) {
+                  console.error(`Error processing event "${event.summary || 'Unknown'}":`, eventError)
                 }
               }
             }
@@ -117,6 +193,15 @@ app.get('/api/calendar', async (req, res) => {
     // Sort events by start date
     allEvents.sort((a, b) => a.start - b.start)
 
+    // Add calendar stats for debugging
+    const calendarStats = calendars.map(cal => {
+      const eventsInCal = allEvents.filter(e => e.calendarName === cal.displayName).length
+      return {
+        name: cal.displayName,
+        eventCount: eventsInCal
+      }
+    })
+
     res.json({
       success: true,
       events: allEvents,
@@ -126,6 +211,17 @@ app.get('/api/calendar', async (req, res) => {
         url: cal.url
       })),
       count: allEvents.length,
+      totalFetched: fetchedCount,
+      stats: {
+        currentYear,
+        calendarsFound: calendars.length,
+        totalEventsFetched: fetchedCount,
+        eventsInCurrentYear: allEvents.length,
+        calendarBreakdown: calendarStats,
+        allDayEvents: allEvents.filter(e => e.allDay).length,
+        timedEvents: allEvents.filter(e => !e.allDay).length,
+        recurringEvents: allEvents.filter(e => e.isRecurring).length,
+      },
       message: `Successfully retrieved ${allEvents.length} events from ${calendars.length} calendars`
     })
 

@@ -360,6 +360,8 @@ function LinearCalendar() {
       }
       
       if (data.success) {
+        console.log('Calendar stats:', data.stats)
+        
         // Convert the events to our format (they should already be in the right format)
         const calDAVEvents = data.events.map((event: any) => ({
           ...event,
@@ -368,7 +370,10 @@ function LinearCalendar() {
         }))
         
         setEvents(calDAVEvents)
-        saveEventsToStorage(calDAVEvents, `CalDAV Live Import`)
+        
+        // Store additional metadata including stats
+        const importInfo = `${data.events.length} events from ${data.calendars?.length || 0} calendars`
+        saveEventsToStorage(calDAVEvents, `CalDAV: ${importInfo}`)
         
         // Hide the form after successful import
         setShowCalDAVForm(false)

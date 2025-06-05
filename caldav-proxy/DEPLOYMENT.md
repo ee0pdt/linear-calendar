@@ -87,11 +87,62 @@ curl "https://your-railway-app.railway.app/health"
 ### Common Issues
 
 1. **CORS Errors**: Make sure `FRONTEND_URL` is set correctly
-2. **Authentication Failed**: Use app-specific passwords, not regular Apple ID password
-3. **Proxy Not Found**: Check Railway deployment URL
-4. **Timeout**: CalDAV requests can be slow, increase timeout if needed
+   - Add all your frontend URLs to the CORS whitelist
+   ```bash
+   # For multiple frontend URLs
+   railway variables set FRONTEND_URL="https://app1.com,https://app2.com"
+   ```
 
-### Logs
+2. **Authentication Failed**: Use app-specific passwords, not regular Apple ID password
+   - Generate app-specific passwords at [appleid.apple.com](https://appleid.apple.com)
+   - Security → App-Specific Passwords → "+" icon
+   - Label it "Linear Calendar" and copy the generated password
+
+3. **Missing Events or All-Day Detection Issues**:
+   - Check logs for any parsing errors
+   - The CalDAV proxy uses multiple detection methods for all-day events:
+     - Date-only values with no time component
+     - Multi-day events with 00:00:00 start/end times
+     - Events spanning full days
+
+4. **Railway Deployment Errors**:
+   - Check application status and logs
+   ```bash
+   railway status
+   railway logs
+   ```
+   - Restart service if needed
+   ```bash
+   railway service restart
+   ```
+
+### Viewing Logs
 ```bash
+# View recent logs
 railway logs
+
+# Follow logs in real-time
+railway logs --follow
+```
+
+## 📊 Stats and Monitoring
+
+The API returns detailed stats in the response:
+
+```json
+{
+  "stats": {
+    "currentYear": 2025,
+    "calendarsFound": 3,
+    "totalEventsFetched": 420,
+    "eventsInCurrentYear": 256,
+    "calendarBreakdown": [
+      { "name": "Personal", "eventCount": 186 },
+      { "name": "Work", "eventCount": 70 }
+    ],
+    "allDayEvents": 42,
+    "timedEvents": 214,
+    "recurringEvents": 35
+  }
+}
 ```
