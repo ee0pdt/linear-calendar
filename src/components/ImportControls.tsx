@@ -115,80 +115,140 @@ export function ImportControls({
   }
 
   return (
-    <div className="import-section">
-      <div className="import-controls">
-        <div className="import-group">
-          <h3>🔗 Live Calendar Import</h3>
+    <div className="mb-6 no-print space-y-4">
+      {/* Live Calendar Import */}
+      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+        <h2 className="text-lg font-semibold mb-2 text-green-800">
+          🔗 Live Calendar Import
+        </h2>
+        <p className="text-sm text-green-700 mb-3">
+          Connect directly to your Apple Calendar for real-time updates
+          (requires app-specific password).
+        </p>
+        {!showCalDAVForm ? (
           <button
-            onClick={() => setShowCalDAVForm(!showCalDAVForm)}
-            className="connect-button"
+            onClick={() => setShowCalDAVForm(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
           >
             Connect to Apple Calendar
           </button>
-
-          {showCalDAVForm && (
-            <div className="caldav-form">
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-green-700 mb-1">
+                Apple ID Email
+              </label>
               <input
-                type="text"
-                placeholder="Username/Email"
+                type="email"
                 value={calDAVCredentials.username}
-                onChange={(e) =>
-                  setCalDAVCredentials({
+                onChange={(e) => {
+                  const newCreds = {
                     ...calDAVCredentials,
                     username: e.target.value,
-                  })
-                }
+                  }
+                  setCalDAVCredentials(newCreds)
+                  localStorage.setItem(
+                    'linear-calendar-caldav-credentials',
+                    JSON.stringify(newCreds),
+                  )
+                }}
+                placeholder="your@icloud.com"
+                className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-green-700 mb-1">
+                App-Specific Password
+              </label>
               <input
                 type="password"
-                placeholder="Password"
                 value={calDAVCredentials.password}
-                onChange={(e) =>
-                  setCalDAVCredentials({
+                onChange={(e) => {
+                  const newCreds = {
                     ...calDAVCredentials,
                     password: e.target.value,
-                  })
-                }
+                  }
+                  setCalDAVCredentials(newCreds)
+                  localStorage.setItem(
+                    'linear-calendar-caldav-credentials',
+                    JSON.stringify(newCreds),
+                  )
+                }}
+                placeholder="xxxx-xxxx-xxxx-xxxx"
+                className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+              <p className="text-xs text-green-600 mt-1">
+                Generate at: appleid.apple.com → Security → App-Specific
+                Passwords
+              </p>
+            </div>
+            <div className="flex space-x-2">
               <button
                 onClick={handleCalDAVConnect}
                 disabled={isCalDAVLoading}
-                className="import-button"
+                className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                {isCalDAVLoading ? 'Connecting...' : 'Connect'}
+                {isCalDAVLoading ? 'Connecting...' : 'Import Calendar'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowCalDAVForm(false)
+                  setCalDAVCredentials({
+                    username: '',
+                    password: '',
+                    serverUrl: '',
+                  })
+                  localStorage.removeItem('linear-calendar-caldav-credentials')
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Cancel & Forget Credentials
               </button>
             </div>
-          )}
-        </div>
-
-        <div className="import-group">
-          <h3>📁 File Import</h3>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".ics"
-            onChange={handleFileImport}
-            style={{ display: 'none' }}
-            id="ics-upload"
-          />
-          <label htmlFor="ics-upload" className="file-input-label">
-            Choose .ics File
-          </label>
-        </div>
-
-        {events.length > 0 && (
-          <button onClick={clearAllEvents} className="clear-button">
-            Clear All Events
-          </button>
-        )}
-
-        {lastImportInfo && (
-          <div className="import-info">
-            Last import: {lastImportInfo.fileName} on{' '}
-            {lastImportInfo.importDate}
           </div>
         )}
       </div>
+
+      {/* File Upload Import */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h2 className="text-lg font-semibold mb-2 text-blue-800">
+          📁 File Import
+        </h2>
+        <p className="text-sm text-blue-700 mb-3">
+          Export your calendar as an ICS file and upload it here (one-time
+          import).
+        </p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".ics"
+          onChange={handleFileImport}
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+      </div>
+
+      {/* Import Status */}
+      {events.length > 0 && (
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="space-y-1">
+            <p className="text-sm text-green-600">
+              ✅ Loaded {events.length} events from your calendar
+            </p>
+            {lastImportInfo && (
+              <p className="text-xs text-gray-500">
+                Last imported: {lastImportInfo.fileName} on{' '}
+                {lastImportInfo.importDate}
+              </p>
+            )}
+            <button
+              onClick={clearAllEvents}
+              className="text-xs text-red-600 hover:text-red-800 underline"
+            >
+              Clear stored calendar data
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
