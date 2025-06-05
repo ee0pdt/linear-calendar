@@ -130,8 +130,9 @@ code {
   .today-highlight {
     background: none !important;
     font-weight: normal !important;
+    scroll-margin-top: 64px;
   }
-  
+
   /* Override screen styles for print - weekend highlighting */
   .weekend-highlight {
     background: #f8f8f8 !important;
@@ -139,14 +140,14 @@ code {
     border-left: none !important;
     padding-left: 1.2pt !important;
   }
-  
+
   /* Override screen styles for print - school holiday highlighting */
   .holiday-highlight {
     background: none !important;
     border-left: 1.5pt solid #999 !important;
     padding-left: 1.2pt !important;
   }
-  
+
   /* Override screen styles for print - weekend + school holiday combination */
   .holiday-weekend-highlight {
     background: #f8f8f8 !important;
@@ -154,13 +155,13 @@ code {
     border-left: 1.5pt solid #999 !important;
     padding-left: 1.2pt !important;
   }
-  
+
   /* Past days - ticked appearance */
   .past-day {
     opacity: 0.7 !important;
     background: #f9f9f9 !important;
   }
-  
+
   /* Past day checkboxes */
   .past-day .day-checkbox {
     background: #e0f2e0 !important;
@@ -194,12 +195,12 @@ code {
     margin: 0 !important;
     padding: 0 !important;
   }
-  
+
   /* Eliminate any potential spacing issues */
   .linear-calendar-container > * {
     margin-bottom: 0 !important;
   }
-  
+
   .linear-calendar-container > *:last-child {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;

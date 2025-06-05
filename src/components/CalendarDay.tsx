@@ -83,7 +83,6 @@ export function CalendarDay({
           <span>
             {monthName} {dayNumber}
           </span>
-          {dayEvents.length > 0 && <span className="text-[8px]">📅</span>}
           {holidayInfo && (
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
               {holidayInfo.name} Day {holidayInfo.dayNumber}/

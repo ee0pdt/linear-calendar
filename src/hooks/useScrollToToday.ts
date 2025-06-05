@@ -5,9 +5,12 @@ export function useScrollToToday() {
 
   const jumpToToday = () => {
     if (todayRef.current) {
-      todayRef.current.scrollIntoView({
+      const element = todayRef.current
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - 64
+      window.scrollTo({
+        top: offsetPosition,
         behavior: 'smooth',
-        block: 'center',
       })
     }
   }
