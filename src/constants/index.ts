@@ -38,10 +38,7 @@ export const SCROLL_BEHAVIOR: ScrollBehavior = 'smooth'
 export const BLOCK_POSITION: ScrollLogicalPosition = 'center'
 
 // CalDAV Proxy
-export const PROXY_URL =
-  import.meta.env.MODE === 'development'
-    ? 'http://localhost:3001'
-    : 'https://caldav-proxy-production.up.railway.app'
+export const PROXY_URL = 'https://caldav-proxy-production.up.railway.app'
 
 // Current Year
 export const CURRENT_YEAR = new Date().getFullYear()

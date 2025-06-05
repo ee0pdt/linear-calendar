@@ -247,12 +247,12 @@ src/
 
 ### Recommended Order
 
-1. **Phase 0** (Pre-Refactor Tests) - Create comprehensive test suite first ✅ **COMPLETE**
-2. **Phase 1** (Types & Constants) - Start here, lowest risk ✅ **COMPLETE**
-3. **Phase 2** (Utilities) - Pure functions, easy to test ✅ **COMPLETE**
-4. **Phase 3** (Hooks) - Extract state logic 🚧 **NEXT**
-5. **Phase 4** (Components) - Break down UI ✅ **COMPLETE**
-6. **Phase 5** (Main Component) - Final orchestration ✅ **COMPLETE**
+1. **Phase 0** (Pre-Refactor Tests) - Create comprehensive test suite first
+2. **Phase 1** (Types & Constants) - Start here, lowest risk
+3. **Phase 2** (Utilities) - Pure functions, easy to test
+4. **Phase 3** (Hooks) - Extract state logic
+5. **Phase 4** (Components) - Break down UI
+6. **Phase 5** (Main Component) - Final orchestration
 
 ### Risk Mitigation
 
@@ -462,58 +462,3 @@ With this structure, future features become much easier:
 ## Files to Create
 
 This refactoring will result in approximately 25-30 new files, replacing the single 1,140-line monster with a clean, maintainable structure.
-
-## ✅ Current Refactor Status (Updated)
-
-### Completed Phases
-
-**Phase 0: Pre-Refactor Testing ✅**
-
-- Vitest and React Testing Library setup verified
-- Created comprehensive utility tests (33 tests passing)
-- Created component tests (7 tests passing)
-- All 40 tests now pass successfully
-
-**Phase 1: Types & Constants ✅**
-
-- Extracted types to `/src/types/index.ts`
-- Extracted constants to `/src/constants/index.ts`
-- All TypeScript types properly defined
-
-**Phase 2: Utilities ✅**
-
-- Extracted all utility functions to `/src/utils/`:
-  - `dateUtils.ts` - Date manipulation and formatting
-  - `emojiUtils.ts` - Event emoji logic
-  - `holidayUtils.ts` - Holiday detection
-  - `icsParser.ts` - ICS file parsing
-  - `recurrenceUtils.ts` - Recurring event handling
-  - `eventUtils.ts` - Event filtering and display
-  - `storageUtils.ts` - Local storage management
-  - `caldavUtils.ts` - CalDAV integration
-- All utility tests passing (33/33)
-
-**Phase 4: Components ✅**
-
-- Created modular React components:
-  - `ImportControls.tsx` - Import section UI
-  - `CalendarHeader.tsx` - Title and stats
-  - `DayDisplay.tsx` - Individual day rendering
-  - `CalendarDay.tsx` - Day container with events
-  - `CalendarMonth.tsx` - Month grouping
-  - `CalendarGrid.tsx` - Calendar layout
-  - `CalendarFooter.tsx` - Footer information
-- Refactored `src/routes/index.tsx` to use modular components
-- All component tests passing (7/7)
-
-**Phase 5: Main Component ✅**
-
-- Successfully integrated all modular components
-- Removed duplicate/legacy logic
-- Main component now serves as orchestrator
-- Component structure is clean and maintainable
-
-### Next Phase: Hooks Extraction 🚧
-
-**Phase 3: Custom Hooks (In Progress)**
-The next logical step is to extract custom hooks for state management and side effects.

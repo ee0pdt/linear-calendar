@@ -44,24 +44,40 @@ export function CalendarDay({
     <div
       ref={isTodayProp ? todayRef : undefined}
       className={`day-entry flex items-center justify-between min-h-[3rem] border-b border-gray-200 transition-colors
-        ${isTodayProp ? 'today-highlight bg-yellow-100 border-yellow-300 font-semibold' : ''}
+        ${isTodayProp ? 'today-highlight bg-yellow-100 border-l-8 border-blue-500 shadow-lg font-bold scale-[1.025] z-10 pl-24 pr-4 pt-4 pb-4' : 'pl-4 pr-4 pt-3 pb-3'}
         ${isWeekendDay && !isHoliday ? 'weekend-highlight' : ''}
         ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight' : ''}
         ${isHoliday && !isWeekendDay ? 'holiday-highlight' : ''}
         ${isPast ? 'past-day' : ''}
       `}
+      style={isTodayProp ? { position: 'relative' } : {}}
     >
-      {/* Left column: checkbox, day name, date, badges, TODAY */}
-      <div className="flex items-center space-x-4">
+      {/* Absolutely positioned floating TODAY badge, flush left with a gap */}
+      {isTodayProp && (
         <div
-          className={`w-6 h-6 border-2 day-checkbox flex items-center justify-center mr-2 ${
-            isPast ? 'bg-green-200 border-green-400' : 'border-gray-400'
-          }`}
+          className="absolute -left-10 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print flex items-center z-20"
+          style={{ pointerEvents: 'none' }}
         >
-          {isPast && (
-            <span className="text-green-700 text-sm font-bold">✓</span>
-          )}
+          <svg
+            className="w-4 h-4 mr-1"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" fill="#fff2" />
+            <path
+              d="M8 2v4M16 2v4M3 10h18"
+              stroke="#fff"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          TODAY
         </div>
+      )}
+      {/* Left column: day name, date, badges, TODAY */}
+      <div className="flex items-center space-x-4">
         <div className="font-medium">{dayName}</div>
         <div className="text-gray-600 flex items-center space-x-2">
           <span>
@@ -75,11 +91,8 @@ export function CalendarDay({
             </span>
           )}
         </div>
-        {isTodayProp && (
-          <div className="bg-red-500 text-white px-2 py-1 rounded text-sm no-print ml-2">
-            TODAY
-          </div>
-        )}
+        {/* Empty placeholder for layout alignment when TODAY badge is floating */}
+        {isTodayProp && <span className="w-0 h-0" />}
       </div>
 
       {/* Right column: day counter and events */}
