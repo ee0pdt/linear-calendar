@@ -15,7 +15,7 @@ export function useScrollToToday() {
         const eventsPanel = document.querySelector('.mobile-events-panel')
         if (eventsPanel) {
           const elementPosition = element.offsetTop
-          const offsetPosition = elementPosition - 180 // Account for fixed header and comfortable viewing
+          const offsetPosition = elementPosition - 220 // Account for fixed header and comfortable viewing
 
           eventsPanel.scrollTo({
             top: offsetPosition,

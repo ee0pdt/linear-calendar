@@ -144,7 +144,7 @@ export function LinearCalendar() {
         </div>
 
         {/* Panel 2: Fixed scrollable events list */}
-        <div className="flex-1 pt-32 overflow-y-auto mobile-events-panel">
+        <div className="flex-1 pt-40 overflow-y-auto mobile-events-panel">
           <div className="px-2">
             <CalendarGrid
               currentYear={currentYear}

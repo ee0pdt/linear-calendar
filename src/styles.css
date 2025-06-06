@@ -244,13 +244,13 @@ code {
     overflow: hidden; /* Prevent body scroll, panels handle their own scrolling */
   }
 
-  /* Month headers in mobile events panel */
-  .month-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
+  /* Month headers in mobile events panel - must clear the fixed header */
+  .mobile-events-panel .month-group > div:first-child {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background: white !important;
+    border-bottom: 2px solid #d1d5db !important;
   }
 
   /* Import controls styling in mobile */
