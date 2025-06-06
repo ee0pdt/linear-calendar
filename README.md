@@ -7,18 +7,21 @@ A specialized calendar application designed for visual time management and ADHD 
 ## ✨ Features
 
 ### 📅 **Linear Time Visualization**
+
 - **All 365 days** displayed vertically in chronological order
 - **Month separators** with clear visual hierarchy
 - **Day counter** showing progress through the year (Day X of 365)
 - **Past days auto-ticked** with green checkboxes for visual progress
 
 ### 🖨️ **Print-Optimized Design**
+
 - **4 A4 pages** - optimized layout for wall mounting
 - **Compact styling** with readable fonts designed for printing
 - **Print-friendly colors** that work in black and white
 - **Physical checkbox spaces** for crossing off days manually
 
 ### 📱 **Apple Calendar Integration**
+
 - **Live CalDAV integration** with Apple Calendar (via proxy server)
 - **ICS file import** as alternative to live connection
 - **Multi-day event support** with day-by-day progress tracking
@@ -27,11 +30,13 @@ A specialized calendar application designed for visual time management and ADHD 
 - **Visual distinction** between recurring and non-recurring events
 
 ### 🏫 **Built-in UK School Holidays**
+
 - **2025 school term dates** pre-loaded for UK/Oxfordshire
 - **Visual indicators** distinguish school holidays from regular days
 - **Weekend highlighting** with italic styling
 
 ### 🎯 **ADHD-Friendly Features**
+
 - **"Jump to Today" button** for quick navigation
 - **Visual time orientation** helps with time blindness
 - **Progress tracking** through completed (past) days
@@ -40,7 +45,8 @@ A specialized calendar application designed for visual time management and ADHD 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -72,6 +78,7 @@ npm run serve
 ## 📖 How to Use
 
 ### 1. **View Your Calendar**
+
 - Scroll through all 365 days of the year
 - Past days are automatically marked as completed
 - Current day is highlighted (on screen only)
@@ -79,34 +86,38 @@ npm run serve
 ### 2. **Import Your Events**
 
 #### Live Calendar Integration:
+
 - Generate an app-specific password at [appleid.apple.com](https://appleid.apple.com)
 - Click "Connect to Apple Calendar" in the app
 - Enter your Apple ID email and app-specific password
 - Your calendar will update automatically with real-time data
 
 #### ICS File Import (Alternative):
+
 - Export your calendar as an ICS file from Apple Calendar, Google Calendar, etc.
 - Click "Choose File" at the top and select your ICS file
 - Events will appear inline with their dates and times
 
 ### 3. **Print Your Calendar**
+
 - Press `Ctrl+P` (or `Cmd+P` on Mac)
 - Calendar automatically formats for 4 A4 pages
 - Print and mount on your wall for physical planning
 
 ### 4. **Navigate Quickly**
+
 - Use the floating blue button to "Jump to Today"
 - Smooth scroll keeps you oriented in time
 
 ## 🎨 Visual Indicators
 
-| Element | Screen Appearance | Print Appearance | Meaning |
-|---------|------------------|------------------|---------|
-| **Past Days** | Faded with green ✓ | Green checkbox | Days that have passed |
-| **Today** | Yellow highlight | Normal (no highlight) | Current day |
-| **Weekends** | Italic text | Italic text | Saturday/Sunday |
-| **School Holidays** | Left border + 📚 | Left border | UK school break periods |
-| **Events** | Blue text with times | Calendar icon only | Your imported calendar events |
+| Element             | Screen Appearance    | Print Appearance      | Meaning                       |
+| ------------------- | -------------------- | --------------------- | ----------------------------- |
+| **Past Days**       | Faded with green ✓   | Green checkbox        | Days that have passed         |
+| **Today**           | Yellow highlight     | Normal (no highlight) | Current day                   |
+| **Weekends**        | Italic text          | Italic text           | Saturday/Sunday               |
+| **School Holidays** | Left border + 📚     | Left border           | UK school break periods       |
+| **Events**          | Blue text with times | Calendar icon only    | Your imported calendar events |
 
 ## 🛠️ Technical Stack
 
@@ -118,6 +129,59 @@ npm run serve
 - **Vitest** - Testing framework
 - **Express.js** - CalDAV proxy server
 - **tsdav** - CalDAV client for Apple Calendar integration
+
+## 🚂 Deployment
+
+### Railway Deployment (Recommended)
+
+Both the UI and CalDAV proxy can be deployed to Railway for free hosting:
+
+#### Quick Deploy
+
+```bash
+# Make sure Railway CLI is installed
+npm install -g @railway/cli
+
+# Login to Railway
+railway login
+
+# Deploy everything with one command
+./deploy.sh
+```
+
+#### Manual Deployment
+
+**Deploy UI Application:**
+
+```bash
+# From project root
+railway init
+railway up
+```
+
+**Deploy CalDAV Proxy:**
+
+```bash
+# From caldav-proxy directory
+cd caldav-proxy
+railway init
+railway up
+```
+
+**Configure CORS:**
+
+```bash
+# In caldav-proxy directory, set your UI URL
+railway variables set FRONTEND_URL="https://your-ui-app.railway.app"
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+
+### Other Hosting Options
+
+- **Vercel/Netlify**: Perfect for the UI (static site)
+- **Heroku**: Good for both UI and proxy
+- **Docker**: Use the included configurations for containerized deployment
 
 ## 📂 Project Structure
 
@@ -157,7 +221,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```bash
 npm run dev        # Start development server
-npm run build      # Build for production  
+npm run build      # Build for production
 npm run test       # Run tests
 npm run lint       # Run ESLint
 npm run format     # Run Prettier

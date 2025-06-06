@@ -22,4 +22,13 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  preview: {
+    host: '0.0.0.0',
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    allowedHosts: ['healthcheck.railway.app', '.railway.app'],
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
 })
