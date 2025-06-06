@@ -7,16 +7,15 @@ import type { CalDAVCredentials, CalendarEvent } from '../types'
 export const importFromCalDAV = async (
   credentials: CalDAVCredentials,
 ): Promise<Array<CalendarEvent>> => {
-  const response = await fetch(`${PROXY_URL}/caldav`, {
-    method: 'POST',
+  const url = new URL(`${PROXY_URL}/api/calendar`)
+  url.searchParams.append('username', credentials.username)
+  url.searchParams.append('password', credentials.password)
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      username: credentials.username,
-      password: credentials.password,
-      serverUrl: credentials.serverUrl || 'https://caldav.icloud.com',
-    }),
   })
 
   const data = await response.json()
