@@ -23,14 +23,27 @@ export function useScrollToToday() {
           })
         }
       } else {
-        // Desktop: Use window scroll as before
-        const elementPosition = element.getBoundingClientRect().top
-        const offsetPosition = elementPosition + window.pageYOffset - 64
+        // Desktop: Find the scrollable content panel and scroll within it
+        const contentPanel = document.querySelector('.desktop-content-panel')
+        if (contentPanel) {
+          // For desktop, we need to calculate the position relative to the scrollable content
+          // The element's offsetTop is relative to its offset parent, but we need position relative to the scroll container
+          const contentRect = contentPanel.getBoundingClientRect()
+          const elementRect = element.getBoundingClientRect()
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        })
+          // Calculate current scroll position plus the relative position of the element
+          const currentScrollTop = contentPanel.scrollTop
+          const elementRelativeTop =
+            elementRect.top - contentRect.top + currentScrollTop
+
+          // Offset to position the element nicely in view (account for some comfortable viewing space)
+          const offsetPosition = elementRelativeTop - 100
+
+          contentPanel.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          })
+        }
       }
     }
   }
