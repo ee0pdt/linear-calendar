@@ -54,9 +54,9 @@ export function CalendarDay({
           <div className="sm:hidden absolute -left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-lg z-20" />
 
           {/* Desktop: Full badge */}
-          <div className="hidden sm:block absolute -left-28 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print flex items-center z-20">
+          <div className="hidden sm:flex absolute -left-28 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print items-center z-20">
             <svg
-              className="w-4 h-4 mr-1"
+              className="w-4 h-4 mr-1.5"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -70,7 +70,7 @@ export function CalendarDay({
                 strokeLinecap="round"
               />
             </svg>
-            TODAY
+            <span>TODAY</span>
           </div>
         </>
       )}
