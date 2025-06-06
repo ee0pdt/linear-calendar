@@ -41,7 +41,7 @@ export const BLOCK_POSITION: ScrollLogicalPosition = 'center'
 export const PROXY_URL =
   import.meta.env.MODE === 'development'
     ? 'http://localhost:3001'
-    : 'https://caldav-proxy-production.up.railway.app'
+    : 'https://caldev-proxy-production.up.railway.app'
 
 // Current Year
 export const CURRENT_YEAR = new Date().getFullYear()
