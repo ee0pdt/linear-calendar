@@ -24,30 +24,26 @@ export function LinearCalendar() {
   const yearDays = generateYearDays(currentYear)
 
   return (
-    <div className="max-w-4xl mx-auto p-4 linear-calendar-container">
-      {/* Time Progress Rings */}
-      {/* HUD-style floating time rings */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 24,
-          right: 24,
-          zIndex: 1000,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-          background: 'rgba(255,255,255,0.85)',
-          borderRadius: 16,
-          boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)',
-          padding: 12,
-          alignItems: 'center',
-          border: '1px solid #e0e0e0',
-        }}
-      >
-        <DayRing size={64} />
-        <WeekRing size={64} />
-        <MonthRing size={64} />
-        <YearRing size={64} />
+    <div className="max-w-4xl mx-auto p-2 sm:p-4 linear-calendar-container">
+      {/* Time Progress Rings - Responsive Layout */}
+      <div className="hidden sm:block fixed top-6 right-6 z-50">
+        {/* Desktop: Vertical stack */}
+        <div className="flex flex-col gap-4 bg-white/85 backdrop-blur-sm rounded-2xl shadow-lg p-3 border border-gray-200">
+          <DayRing size={56} />
+          <WeekRing size={56} />
+          <MonthRing size={56} />
+          <YearRing size={56} />
+        </div>
+      </div>
+
+      {/* Mobile: Horizontal layout at top */}
+      <div className="sm:hidden mb-4">
+        <div className="flex justify-center gap-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-md p-2 border border-gray-200">
+          <DayRing size={40} />
+          <WeekRing size={40} />
+          <MonthRing size={40} />
+          <YearRing size={40} />
+        </div>
       </div>
       <CalendarHeader
         currentYear={currentYear}

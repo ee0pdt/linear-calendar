@@ -206,3 +206,36 @@ code {
     padding-bottom: 0 !important;
   }
 }
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  /* Reduce font sizes for mobile */
+  .linear-calendar-container {
+    font-size: 14px;
+  }
+
+  /* Improve touch targets for mobile */
+  .day-entry {
+    min-height: 4rem !important;
+  }
+
+  /* Better spacing for mobile */
+  .space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+
+  /* Ensure events are readable on mobile */
+  .events-list {
+    font-size: 11px;
+  }
+
+  /* Hide desktop-only elements */
+  .no-mobile {
+    display: none !important;
+  }
+
+  /* Better mobile typography */
+  h1 {
+    font-size: 1.5rem;
+  }
+}
