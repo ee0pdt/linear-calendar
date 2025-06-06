@@ -238,4 +238,24 @@ code {
   h1 {
     font-size: 1.5rem;
   }
+
+  /* Two-panel mobile layout optimizations */
+  body {
+    overflow: hidden; /* Prevent body scroll, panels handle their own scrolling */
+  }
+
+  /* Month headers in mobile events panel */
+  .month-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* Import controls styling in mobile */
+  .import-controls-mobile {
+    max-height: 200px;
+    overflow-y: auto;
+  }
 }

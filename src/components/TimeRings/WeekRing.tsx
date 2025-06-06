@@ -62,7 +62,7 @@ export const WeekRing: React.FC<WeekRingProps> = ({
           y="50%"
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize="1.5em"
+          fontSize={size < 60 ? '0.8em' : size < 80 ? '1.0em' : '1.5em'}
           fill="#333"
         >
           {percent}%

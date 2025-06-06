@@ -24,7 +24,6 @@ export const MonthRing: React.FC<MonthRingProps> = ({
   const progress = getMonthProgress(now)
   const percent = Math.round(progress * 100)
   const year = now.getFullYear()
-  const month = now.toLocaleString('default', { month: 'short' })
   const day = now.getDate()
   const totalDays = new Date(year, now.getMonth() + 1, 0).getDate()
   const stroke = Math.max(6, Math.round(size / 10))
@@ -67,7 +66,7 @@ export const MonthRing: React.FC<MonthRingProps> = ({
           y="50%"
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize="1.5em"
+          fontSize={size < 60 ? '0.8em' : size < 80 ? '1.0em' : '1.5em'}
           fill="#333"
         >
           {percent}%
@@ -75,7 +74,7 @@ export const MonthRing: React.FC<MonthRingProps> = ({
       </svg>
       <div style={{ marginTop: 4, fontWeight: 500, fontSize: 12 }}>Month</div>
       <div style={{ fontSize: 10, color: '#888' }}>
-        {month} {day} / {totalDays}
+        {day} / {totalDays}
       </div>
     </div>
   )

@@ -71,7 +71,7 @@ export const YearRing: React.FC<YearRingProps> = ({
           y="50%"
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize="1.5em"
+          fontSize={size < 60 ? '0.8em' : size < 80 ? '1.0em' : '1.5em'}
           fill="#333"
         >
           {percent}%
@@ -79,7 +79,7 @@ export const YearRing: React.FC<YearRingProps> = ({
       </svg>
       <div style={{ marginTop: 4, fontWeight: 500, fontSize: 12 }}>Year</div>
       <div style={{ fontSize: 10, color: '#888' }}>
-        {year} • Day {dayOfYear} / {totalDays}
+        {dayOfYear} / {totalDays}
       </div>
     </div>
   )

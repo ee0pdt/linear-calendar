@@ -50,8 +50,8 @@ export function CalendarDay({
       {/* TODAY indicator - responsive */}
       {isTodayProp && (
         <>
-          {/* Mobile: Small blue dot */}
-          <div className="sm:hidden absolute -left-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md z-20" />
+          {/* Mobile: Larger blue dot */}
+          <div className="sm:hidden absolute -left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-lg z-20" />
 
           {/* Desktop: Full badge */}
           <div className="hidden sm:block absolute -left-28 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print flex items-center z-20">

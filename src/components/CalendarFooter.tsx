@@ -24,10 +24,10 @@ export function CalendarFooter({
         </p>
       </div>
 
-      {/* Floating Jump to Today Button */}
+      {/* Floating Jump to Today Button - Desktop only */}
       <button
         onClick={onJumpToToday}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors no-print z-50"
+        className="hidden sm:block fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors no-print z-50"
         title="Jump to Today"
       >
         <svg
