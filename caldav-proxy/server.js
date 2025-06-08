@@ -194,14 +194,8 @@ app.get('/api/calendar', async (req, res) => {
                     `Processed event "${calendarEvent.title}": allDay=${calendarEvent.allDay}, start=${calendarEvent.start.toISOString()}`,
                   )
 
-                  // Only include events from current year
-                  if (calendarEvent.start.getFullYear() === currentYear) {
-                    allEvents.push(calendarEvent)
-                  } else {
-                    console.log(
-                      `Skipping event "${calendarEvent.title}" - not in current year: ${calendarEvent.start.getFullYear()}`,
-                    )
-                  }
+                  // Include all events - let client handle recurring event expansion and year filtering
+                  allEvents.push(calendarEvent)
                 } catch (eventError) {
                   console.error(
                     `Error processing event "${event.summary || 'Unknown'}":`,
@@ -255,7 +249,7 @@ app.get('/api/calendar', async (req, res) => {
         currentYear,
         calendarsFound: calendars.length,
         totalEventsFetched: fetchedCount,
-        eventsInCurrentYear: allEvents.length,
+        eventsReturned: allEvents.length,
         calendarBreakdown: calendarStats,
         allDayEvents: allEvents.filter((e) => e.allDay).length,
         timedEvents: allEvents.filter((e) => !e.allDay).length,

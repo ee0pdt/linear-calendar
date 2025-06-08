@@ -1,4 +1,5 @@
 import { PROXY_URL } from '../constants'
+import { expandRecurringEvent } from './recurrenceUtils'
 import type { CalDAVCredentials, CalendarEvent } from '../types'
 
 /**
@@ -21,16 +22,32 @@ export const importFromCalDAV = async (
   const data = await response.json()
 
   if (data.success) {
-    // Convert date strings back to Date objects
-    const calDAVEvents = data.events.map((event: any) => ({
-      ...event,
-      start: new Date(event.start),
-      end: new Date(event.end),
-      allDay: event.allDay || false,
-      isRecurring: event.isRecurring || false,
-    }))
+    const currentYear = new Date().getFullYear()
+    const expandedEvents: Array<CalendarEvent> = []
 
-    return calDAVEvents
+    // Process each event and expand recurring events
+    for (const event of data.events) {
+      const calDAVEvent: CalendarEvent = {
+        ...event,
+        start: new Date(event.start),
+        end: new Date(event.end),
+        allDay: event.allDay || false,
+        isRecurring: event.isRecurring || false,
+      }
+
+      // Handle recurring events by expanding them
+      if (calDAVEvent.rrule && calDAVEvent.isRecurring) {
+        const expanded = expandRecurringEvent(calDAVEvent, currentYear)
+        expandedEvents.push(...expanded)
+      } else {
+        // Only include non-recurring events from current year
+        if (calDAVEvent.start.getFullYear() === currentYear) {
+          expandedEvents.push(calDAVEvent)
+        }
+      }
+    }
+
+    return expandedEvents
   } else {
     throw new Error(data.error || 'Unknown error occurred')
   }

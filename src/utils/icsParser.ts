@@ -1,4 +1,5 @@
 import { parseICSDate } from './dateUtils'
+import { expandRecurringEvent } from './recurrenceUtils'
 import type { CalendarEvent } from '../types'
 
 /**
@@ -37,8 +38,15 @@ export const parseICSFile = (
 
         currentEvent.allDay = isAllDay
 
-        // For now, skip recurring events - will be handled in next phase
-        if (!currentEvent.rrule) {
+        // Handle recurring events by expanding them
+        if (currentEvent.rrule) {
+          currentEvent.isRecurring = true
+          const expandedEvents = expandRecurringEvent(
+            currentEvent as CalendarEvent,
+            year,
+          )
+          events.push(...expandedEvents)
+        } else {
           currentEvent.isRecurring = false
           events.push(currentEvent as CalendarEvent)
         }
