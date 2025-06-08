@@ -1,8 +1,8 @@
 # 🚀 Railway Deployment Status
 
-## ✅ Successfully Deployed!
+## ✅ Successfully Deployed with Timezone Fix!
 
-Your Linear Calendar application is now fully deployed on Railway with both components running:
+Your Linear Calendar application is now fully deployed on Railway with both components running and timezone issues resolved:
 
 ### 🎯 Live Applications
 
@@ -63,14 +63,29 @@ Your Linear Calendar application is now fully deployed on Railway with both comp
 - ✅ **Auto-scaling**: Railway handles traffic
 - ✅ **HTTPS**: SSL certificates auto-provisioned
 - ✅ **Environment Variables**: Properly configured
+- ✅ **Timezone Support**: User-selectable timezone with London default
+- ✅ **Timezone Fix**: Resolved 1-hour time shift between local and server
+
+### 🌐 Timezone Features
+
+The deployed application now includes:
+- **User-selectable timezone** with dropdown in header
+- **London timezone as default** (matching your local development)
+- **Consistent date handling** across all environments
+- **Timezone-aware CalDAV imports** and ICS parsing
+- **Robust date calculations** that work regardless of server timezone
 
 ### 🧪 Testing Your Deployment
 
 1. **Visit the UI**: https://linear-calendar-production.up.railway.app
-2. **Test Calendar Import**:
+2. **Test Timezone Selector**: 
+   - Look for timezone dropdown in header (defaults to London)
+   - Try switching between timezones
+   - Verify dates update correctly
+3. **Test Calendar Import**:
    - Click "Connect to Apple Calendar"
    - Use your Apple ID and app-specific password
-   - Verify events appear in the calendar
+   - Verify events appear in the calendar with correct dates/times
 
 ### 💳 Railway Free Tier Usage
 
