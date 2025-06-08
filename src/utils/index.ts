@@ -19,5 +19,5 @@ export * from './recurrenceUtils'
 // Storage utilities
 export * from './storageUtils'
 
-// CalDAV utilities
-export * from './caldavUtils'
+// Timezone utilities
+export * from './timezoneUtils'

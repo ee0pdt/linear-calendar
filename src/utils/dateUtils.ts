@@ -1,4 +1,9 @@
 import { CURRENT_YEAR, MONTHS } from '../constants'
+import {
+  getCurrentDateInTimezone,
+  getUserTimezone,
+  parseICSDateWithTimezone,
+} from './timezoneUtils'
 
 /**
  * Generates an array of all days in a given year
@@ -45,11 +50,17 @@ export const formatDate = (date: Date) => {
 }
 
 /**
- * Checks if a date is today
+ * Checks if a date is today (timezone-aware)
  */
 export const isToday = (date: Date): boolean => {
-  const today = new Date()
-  return date.toDateString() === today.toDateString()
+  const today = getCurrentDateInTimezone()
+  const userTimezone = getUserTimezone()
+
+  // Format both dates in the user's timezone for comparison
+  const todayStr = today.toLocaleDateString('en-CA', { timeZone: userTimezone })
+  const dateStr = date.toLocaleDateString('en-CA', { timeZone: userTimezone })
+
+  return todayStr === dateStr
 }
 
 /**
@@ -86,24 +97,11 @@ export const isWeekend = (date: Date): boolean => {
 }
 
 /**
- * Parses an ICS date string into a Date object
+ * Parses an ICS date string into a Date object (timezone-aware)
  * Handles both date-only (YYYYMMDD) and datetime (YYYYMMDDTHHMMSS) formats
  */
 export const parseICSDate = (dateStr: string): Date => {
-  if (dateStr.includes('T')) {
-    const [datePart, timePart] = dateStr.split('T')
-    const year = parseInt(datePart.substring(0, 4))
-    const month = parseInt(datePart.substring(4, 6)) - 1
-    const day = parseInt(datePart.substring(6, 8))
-    const hour = parseInt(timePart.substring(0, 2))
-    const minute = parseInt(timePart.substring(2, 4))
-    return new Date(year, month, day, hour, minute)
-  } else {
-    const year = parseInt(dateStr.substring(0, 4))
-    const month = parseInt(dateStr.substring(4, 6)) - 1
-    const day = parseInt(dateStr.substring(6, 8))
-    return new Date(year, month, day)
-  }
+  return parseICSDateWithTimezone(dateStr)
 }
 
 /**

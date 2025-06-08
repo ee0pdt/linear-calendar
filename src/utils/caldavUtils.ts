@@ -1,5 +1,6 @@
 import { PROXY_URL } from '../constants'
 import { expandRecurringEvent } from './recurrenceUtils'
+import { getCurrentDateInTimezone } from './timezoneUtils'
 import type { CalDAVCredentials, CalendarEvent } from '../types'
 
 /**
@@ -22,7 +23,8 @@ export const importFromCalDAV = async (
   const data = await response.json()
 
   if (data.success) {
-    const currentYear = new Date().getFullYear()
+    const currentDateInTz = getCurrentDateInTimezone()
+    const currentYear = currentDateInTz.getFullYear()
     const expandedEvents: Array<CalendarEvent> = []
 
     // Process each event and expand recurring events

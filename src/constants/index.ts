@@ -45,3 +45,18 @@ export const PROXY_URL =
 
 // Current Year
 export const CURRENT_YEAR = new Date().getFullYear()
+
+// Timezone Configuration
+export const DEFAULT_TIMEZONE = 'Europe/London'
+export const TIMEZONE_STORAGE_KEY = 'linear-calendar-timezone'
+
+// Available timezones for the UI selector
+export const AVAILABLE_TIMEZONES = [
+  { value: 'Europe/London', label: 'London (GMT/BST)' },
+  { value: 'America/New_York', label: 'New York (EST/EDT)' },
+  { value: 'America/Los_Angeles', label: 'Los Angeles (PST/PDT)' },
+  { value: 'Europe/Paris', label: 'Paris (CET/CEST)' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+  { value: 'Australia/Sydney', label: 'Sydney (AEST/AEDT)' },
+  { value: 'UTC', label: 'UTC' },
+] as const

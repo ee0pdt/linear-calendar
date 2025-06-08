@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { CalendarFooter } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { ImportControls } from '../components/ImportControls'
+import { TimezoneSelect } from '../components/TimezoneSelect'
 import { useEvents } from '../hooks/useEvents'
 
 import { useScrollToToday } from '../hooks/useScrollToToday'
@@ -40,9 +41,12 @@ export function LinearCalendar() {
           {/* Calendar header and import toggle */}
           <div className="px-4 py-2 sm:px-6 sm:py-3">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-                {currentYear} Calendar
-              </h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                  {currentYear} Calendar
+                </h1>
+                <TimezoneSelect />
+              </div>
               <div className="flex items-center gap-2">
                 {/* Jump to Today button */}
                 <button
