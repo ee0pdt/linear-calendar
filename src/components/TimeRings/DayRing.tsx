@@ -1,4 +1,5 @@
 import React from 'react'
+import { getUserTimezone } from '../../utils/timezoneUtils'
 
 interface DayRingProps {
   currentDate?: Date
@@ -72,7 +73,11 @@ export const DayRing: React.FC<DayRingProps> = ({
       </svg>
       <div style={{ marginTop: 4, fontWeight: 500, fontSize: 12 }}>Day</div>
       <div style={{ fontSize: 10, color: '#888' }}>
-        {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        {now.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: getUserTimezone(),
+        })}
       </div>
     </div>
   )

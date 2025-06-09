@@ -1,4 +1,5 @@
 import { getEventEmoji } from '../utils/emojiUtils'
+import { getUserTimezone } from '../utils/timezoneUtils'
 import type { DayInfo } from '../types'
 
 interface DayDisplayProps {
@@ -38,11 +39,13 @@ export function DayDisplay({ dayInfo, isToday, ref }: DayDisplayProps) {
   }
 
   const formatTimeRange = (start: Date, end?: Date) => {
+    const userTimezone = getUserTimezone()
     const formatTime = (timeDate: Date) =>
       timeDate.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
+        timeZone: userTimezone,
       })
 
     if (!end) return formatTime(start)

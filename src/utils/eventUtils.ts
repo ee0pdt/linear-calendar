@@ -1,3 +1,4 @@
+import { getUserTimezone } from './timezoneUtils'
 import type { CalendarEvent } from '../types'
 
 /**
@@ -51,10 +52,12 @@ export const getEventDisplayForDate = (
   date: Date,
 ): string => {
   if (!event.allDay) {
-    // Timed events show the time
+    // Timed events show the time in the user's selected timezone
+    const userTimezone = getUserTimezone()
     return event.start.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: userTimezone,
     })
   }
 
