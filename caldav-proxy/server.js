@@ -151,40 +151,30 @@ app.get('/api/calendar', async (req, res) => {
 
                   // Also check for multi-day events where both start and end have 00:00:00 time component
                   if (!isAllDay && event.end && event.start) {
-                    const startDate = new Date(event.start)
-                    const endDate = new Date(event.end)
+                    // Check if both times look like midnight (without creating Date objects)
+                    const startStr = event.start.toString()
+                    const endStr = event.end.toString()
+                    
+                    // Look for patterns that indicate midnight times (00:00:00 or T00:00:00)
+                    const isMidnightStart = 
+                      startStr.includes('T00:00:00') || startStr.includes(' 00:00:00')
+                    const isMidnightEnd = 
+                      endStr.includes('T00:00:00') || endStr.includes(' 00:00:00')
 
-                    // Calculate duration in days
-                    const durationMs = endDate.getTime() - startDate.getTime()
-                    const durationDays = durationMs / (1000 * 60 * 60 * 24)
-
-                    // Check if both times are midnight and the duration is at least 1 full day
-                    const isMidnightStart =
-                      startDate.getHours() === 0 &&
-                      startDate.getMinutes() === 0 &&
-                      startDate.getSeconds() === 0
-
-                    const isMidnightEnd =
-                      endDate.getHours() === 0 &&
-                      endDate.getMinutes() === 0 &&
-                      endDate.getSeconds() === 0
-
-                    if (isMidnightStart && isMidnightEnd && durationDays >= 1) {
+                    if (isMidnightStart && isMidnightEnd) {
                       isAllDay = true
                       console.log(
-                        `Detected multi-day all-day event: ${event.summary}, duration: ${durationDays} days`,
+                        `Detected multi-day all-day event: ${event.summary}`,
                       )
                     }
                   }
 
                   // Create calendar event with proper format
-                  // Send ISO strings instead of Date objects to preserve timezone info
+                  // Send raw date strings to preserve original timezone info
                   const calendarEvent = {
                     title: event.summary || 'Untitled Event',
-                    start: event.start instanceof Date ? event.start.toISOString() : event.start,
-                    end: event.end
-                      ? (event.end instanceof Date ? event.end.toISOString() : event.end)
-                      : (event.start instanceof Date ? event.start.toISOString() : event.start),
+                    start: event.start,
+                    end: event.end || event.start,
                     allDay: isAllDay,
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
