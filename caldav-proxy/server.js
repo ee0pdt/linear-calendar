@@ -9,6 +9,39 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Helper function to consistently interpret calendar dates as London time
+function formatDateForLondonTime(dateInput) {
+  if (!dateInput) return dateInput
+  
+  // If it's already a Date object with proper timezone, return ISO string
+  if (dateInput instanceof Date) {
+    return dateInput.toISOString()
+  }
+  
+  // If it's a string, check if it has timezone info
+  if (typeof dateInput === 'string') {
+    // If it already has timezone info (Z, +, -), return as-is
+    if (dateInput.includes('Z') || dateInput.includes('+') || dateInput.includes('-', 10)) {
+      return dateInput
+    }
+    
+    // If it's a datetime string without timezone, assume it's London time and convert to UTC
+    if (dateInput.includes('T')) {
+      // Create a date as if it's UTC, then adjust for London offset
+      const tempDate = new Date(dateInput + 'Z') // Treat as UTC first
+      
+      // Get current London offset (handles BST/GMT automatically)
+      const londonOffset = new Date().toLocaleString('en', {timeZone: 'Europe/London', timeZoneName: 'longOffset'}).includes('+01:00') ? 1 : 0
+      
+      // Subtract London offset to get the correct UTC time
+      const correctedDate = new Date(tempDate.getTime() - (londonOffset * 60 * 60 * 1000))
+      return correctedDate.toISOString()
+    }
+  }
+  
+  return dateInput
+}
+
 // Parse FRONTEND_URL to handle comma-separated values
 const frontendUrls = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map((url) => url.trim())
@@ -170,11 +203,11 @@ app.get('/api/calendar', async (req, res) => {
                   }
 
                   // Create calendar event with proper format
-                  // Send raw date strings to preserve original timezone info
+                  // Force consistent timezone interpretation by treating all times as London time
                   const calendarEvent = {
                     title: event.summary || 'Untitled Event',
-                    start: event.start,
-                    end: event.end || event.start,
+                    start: formatDateForLondonTime(event.start),
+                    end: formatDateForLondonTime(event.end || event.start),
                     allDay: isAllDay,
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
