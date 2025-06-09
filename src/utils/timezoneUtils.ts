@@ -115,18 +115,14 @@ export const formatDateInTimezone = (date: Date, timezone?: string): string => {
  * Parses an event date from CalDAV/API response and ensures it's in the correct timezone
  * This handles dates that come as ISO strings from the server
  */
-export const parseEventDateWithTimezone = (
-  dateInput: string | Date,
-  timezone?: string,
-): Date => {
-  const tz = timezone || getUserTimezone()
-
-  // If it's already a Date object, convert it to the target timezone
+export const parseEventDateWithTimezone = (dateInput: string | Date): Date => {
+  // If it's already a Date object, just return it as-is
+  // (the timezone conversion should happen at display time)
   if (dateInput instanceof Date) {
-    return convertToTimezone(dateInput, tz)
+    return dateInput
   }
 
-  // If it's an ISO string, parse it and convert
-  const date = new Date(dateInput)
-  return convertToTimezone(date, tz)
+  // If it's a string, parse it normally
+  // The server should be sending proper ISO strings
+  return new Date(dateInput)
 }
