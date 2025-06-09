@@ -178,12 +178,13 @@ app.get('/api/calendar', async (req, res) => {
                   }
 
                   // Create calendar event with proper format
+                  // Send ISO strings instead of Date objects to preserve timezone info
                   const calendarEvent = {
                     title: event.summary || 'Untitled Event',
-                    start: new Date(event.start),
+                    start: event.start instanceof Date ? event.start.toISOString() : event.start,
                     end: event.end
-                      ? new Date(event.end)
-                      : new Date(event.start),
+                      ? (event.end instanceof Date ? event.end.toISOString() : event.end)
+                      : (event.start instanceof Date ? event.start.toISOString() : event.start),
                     allDay: isAllDay,
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
@@ -191,7 +192,7 @@ app.get('/api/calendar', async (req, res) => {
                   }
 
                   console.log(
-                    `Processed event "${calendarEvent.title}": allDay=${calendarEvent.allDay}, start=${calendarEvent.start.toISOString()}`,
+                    `Processed event "${calendarEvent.title}": allDay=${calendarEvent.allDay}, start=${calendarEvent.start}`,
                   )
 
                   // Include all events - let client handle recurring event expansion and year filtering
