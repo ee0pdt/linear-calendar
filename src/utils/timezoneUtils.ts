@@ -117,12 +117,44 @@ export const formatDateInTimezone = (date: Date, timezone?: string): string => {
  */
 export const parseEventDateWithTimezone = (dateInput: string | Date): Date => {
   // If it's already a Date object, just return it as-is
-  // (the timezone conversion should happen at display time)
   if (dateInput instanceof Date) {
     return dateInput
   }
 
-  // If it's a string, parse it normally
-  // The server should be sending proper ISO strings
+  // If it's a string, parse it safely
+  if (typeof dateInput === 'string') {
+    try {
+      // First, try parsing as-is
+      const directParse = new Date(dateInput)
+
+      // If direct parsing works and gives a valid date, use it
+      if (!isNaN(directParse.getTime())) {
+        return directParse
+      }
+
+      // If that fails, and it looks like a datetime without timezone info,
+      // try treating it as UTC
+      if (
+        dateInput.includes('T') &&
+        !dateInput.endsWith('Z') &&
+        !dateInput.includes('+') &&
+        !dateInput.includes('-', 19)
+      ) {
+        // Only add 'Z' if the string doesn't already have milliseconds or other issues
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(dateInput)) {
+          return new Date(dateInput + 'Z')
+        }
+      }
+
+      // As a last resort, return the direct parse even if it might be invalid
+      return directParse
+    } catch (error) {
+      console.error('Error parsing date:', dateInput, error)
+      // Return current date as fallback to prevent crashes
+      return new Date()
+    }
+  }
+
+  // Fallback for any other type
   return new Date(dateInput)
 }

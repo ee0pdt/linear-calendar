@@ -32,23 +32,36 @@ export const importFromCalDAV = async (
 
     // Process each event and expand recurring events
     for (const event of data.events) {
-      const calDAVEvent: CalendarEvent = {
-        ...event,
-        start: parseEventDateWithTimezone(event.start),
-        end: parseEventDateWithTimezone(event.end),
-        allDay: event.allDay || false,
-        isRecurring: event.isRecurring || false,
-      }
+      try {
+        console.log('Processing CalDAV event:', {
+          title: event.title,
+          start: event.start,
+          startType: typeof event.start,
+          end: event.end,
+          endType: typeof event.end,
+        })
 
-      // Handle recurring events by expanding them
-      if (calDAVEvent.rrule && calDAVEvent.isRecurring) {
-        const expanded = expandRecurringEvent(calDAVEvent, currentYear)
-        expandedEvents.push(...expanded)
-      } else {
-        // Only include non-recurring events from current year
-        if (calDAVEvent.start.getFullYear() === currentYear) {
-          expandedEvents.push(calDAVEvent)
+        const calDAVEvent: CalendarEvent = {
+          ...event,
+          start: parseEventDateWithTimezone(event.start),
+          end: parseEventDateWithTimezone(event.end),
+          allDay: event.allDay || false,
+          isRecurring: event.isRecurring || false,
         }
+
+        // Handle recurring events by expanding them
+        if (calDAVEvent.rrule && calDAVEvent.isRecurring) {
+          const expanded = expandRecurringEvent(calDAVEvent, currentYear)
+          expandedEvents.push(...expanded)
+        } else {
+          // Only include non-recurring events from current year
+          if (calDAVEvent.start.getFullYear() === currentYear) {
+            expandedEvents.push(calDAVEvent)
+          }
+        }
+      } catch (eventError) {
+        console.error('Error processing CalDAV event:', eventError, event)
+        // Skip this event and continue processing others
       }
     }
 
