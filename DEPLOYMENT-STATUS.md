@@ -69,6 +69,7 @@ Your Linear Calendar application is now fully deployed on Railway with both comp
 ### 🌐 Timezone Features
 
 The deployed application now includes:
+
 - **User-selectable timezone** with dropdown in header
 - **London timezone as default** (matching your local development)
 - **Consistent date handling** across all environments
@@ -78,7 +79,7 @@ The deployed application now includes:
 ### 🧪 Testing Your Deployment
 
 1. **Visit the UI**: https://linear-calendar-production.up.railway.app
-2. **Test Timezone Selector**: 
+2. **Test Timezone Selector**:
    - Look for timezone dropdown in header (defaults to London)
    - Try switching between timezones
    - Verify dates update correctly
