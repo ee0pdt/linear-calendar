@@ -9,37 +9,46 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Helper function to consistently interpret calendar dates as London time
-function formatDateForLondonTime(dateInput) {
-  if (!dateInput) return dateInput
+// Helper function to preprocess ICAL data and fix floating time issues
+function preprocessICALData(icalData) {
+  // Add London timezone definition to the calendar if not present
+  let processedData = icalData
   
-  // If it's already a Date object with proper timezone, return ISO string
-  if (dateInput instanceof Date) {
-    return dateInput.toISOString()
+  if (!processedData.includes('BEGIN:VTIMEZONE')) {
+    // Add Europe/London timezone definition
+    const londonTz = `BEGIN:VTIMEZONE
+TZID:Europe/London
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0000
+TZOFFSETTO:+0100
+TZNAME:BST
+DTSTART:19700329T010000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0000
+TZNAME:GMT
+DTSTART:19701025T020000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+`
+    // Insert timezone after BEGIN:VCALENDAR
+    processedData = processedData.replace(
+      /(BEGIN:VCALENDAR[\s\S]*?\n)/,
+      `$1${londonTz}`
+    )
   }
   
-  // If it's a string, check if it has timezone info
-  if (typeof dateInput === 'string') {
-    // If it already has timezone info (Z, +, -), return as-is
-    if (dateInput.includes('Z') || dateInput.includes('+') || dateInput.includes('-', 10)) {
-      return dateInput
-    }
-    
-    // If it's a datetime string without timezone, assume it's London time and convert to UTC
-    if (dateInput.includes('T')) {
-      // Create a date as if it's UTC, then adjust for London offset
-      const tempDate = new Date(dateInput + 'Z') // Treat as UTC first
-      
-      // Get current London offset (handles BST/GMT automatically)
-      const londonOffset = new Date().toLocaleString('en', {timeZone: 'Europe/London', timeZoneName: 'longOffset'}).includes('+01:00') ? 1 : 0
-      
-      // Subtract London offset to get the correct UTC time
-      const correctedDate = new Date(tempDate.getTime() - (londonOffset * 60 * 60 * 1000))
-      return correctedDate.toISOString()
-    }
-  }
+  // Fix floating time datetime values by adding TZID parameter
+  // Match DTSTART and DTEND without TZID that have time components
+  processedData = processedData.replace(
+    /^(DTSTART|DTEND):(\d{8}T\d{6})$/gm,
+    '$1;TZID=Europe/London:$2'
+  )
   
-  return dateInput
+  return processedData
 }
 
 // Parse FRONTEND_URL to handle comma-separated values
@@ -147,7 +156,9 @@ app.get('/api/calendar', async (req, res) => {
         // Parse each calendar object
         for (const calendarObject of calendarObjects) {
           try {
-            const parsed = ICAL.parseICS(calendarObject.data)
+            // Preprocess ICAL data to fix floating time issues
+            const processedData = preprocessICALData(calendarObject.data)
+            const parsed = ICAL.parseICS(processedData)
 
             for (const key in parsed) {
               const event = parsed[key]
@@ -203,11 +214,13 @@ app.get('/api/calendar', async (req, res) => {
                   }
 
                   // Create calendar event with proper format
-                  // Force consistent timezone interpretation by treating all times as London time
+                  // Now that floating times are preprocessed, Date objects should be consistent
                   const calendarEvent = {
                     title: event.summary || 'Untitled Event',
-                    start: formatDateForLondonTime(event.start),
-                    end: formatDateForLondonTime(event.end || event.start),
+                    start: event.start instanceof Date ? event.start.toISOString() : event.start,
+                    end: event.end 
+                      ? (event.end instanceof Date ? event.end.toISOString() : event.end)
+                      : (event.start instanceof Date ? event.start.toISOString() : event.start),
                     allDay: isAllDay,
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
