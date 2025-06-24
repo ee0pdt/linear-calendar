@@ -41,12 +41,7 @@ export function useCalDAVImport() {
       const importedEvents = await importFromCalDAV(calDAVCredentials)
       onSuccess(importedEvents)
       setShowCalDAVForm(false)
-      // Reset credentials after successful import for security
-      setCalDAVCredentials({
-        username: '',
-        password: '',
-        serverUrl: '',
-      })
+      // Keep credentials saved for future imports and refresh functionality
     } catch (error) {
       console.error('CalDAV import failed:', error)
       onError(

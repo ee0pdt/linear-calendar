@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { parseICSFile } from '../utils/icsParser'
 import { saveEventsToStorage } from '../utils/storageUtils'
@@ -18,6 +18,7 @@ export function ImportControls({
   setLastImportInfo,
 }: ImportControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Use CalDAV hook
   const {
@@ -75,6 +76,61 @@ export function ImportControls({
     }
   }
 
+  const refreshEvents = async () => {
+    if (!lastImportInfo || !confirm('This will clear all events and re-import from the last source. Continue?')) {
+      return
+    }
+
+    setIsRefreshing(true)
+    
+    try {
+      // Clear existing events first
+      setEvents([], 'Refreshing...')
+      
+      if (lastImportInfo.type === 'caldav') {
+        // Re-import from CalDAV
+        const savedCredentials = localStorage.getItem('linear-calendar-caldav-credentials')
+        if (!savedCredentials) {
+          alert('CalDAV credentials not found. Please reconnect to your calendar.')
+          setIsRefreshing(false)
+          return
+        }
+
+        const credentials = JSON.parse(savedCredentials)
+        setCalDAVCredentials(credentials)
+        
+        await handleCalDAVImport(
+          (calDAVEvents) => {
+            setEvents(calDAVEvents, 'CalDAV Refresh')
+            
+            const importInfo: ImportInfo = {
+              fileName: 'CalDAV Refresh',
+              eventCount: calDAVEvents.length,
+              importDate: new Date().toLocaleString(),
+              type: 'caldav',
+            }
+            setLastImportInfo(importInfo)
+            
+            saveEventsToStorage(calDAVEvents, 'CalDAV Refresh')
+            localStorage.setItem('linear-calendar-import-info', JSON.stringify(importInfo))
+          },
+          (error) => {
+            console.error('CalDAV refresh error:', error)
+            alert('Failed to refresh from CalDAV server. Please check your connection.')
+          },
+        )
+      } else {
+        // File import - can't refresh automatically since we don't store the file
+        alert('File imports cannot be automatically refreshed. Please re-upload your ICS file.')
+      }
+    } catch (error) {
+      console.error('Refresh error:', error)
+      alert('Failed to refresh events. Please try again.')
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   const handleCalDAVConnect = async () => {
     if (!calDAVCredentials.username || !calDAVCredentials.password) {
       alert('Please enter both username and password')
@@ -94,11 +150,7 @@ export function ImportControls({
         }
         setLastImportInfo(importInfo)
 
-        // Save credentials and events
-        localStorage.setItem(
-          'linear-calendar-caldav-credentials',
-          JSON.stringify(calDAVCredentials),
-        )
+        // Save events (credentials are already auto-saved by the hook)
         saveEventsToStorage(allEvents, 'CalDAV Import')
         localStorage.setItem(
           'linear-calendar-import-info',
@@ -147,10 +199,6 @@ export function ImportControls({
                     username: e.target.value,
                   }
                   setCalDAVCredentials(newCreds)
-                  localStorage.setItem(
-                    'linear-calendar-caldav-credentials',
-                    JSON.stringify(newCreds),
-                  )
                 }}
                 placeholder="your@icloud.com"
                 className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -169,10 +217,6 @@ export function ImportControls({
                     password: e.target.value,
                   }
                   setCalDAVCredentials(newCreds)
-                  localStorage.setItem(
-                    'linear-calendar-caldav-credentials',
-                    JSON.stringify(newCreds),
-                  )
                 }}
                 placeholder="xxxx-xxxx-xxxx-xxxx"
                 className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -240,12 +284,21 @@ export function ImportControls({
                 {lastImportInfo.importDate}
               </p>
             )}
-            <button
-              onClick={clearAllEvents}
-              className="text-xs text-red-600 hover:text-red-800 underline"
-            >
-              Clear stored calendar data
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={refreshEvents}
+                disabled={isRefreshing || !lastImportInfo}
+                className="text-xs text-blue-600 hover:text-blue-800 underline disabled:text-gray-400 disabled:no-underline"
+              >
+                {isRefreshing ? '🔄 Refreshing...' : '🔄 Refresh Events'}
+              </button>
+              <button
+                onClick={clearAllEvents}
+                className="text-xs text-red-600 hover:text-red-800 underline"
+              >
+                Clear stored calendar data
+              </button>
+            </div>
           </div>
         </div>
       )}
