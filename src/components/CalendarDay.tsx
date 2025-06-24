@@ -24,7 +24,20 @@ export function CalendarDay({
   const holidayInfo = getSchoolHolidayInfo(date)
 
   const dayEvents = getEventsForDate(events, date)
-  const displayedEvents = dayEvents.slice(0, 3)
+  // Sort events by time (all-day events first, then by start time)
+  const sortedEvents = dayEvents.sort((a, b) => {
+    // All-day events come first
+    if (a.allDay !== b.allDay) {
+      return a.allDay ? -1 : 1
+    }
+    // Both are timed events - sort by start time
+    if (!a.allDay && !b.allDay) {
+      return a.start.getTime() - b.start.getTime()
+    }
+    // Both are all-day events - sort by title
+    return a.title.localeCompare(b.title)
+  })
+  const displayedEvents = sortedEvents
   const globalIndex = (() => {
     // Used for "Day X of Y" counter
     const yearStart = new Date(date.getFullYear(), 0, 1)
@@ -103,7 +116,7 @@ export function CalendarDay({
           </div>
           {dayEvents.length > 0 && (
             <div className="mt-1 text-xs space-y-1 events-list">
-              {displayedEvents.map((event, i) => {
+              {sortedEvents.map((event, i) => {
                 const timeDisplay = getEventDisplayForDate(event, date)
                 return (
                   <div key={i}>
@@ -125,8 +138,8 @@ export function CalendarDay({
                           )
                           const emoji = getEventEmoji(event.title)
                           const title =
-                            event.title.length > 12
-                              ? `${event.title.substring(0, 12)}...`
+                            event.title.length > 18
+                              ? `${event.title.substring(0, 18)}...`
                               : event.title
                           const recurringIndicator = event.isRecurring
                             ? ''
@@ -167,8 +180,8 @@ export function CalendarDay({
                           {(() => {
                             const emoji = getEventEmoji(event.title)
                             const title =
-                              event.title.length > 20
-                                ? `${event.title.substring(0, 20)}...`
+                              event.title.length > 25
+                                ? `${event.title.substring(0, 25)}...`
                                 : event.title
                             return `${title} ${emoji}`
                           })()}
@@ -178,11 +191,6 @@ export function CalendarDay({
                   </div>
                 )
               })}
-              {dayEvents.length > 3 && (
-                <div className="text-gray-500 text-xs">
-                  +{dayEvents.length - 3} more
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -221,7 +229,7 @@ export function CalendarDay({
         {/* Events - full width on mobile */}
         {dayEvents.length > 0 && (
           <div className="space-y-1">
-            {displayedEvents.map((event, i) => {
+            {sortedEvents.map((event, i) => {
               const timeDisplay = getEventDisplayForDate(event, date)
               return (
                 <div key={i} className="w-full">
@@ -238,8 +246,8 @@ export function CalendarDay({
                         const dayProgress = getEventDisplayForDate(event, date)
                         const emoji = getEventEmoji(event.title)
                         const title =
-                          event.title.length > 20
-                            ? `${event.title.substring(0, 20)}...`
+                          event.title.length > 45
+                            ? `${event.title.substring(0, 45)}...`
                             : event.title
                         const recurringIndicator = event.isRecurring ? '' : '★ '
                         return dayProgress
@@ -266,8 +274,8 @@ export function CalendarDay({
                         {(() => {
                           const emoji = getEventEmoji(event.title)
                           const title =
-                            event.title.length > 25
-                              ? `${event.title.substring(0, 25)}...`
+                            event.title.length > 45
+                              ? `${event.title.substring(0, 45)}...`
                               : event.title
                           return `${title} ${emoji}`
                         })()}
@@ -277,11 +285,6 @@ export function CalendarDay({
                 </div>
               )
             })}
-            {dayEvents.length > 3 && (
-              <div className="text-gray-500 text-xs text-center">
-                +{dayEvents.length - 3} more
-              </div>
-            )}
           </div>
         )}
       </div>
