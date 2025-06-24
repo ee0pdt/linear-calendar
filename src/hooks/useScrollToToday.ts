@@ -1,9 +1,9 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 
 export function useScrollToToday() {
   const todayRef = useRef<HTMLDivElement>(null)
 
-  const jumpToToday = () => {
+  const jumpToToday = (smooth = true) => {
     if (todayRef.current) {
       const element = todayRef.current
 
@@ -15,11 +15,21 @@ export function useScrollToToday() {
 
         eventsPanel.scrollTo({
           top: offsetPosition,
-          behavior: 'smooth',
+          behavior: smooth ? 'smooth' : 'instant',
         })
       }
     }
   }
+
+  // Auto-scroll to today on page load
+  useEffect(() => {
+    // Use a small delay to ensure the DOM is fully rendered
+    const timer = setTimeout(() => {
+      jumpToToday(false) // Use instant scroll for initial load
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [])
 
   return {
     todayRef,
