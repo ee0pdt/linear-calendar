@@ -48,7 +48,7 @@ export function LinearCalendar() {
               <div className="flex items-center gap-2">
                 {/* Jump to Today button */}
                 <button
-                  onClick={jumpToToday}
+                  onClick={() => jumpToToday()}
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                   aria-label="Jump to today"
                   title="Jump to Today"
@@ -118,7 +118,7 @@ export function LinearCalendar() {
             <CalendarFooter
               currentYear={currentYear}
               totalDays={yearDays.length}
-              onJumpToToday={jumpToToday}
+              onJumpToToday={() => jumpToToday()}
             />
           </div>
         </div>

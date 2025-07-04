@@ -3,6 +3,7 @@ import { getSchoolHolidayInfo, isSchoolHoliday } from '../utils/holidayUtils'
 import { getEventEmoji } from '../utils/emojiUtils'
 import { getEventDisplayForDate, getEventsForDate } from '../utils/eventUtils'
 import type { CalendarEvent } from '../types'
+import { useVerseOfTheDay } from '../hooks/useVerseOfTheDay'
 
 interface CalendarDayProps {
   date: Date
@@ -22,6 +23,7 @@ export function CalendarDay({
   const isWeekendDay = isWeekend(date)
   const isHoliday = isSchoolHoliday(date)
   const holidayInfo = getSchoolHolidayInfo(date)
+  const { verse, loading: verseLoading, error: verseError } = useVerseOfTheDay()
 
   const dayEvents = getEventsForDate(events, date)
   // Sort events by time (all-day events first, then by start time)
@@ -114,6 +116,26 @@ export function CalendarDay({
           <div className="text-gray-400 text-sm day-counter">
             Day {globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
           </div>
+          {/* Verse of the Day - Desktop */}
+          {isTodayProp && (
+            <div className="mt-2 mb-2">
+              {verseLoading && (
+                <span className="text-gray-400 text-xs">Loading verse...</span>
+              )}
+              {verseError && (
+                <span className="text-red-500 text-xs">{verseError}</span>
+              )}
+              {verse && !verseLoading && !verseError && (
+                <div className="verse-of-the-day text-blue-900 italic text-xs sm:text-sm max-w-xl mx-auto">
+                  <span>“{verse.text}”</span>
+                  <br />
+                  <span className="font-semibold text-blue-700">
+                    {verse.reference}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
           {dayEvents.length > 0 && (
             <div className="mt-1 text-xs space-y-1 events-list">
               {sortedEvents.map((event, i) => {
@@ -226,6 +248,26 @@ export function CalendarDay({
           </div>
         )}
 
+        {/* Verse of the Day - Mobile */}
+        {isTodayProp && (
+          <div className="mb-2">
+            {verseLoading && (
+              <span className="text-gray-400 text-xs">Loading verse...</span>
+            )}
+            {verseError && (
+              <span className="text-red-500 text-xs">{verseError}</span>
+            )}
+            {verse && !verseLoading && !verseError && (
+              <div className="verse-of-the-day text-blue-900 italic text-xs max-w-xl mx-auto">
+                <span>“{verse.text}”</span>
+                <br />
+                <span className="font-semibold text-blue-700">
+                  {verse.reference}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
         {/* Events - full width on mobile */}
         {dayEvents.length > 0 && (
           <div className="space-y-1">
