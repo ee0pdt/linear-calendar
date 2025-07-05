@@ -53,56 +53,35 @@ export function CalendarDay({
     <div
       ref={isTodayProp ? todayRef : undefined}
       className={`day-entry border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors relative
-        ${isTodayProp ? 'today-highlight bg-gray-50 dark:bg-gray-800 border-l-4 sm:border-l-8 border-blue-500 dark:border-blue-400 shadow-lg font-bold z-10' : ''}
+        ${isTodayProp ? 'today-highlight bg-blue-50 dark:bg-blue-900 font-bold z-10' : ''}
         ${isWeekendDay && !isHoliday ? 'weekend-highlight bg-gray-100 dark:bg-gray-800' : ''}
         ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight bg-blue-50 dark:bg-gray-800' : ''}
         ${isHoliday && !isWeekendDay ? 'holiday-highlight bg-green-50 dark:bg-gray-800' : ''}
         ${isPast ? 'past-day dark:opacity-70' : ''}
-        p-3 sm:p-4 min-h-[3rem] sm:min-h-[4rem]`}
+        p-3 sm:p-4 min-h-[3rem] sm:min-h-[4rem] ${isTodayProp ? 'text-lg sm:text-xl' : ''}`}
       style={isTodayProp ? { position: 'relative' } : {}}
     >
       {/* TODAY indicator - responsive */}
-      {isTodayProp && (
-        <>
-          {/* Mobile: Larger blue dot */}
-          <div className="sm:hidden absolute -left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-lg z-20" />
-
-          {/* Desktop: Full badge */}
-          <div className="hidden sm:flex absolute -left-28 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-base font-extrabold shadow-md border-2 border-blue-700 no-print items-center z-20">
-            <svg
-              className="w-4 h-4 mr-1.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" fill="#fff2" />
-              <path
-                d="M8 2v4M16 2v4M3 10h18"
-                stroke="#fff"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span>TODAY</span>
-          </div>
-        </>
-      )}
+      {/* Removed Today pill and dot for today row */}
 
       {/* Desktop: Horizontal layout */}
       <div className="hidden sm:flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="text-gray-400 flex items-center space-x-2 font-normal">
             <span
-              className="inline-block w-12 text-center rounded-full bg-gray-100 text-gray-400 dark:bg-black dark:text-gray-100 px-2 py-1 mr-2 text-sm font-normal"
+              className={`inline-block w-12 text-center rounded-full px-2 py-1 mr-2 text-sm font-normal ${isTodayProp ? 'bg-blue-600 text-white dark:bg-blue-400 dark:text-gray-900' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
               style={{ minWidth: '48px' }}
             >
               {dayName}
             </span>
-            <span className="text-gray-800 font-bold text-lg dark:text-gray-100">
+            <span
+              className={`font-bold ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-2xl' : 'text-gray-800 dark:text-gray-100 text-lg'}`}
+            >
               {dayNumberOrdinal}
             </span>
-            <span className="text-gray-700 font-medium dark:text-gray-100">
+            <span
+              className={`font-medium ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-lg' : 'text-gray-700 dark:text-gray-100'}`}
+            >
               {monthName}
             </span>
             {holidayInfo && (
@@ -127,10 +106,10 @@ export function CalendarDay({
                 <span className="text-red-500 text-xs">{verseError}</span>
               )}
               {verse && !verseLoading && !verseError && (
-                <div className="verse-of-the-day text-blue-900 dark:text-blue-200 italic text-xs sm:text-sm max-w-xl mx-auto">
+                <div className="verse-of-the-day text-blue-900 dark:text-blue-200 italic text-base sm:text-lg max-w-xl mx-auto font-semibold py-4">
                   <span>“{verse.text}”</span>
                   <br />
-                  <span className="font-semibold text-blue-700 dark:text-blue-400">
+                  <span className="font-bold text-blue-700 dark:text-blue-400 text-base sm:text-lg">
                     {verse.reference}
                   </span>
                 </div>
@@ -224,17 +203,25 @@ export function CalendarDay({
         {/* Date and day info */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="inline-block w-10 text-center rounded-full bg-gray-100 dark:bg-black text-gray-400 dark:text-gray-100 px-1.5 py-0.5 text-xs font-normal">
+            <span
+              className={`inline-block w-10 text-center rounded-full px-1.5 py-0.5 text-xs font-normal ${isTodayProp ? 'bg-blue-600 text-white dark:bg-blue-400 dark:text-gray-900' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
+            >
               {dayName}
             </span>
-            <span className="text-gray-800 font-bold text-base dark:text-gray-100">
+            <span
+              className={`font-bold ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-xl' : 'text-gray-800 dark:text-gray-100 text-base'}`}
+            >
               {dayNumberOrdinal}
             </span>
-            <span className="text-gray-700 font-medium text-sm dark:text-gray-100">
+            <span
+              className={`font-medium ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-lg' : 'text-gray-700 dark:text-gray-100 text-sm'}`}
+            >
               {monthName}
             </span>
           </div>
-          <div className="text-gray-400 text-xs">
+          <div
+            className={`text-xs ${isTodayProp ? 'text-blue-700 dark:text-blue-200 font-bold text-base' : 'text-gray-400'}`}
+          >
             Day {globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
           </div>
         </div>
@@ -259,10 +246,10 @@ export function CalendarDay({
               <span className="text-red-500 text-xs">{verseError}</span>
             )}
             {verse && !verseLoading && !verseError && (
-              <div className="verse-of-the-day text-blue-900 dark:text-blue-200 italic text-xs max-w-xl mx-auto">
+              <div className="verse-of-the-day text-blue-900 dark:text-blue-200 italic text-base max-w-xl mx-auto font-semibold py-3">
                 <span>“{verse.text}”</span>
                 <br />
-                <span className="font-semibold text-blue-700 dark:text-blue-400">
+                <span className="font-bold text-blue-700 dark:text-blue-400 text-base">
                   {verse.reference}
                 </span>
               </div>
