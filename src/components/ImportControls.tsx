@@ -3,6 +3,7 @@ import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { parseICSFile } from '../utils/icsParser'
 import { saveEventsToStorage } from '../utils/storageUtils'
 import type { CalendarEvent, ImportInfo } from '../types'
+import { Loader2 } from 'lucide-react'
 
 interface ImportControlsProps {
   events: Array<CalendarEvent>
@@ -77,32 +78,41 @@ export function ImportControls({
   }
 
   const refreshEvents = async () => {
-    if (!lastImportInfo || !confirm('This will clear all events and re-import from the last source. Continue?')) {
+    if (
+      !lastImportInfo ||
+      !confirm(
+        'This will clear all events and re-import from the last source. Continue?',
+      )
+    ) {
       return
     }
 
     setIsRefreshing(true)
-    
+
     try {
       // Clear existing events first
       setEvents([], 'Refreshing...')
-      
+
       if (lastImportInfo.type === 'caldav') {
         // Re-import from CalDAV
-        const savedCredentials = localStorage.getItem('linear-calendar-caldav-credentials')
+        const savedCredentials = localStorage.getItem(
+          'linear-calendar-caldav-credentials',
+        )
         if (!savedCredentials) {
-          alert('CalDAV credentials not found. Please reconnect to your calendar.')
+          alert(
+            'CalDAV credentials not found. Please reconnect to your calendar.',
+          )
           setIsRefreshing(false)
           return
         }
 
         const credentials = JSON.parse(savedCredentials)
         setCalDAVCredentials(credentials)
-        
+
         await handleCalDAVImport(
           (calDAVEvents) => {
             setEvents(calDAVEvents, 'CalDAV Refresh')
-            
+
             const importInfo: ImportInfo = {
               fileName: 'CalDAV Refresh',
               eventCount: calDAVEvents.length,
@@ -110,18 +120,25 @@ export function ImportControls({
               type: 'caldav',
             }
             setLastImportInfo(importInfo)
-            
+
             saveEventsToStorage(calDAVEvents, 'CalDAV Refresh')
-            localStorage.setItem('linear-calendar-import-info', JSON.stringify(importInfo))
+            localStorage.setItem(
+              'linear-calendar-import-info',
+              JSON.stringify(importInfo),
+            )
           },
           (error) => {
             console.error('CalDAV refresh error:', error)
-            alert('Failed to refresh from CalDAV server. Please check your connection.')
+            alert(
+              'Failed to refresh from CalDAV server. Please check your connection.',
+            )
           },
         )
       } else {
         // File import - can't refresh automatically since we don't store the file
-        alert('File imports cannot be automatically refreshed. Please re-upload your ICS file.')
+        alert(
+          'File imports cannot be automatically refreshed. Please re-upload your ICS file.',
+        )
       }
     } catch (error) {
       console.error('Refresh error:', error)
@@ -167,7 +184,16 @@ export function ImportControls({
   }
 
   return (
-    <div className="mb-6 no-print space-y-4">
+    <div className="mb-6 no-print space-y-4 relative">
+      {/* Loading overlay */}
+      {(isRefreshing || isCalDAVLoading) && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-lg">
+          <Loader2 className="animate-spin w-8 h-8 text-blue-600 mb-2" />
+          <span className="text-blue-700 font-semibold text-sm">
+            {isRefreshing ? 'Refreshing events...' : 'Connecting...'}
+          </span>
+        </div>
+      )}
       {/* Live Calendar Import */}
       <div className="bg-green-50 p-4 rounded-lg border border-green-200">
         <h2 className="text-lg font-semibold mb-2 text-green-800">
@@ -180,7 +206,7 @@ export function ImportControls({
         {!showCalDAVForm ? (
           <button
             onClick={() => setShowCalDAVForm(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-green-600 hover:bg-green-700 text-white"
           >
             Connect to Apple Calendar
           </button>
@@ -201,7 +227,7 @@ export function ImportControls({
                   setCalDAVCredentials(newCreds)
                 }}
                 placeholder="your@icloud.com"
-                className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white border border-gray-300"
               />
             </div>
             <div>
@@ -219,7 +245,7 @@ export function ImportControls({
                   setCalDAVCredentials(newCreds)
                 }}
                 placeholder="xxxx-xxxx-xxxx-xxxx"
-                className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white border border-gray-300"
               />
               <p className="text-xs text-green-600 mt-1">
                 Generate at: appleid.apple.com → Security → App-Specific
@@ -230,7 +256,7 @@ export function ImportControls({
               <button
                 onClick={handleCalDAVConnect}
                 disabled={isCalDAVLoading}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:opacity-60 text-white"
               >
                 {isCalDAVLoading ? 'Connecting...' : 'Import Calendar'}
               </button>
@@ -244,7 +270,7 @@ export function ImportControls({
                   })
                   localStorage.removeItem('linear-calendar-caldav-credentials')
                 }}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 hover:bg-gray-200 text-gray-700"
               >
                 Cancel & Forget Credentials
               </button>
@@ -267,7 +293,7 @@ export function ImportControls({
           type="file"
           accept=".ics"
           onChange={handleFileImport}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          className="rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white border border-gray-300"
         />
       </div>
 
@@ -288,13 +314,13 @@ export function ImportControls({
               <button
                 onClick={refreshEvents}
                 disabled={isRefreshing || !lastImportInfo}
-                className="text-xs text-blue-600 hover:text-blue-800 underline disabled:text-gray-400 disabled:no-underline"
+                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
               >
                 {isRefreshing ? '🔄 Refreshing...' : '🔄 Refresh Events'}
               </button>
               <button
                 onClick={clearAllEvents}
-                className="text-xs text-red-600 hover:text-red-800 underline"
+                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-red-600 hover:bg-red-700 text-white"
               >
                 Clear stored calendar data
               </button>

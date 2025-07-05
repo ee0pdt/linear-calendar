@@ -46,24 +46,24 @@ export function ThemeToggle({
   onChange: (v: ThemePreference) => void
 }) {
   return (
-    <div className="mt-4 flex justify-center items-center gap-3 text-sm">
-      <span>Theme:</span>
+    <div className="mt-4 flex justify-center items-center gap-3 text-base">
+      <span className="font-semibold text-gray-700">Theme:</span>
       <button
-        className={`px-2 py-1 rounded ${value === 'light' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        className={`rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${value === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         onClick={() => onChange('light')}
         aria-pressed={value === 'light'}
       >
         Light
       </button>
       <button
-        className={`px-2 py-1 rounded ${value === 'dark' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        className={`rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${value === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         onClick={() => onChange('dark')}
         aria-pressed={value === 'dark'}
       >
         Dark
       </button>
       <button
-        className={`px-2 py-1 rounded ${value === 'system' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        className={`rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${value === 'system' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         onClick={() => onChange('system')}
         aria-pressed={value === 'system'}
       >

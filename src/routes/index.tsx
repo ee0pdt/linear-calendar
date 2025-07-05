@@ -14,7 +14,7 @@ import {
 } from '../utils/storageUtils'
 import type { ThemePreference } from '../utils/storageUtils'
 import { ThemeToggle } from '../components/CalendarFooter'
-import { Settings2 } from 'lucide-react'
+import { Settings2, X } from 'lucide-react'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 
 export const Route = createFileRoute('/')({
@@ -130,10 +130,10 @@ export function LinearCalendar() {
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative">
               <button
                 onClick={() => setShowSettings(false)}
-                className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-800"
+                className="absolute top-2 right-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
                 aria-label="Close settings"
               >
-                <span aria-hidden="true">&times;</span>
+                <X className="w-5 h-5" />
               </button>
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Settings2 className="w-5 h-5" /> Settings
