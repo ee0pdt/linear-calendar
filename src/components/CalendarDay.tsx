@@ -106,7 +106,7 @@ export function CalendarDay({
               {monthName}
             </span>
             {holidayInfo && (
-              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
+              <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
                 {holidayInfo.name} Day {holidayInfo.dayNumber}/
                 {holidayInfo.totalDays}
               </span>
@@ -127,10 +127,10 @@ export function CalendarDay({
                 <span className="text-red-500 text-xs">{verseError}</span>
               )}
               {verse && !verseLoading && !verseError && (
-                <div className="verse-of-the-day text-blue-900 italic text-xs sm:text-sm max-w-xl mx-auto">
+                <div className="verse-of-the-day text-blue-900 dark:text-blue-200 italic text-xs sm:text-sm max-w-xl mx-auto">
                   <span>“{verse.text}”</span>
                   <br />
-                  <span className="font-semibold text-blue-700">
+                  <span className="font-semibold text-blue-700 dark:text-blue-400">
                     {verse.reference}
                   </span>
                 </div>
@@ -147,8 +147,8 @@ export function CalendarDay({
                       <span
                         className={`text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-help ${
                           event.isRecurring
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-purple-100 text-purple-800 border-2 border-purple-300'
+                            ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
+                            : 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-2 border-purple-300 dark:border-purple-700'
                         }`}
                         title={
                           event.title.length > 15 ? event.title : undefined
@@ -176,15 +176,15 @@ export function CalendarDay({
                       <div
                         className={`cursor-help ${
                           event.isRecurring
-                            ? 'text-blue-700'
-                            : 'text-purple-700'
+                            ? 'text-blue-700 dark:text-blue-200'
+                            : 'text-purple-700 dark:text-purple-200'
                         }`}
                         title={
                           event.title.length > 22 ? event.title : undefined
                         }
                       >
                         {!event.isRecurring && (
-                          <span className="text-purple-600 font-medium mr-1">
+                          <span className="text-purple-600 font-medium mr-1 dark:text-purple-200">
                             ★
                           </span>
                         )}
@@ -196,8 +196,8 @@ export function CalendarDay({
                         <span
                           className={
                             event.isRecurring
-                              ? 'text-blue-600'
-                              : 'text-purple-600'
+                              ? 'text-blue-600 dark:text-blue-200'
+                              : 'text-purple-600 dark:text-purple-200'
                           }
                         >
                           {(() => {
@@ -224,13 +224,13 @@ export function CalendarDay({
         {/* Date and day info */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="inline-block w-10 text-center rounded-full bg-gray-100 px-1.5 py-0.5 text-xs font-normal">
+            <span className="inline-block w-10 text-center rounded-full bg-gray-100 dark:bg-black text-gray-400 dark:text-gray-100 px-1.5 py-0.5 text-xs font-normal">
               {dayName}
             </span>
-            <span className="text-gray-800 font-bold text-base">
+            <span className="text-gray-800 font-bold text-base dark:text-gray-100">
               {dayNumberOrdinal}
             </span>
-            <span className="text-gray-700 font-medium text-sm">
+            <span className="text-gray-700 font-medium text-sm dark:text-gray-100">
               {monthName}
             </span>
           </div>
@@ -242,7 +242,7 @@ export function CalendarDay({
         {/* Holiday badge - full width on mobile */}
         {holidayInfo && (
           <div className="w-full">
-            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full block text-center">
+            <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs font-medium px-2 py-1 rounded-full block text-center">
               {holidayInfo.name} Day {holidayInfo.dayNumber}/
               {holidayInfo.totalDays}
             </span>
@@ -259,10 +259,10 @@ export function CalendarDay({
               <span className="text-red-500 text-xs">{verseError}</span>
             )}
             {verse && !verseLoading && !verseError && (
-              <div className="verse-of-the-day text-blue-900 italic text-xs max-w-xl mx-auto">
+              <div className="verse-of-the-day text-blue-900 dark:text-blue-200 italic text-xs max-w-xl mx-auto">
                 <span>“{verse.text}”</span>
                 <br />
-                <span className="font-semibold text-blue-700">
+                <span className="font-semibold text-blue-700 dark:text-blue-400">
                   {verse.reference}
                 </span>
               </div>
@@ -280,8 +280,8 @@ export function CalendarDay({
                     <span
                       className={`text-xs font-medium px-2 py-1 rounded-full block text-center cursor-help ${
                         event.isRecurring
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-purple-100 text-purple-800 border-2 border-purple-300'
+                          ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
+                          : 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-2 border-purple-300 dark:border-purple-700'
                       }`}
                       title={event.title.length > 25 ? event.title : undefined}
                     >
@@ -301,12 +301,14 @@ export function CalendarDay({
                   ) : (
                     <div
                       className={`text-xs cursor-help text-center p-1 rounded ${
-                        event.isRecurring ? 'text-blue-700' : 'text-purple-700'
+                        event.isRecurring
+                          ? 'text-blue-700 dark:text-blue-200'
+                          : 'text-purple-700 dark:text-purple-200'
                       }`}
                       title={event.title.length > 30 ? event.title : undefined}
                     >
                       {!event.isRecurring && (
-                        <span className="text-purple-600 font-medium mr-1">
+                        <span className="text-purple-600 font-medium mr-1 dark:text-purple-200">
                           ★
                         </span>
                       )}
