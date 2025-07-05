@@ -69,7 +69,7 @@ export function CalendarDay({
         <div className="flex items-center space-x-4">
           <div className="text-gray-400 flex items-center space-x-2 font-normal">
             <span
-              className={`inline-block w-12 text-center rounded-full px-2 py-1 mr-2 text-sm font-normal ${isTodayProp ? 'bg-blue-600 text-white dark:bg-blue-400 dark:text-gray-900' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
+              className={`inline-block w-12 text-center rounded-full px-2 py-1 mr-2 text-sm font-normal ${isTodayProp ? 'bg-blue-700 text-white dark:bg-blue-600 dark:text-white' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
               style={{ minWidth: '48px' }}
             >
               {dayName}
@@ -204,7 +204,7 @@ export function CalendarDay({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span
-              className={`inline-block w-10 text-center rounded-full px-1.5 py-0.5 text-xs font-normal ${isTodayProp ? 'bg-blue-600 text-white dark:bg-blue-400 dark:text-gray-900' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
+              className={`inline-block w-10 text-center rounded-full px-1.5 py-0.5 text-xs font-normal ${isTodayProp ? 'bg-blue-700 text-white dark:bg-blue-600 dark:text-white' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
             >
               {dayName}
             </span>
