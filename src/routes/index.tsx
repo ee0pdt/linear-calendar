@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CalendarFooter } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { ImportControls } from '../components/ImportControls'
@@ -8,6 +8,12 @@ import { useEvents } from '../hooks/useEvents'
 import { useScrollToToday } from '../hooks/useScrollToToday'
 import { generateYearDays } from '../utils/dateUtils'
 import { DayRing, MonthRing, WeekRing, YearRing } from '../components/TimeRings'
+import {
+  getStoredThemePreference,
+  setStoredThemePreference,
+} from '../utils/storageUtils'
+import type { ThemePreference } from '../utils/storageUtils'
+import { ThemeToggle } from '../components/CalendarFooter'
 
 export const Route = createFileRoute('/')({
   component: LinearCalendar,
@@ -20,6 +26,53 @@ export function LinearCalendar() {
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
   const { todayRef, jumpToToday } = useScrollToToday()
+
+  // THEME STATE
+  const [theme, setTheme] = useState<ThemePreference>(() =>
+    getStoredThemePreference(),
+  )
+
+  useEffect(() => {
+    // Apply theme class to <body>
+    const body = document.body
+    body.classList.remove('theme-light', 'theme-dark')
+    if (theme === 'light') body.classList.add('theme-light')
+    else if (theme === 'dark') body.classList.add('theme-dark')
+    // Update theme-color meta
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) {
+      if (theme === 'dark') meta.setAttribute('content', '#181c20')
+      else if (theme === 'light') meta.setAttribute('content', '#4f8cff')
+      else {
+        // system: match media
+        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        meta.setAttribute('content', dark ? '#181c20' : '#4f8cff')
+      }
+    }
+    // Listen for system changes if "system" is selected
+    let mql: MediaQueryList | null = null
+    const handleSystem = () => {
+      if (theme === 'system' && meta) {
+        const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        meta.setAttribute('content', dark ? '#181c20' : '#4f8cff')
+        body.classList.toggle('theme-dark', dark)
+        body.classList.toggle('theme-light', !dark)
+      }
+    }
+    if (theme === 'system') {
+      mql = window.matchMedia('(prefers-color-scheme: dark)')
+      mql.addEventListener('change', handleSystem)
+      handleSystem()
+    }
+    return () => {
+      if (mql) mql.removeEventListener('change', handleSystem)
+    }
+  }, [theme])
+
+  const handleThemeChange = (pref: ThemePreference) => {
+    setStoredThemePreference(pref)
+    setTheme(pref)
+  }
 
   const yearDays = generateYearDays(currentYear)
 
@@ -119,7 +172,9 @@ export function LinearCalendar() {
               currentYear={currentYear}
               totalDays={yearDays.length}
               onJumpToToday={() => jumpToToday()}
-            />
+            >
+              <ThemeToggle value={theme} onChange={handleThemeChange} />
+            </CalendarFooter>
           </div>
         </div>
       </div>

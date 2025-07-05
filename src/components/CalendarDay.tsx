@@ -95,15 +95,17 @@ export function CalendarDay({
         <div className="flex items-center space-x-4">
           <div className="text-gray-400 flex items-center space-x-2 font-normal">
             <span
-              className="inline-block w-12 text-center rounded-full bg-gray-100 px-2 py-1 mr-2 text-sm font-normal"
+              className="inline-block w-12 text-center rounded-full bg-gray-100 text-gray-400 dark:bg-black dark:text-gray-100 px-2 py-1 mr-2 text-sm font-normal"
               style={{ minWidth: '48px' }}
             >
               {dayName}
             </span>
-            <span className="text-gray-800 font-bold text-lg">
+            <span className="text-gray-800 font-bold text-lg dark:text-gray-100">
               {dayNumberOrdinal}
             </span>
-            <span className="text-gray-700 font-medium">{monthName}</span>
+            <span className="text-gray-700 font-medium dark:text-gray-100">
+              {monthName}
+            </span>
             {holidayInfo && (
               <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
                 {holidayInfo.name} Day {holidayInfo.dayNumber}/

@@ -72,3 +72,17 @@ export const clearStoredData = (): void => {
   localStorage.removeItem(STORAGE_KEY)
   localStorage.removeItem(IMPORT_INFO_KEY)
 }
+
+export type ThemePreference = 'light' | 'dark' | 'system'
+
+const THEME_KEY = 'linear-calendar-theme-preference'
+
+export function getStoredThemePreference(): ThemePreference {
+  const pref = localStorage.getItem(THEME_KEY)
+  if (pref === 'light' || pref === 'dark' || pref === 'system') return pref
+  return 'system'
+}
+
+export function setStoredThemePreference(pref: ThemePreference) {
+  localStorage.setItem(THEME_KEY, pref)
+}

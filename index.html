@@ -35,6 +35,21 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Linear Calendar" />
     <title>Linear Calendar</title>
+    <script>
+      ;(function () {
+        function setThemeColor() {
+          const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) {
+            meta.setAttribute('content', dark ? '#181c20' : '#4f8cff')
+          }
+        }
+        setThemeColor()
+        window
+          .matchMedia('(prefers-color-scheme: dark)')
+          .addEventListener('change', setThemeColor)
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

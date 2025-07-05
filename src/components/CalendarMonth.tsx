@@ -19,7 +19,9 @@ export function CalendarMonth({
   return (
     <div className="month-group">
       <div className="sticky top-0 bg-white border-b-2 border-gray-300 py-2 mb-4 z-10">
-        <h2 className="text-xl font-bold text-gray-800">{monthName}</h2>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+          {monthName}
+        </h2>
       </div>
       <div className="days-grid">
         {daysInMonth.map((date) => (
