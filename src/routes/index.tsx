@@ -14,6 +14,8 @@ import {
 } from '../utils/storageUtils'
 import type { ThemePreference } from '../utils/storageUtils'
 import { ThemeToggle } from '../components/CalendarFooter'
+import { Settings2 } from 'lucide-react'
+import { TimezoneSelect } from '../components/TimezoneSelect'
 
 export const Route = createFileRoute('/')({
   component: LinearCalendar,
@@ -21,7 +23,7 @@ export const Route = createFileRoute('/')({
 
 export function LinearCalendar() {
   const currentYear = new Date().getFullYear()
-  const [showImportControls, setShowImportControls] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
@@ -90,7 +92,7 @@ export function LinearCalendar() {
             <YearRing size={56} />
           </div>
 
-          {/* Calendar header and import toggle */}
+          {/* Calendar header and settings toggle */}
           <div className="px-4 py-2 sm:px-6 sm:py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -99,68 +101,59 @@ export function LinearCalendar() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
-                {/* Jump to Today button */}
+                {/* Jump to Today button (text) */}
                 <button
                   onClick={() => jumpToToday()}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-semibold"
                   aria-label="Jump to today"
                   title="Jump to Today"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
-                    />
-                  </svg>
+                  Today
                 </button>
-                {/* Import controls toggle */}
+                {/* Settings panel toggle (cog icon) */}
                 <button
-                  onClick={() => setShowImportControls(!showImportControls)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  aria-label="Toggle import controls"
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Open settings"
+                  title="Settings"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
+                  <Settings2 className="w-5 h-5" />
                 </button>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Collapsible import controls */}
-            {showImportControls && (
-              <div className="mt-3 p-3 sm:p-4 bg-gray-50 rounded-lg sm:border-t sm:border-gray-100 sm:bg-gray-50 sm:mt-0 sm:rounded-none">
+        {/* Settings Panel Modal */}
+        {showSettings && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-800"
+                aria-label="Close settings"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Settings2 className="w-5 h-5" /> Settings
+              </h2>
+              <div className="space-y-6">
                 <ImportControls
                   events={events}
                   setEvents={setEvents}
                   lastImportInfo={lastImportInfo}
                   setLastImportInfo={setLastImportInfo}
                 />
+                <ThemeToggle value={theme} onChange={handleThemeChange} />
+                <TimezoneSelect />
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Panel 2: Scrollable calendar content */}
-        <div
-          className={`flex-1 overflow-y-auto events-panel ${showImportControls ? 'pt-64' : 'pt-40'} sm:pt-32`}
-        >
+        <div className={`flex-1 overflow-y-auto events-panel pt-40 sm:pt-32`}>
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
             <CalendarGrid
               currentYear={currentYear}
@@ -173,7 +166,7 @@ export function LinearCalendar() {
               totalDays={yearDays.length}
               onJumpToToday={() => jumpToToday()}
             >
-              <ThemeToggle value={theme} onChange={handleThemeChange} />
+              {/* No ThemeToggle here, now in settings panel */}
             </CalendarFooter>
           </div>
         </div>
