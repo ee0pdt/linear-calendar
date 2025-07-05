@@ -95,10 +95,10 @@ export function LinearCalendar() {
         <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
           {/* Time rings */}
           <div className="flex justify-center gap-6 p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700">
-            <DayRing size={56} className="text-gray-900 dark:text-gray-100" />
-            <WeekRing size={56} className="text-gray-900 dark:text-gray-100" />
-            <MonthRing size={56} className="text-gray-900 dark:text-gray-100" />
-            <YearRing size={56} className="text-gray-900 dark:text-gray-100" />
+            <DayRing size={56} />
+            <WeekRing size={56} />
+            <MonthRing size={56} />
+            <YearRing size={56} />
           </div>
 
           {/* Calendar header and settings toggle */}
@@ -135,27 +135,51 @@ export function LinearCalendar() {
 
         {/* Settings Panel Modal */}
         {showSettings && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 dark:bg-black dark:bg-opacity-60">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md relative text-gray-900 dark:text-gray-100">
               <button
                 onClick={() => setShowSettings(false)}
-                className="absolute top-2 right-2 p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                className="absolute top-2 right-2 p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Close settings"
               >
                 <X className="w-5 h-5" />
               </button>
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-gray-900 dark:text-gray-100">
                 <Settings2 className="w-5 h-5" /> Settings
               </h2>
-              <div className="space-y-6">
-                <ImportControls
-                  events={events}
-                  setEvents={setEvents}
-                  lastImportInfo={lastImportInfo}
-                  setLastImportInfo={setLastImportInfo}
-                />
-                <ThemeToggle value={theme} onChange={handleThemeChange} />
-                <TimezoneSelect />
+              <div className="flex flex-col gap-6">
+                {/* ImportControls Section */}
+                <section>
+                  <h3 className="text-base font-semibold mb-2 text-gray-700 dark:text-gray-200">
+                    Import Calendar
+                  </h3>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <ImportControls
+                      events={events}
+                      setEvents={setEvents}
+                      lastImportInfo={lastImportInfo}
+                      setLastImportInfo={setLastImportInfo}
+                    />
+                  </div>
+                </section>
+                {/* Theme Section */}
+                <section>
+                  <h3 className="text-base font-semibold mb-2 text-gray-700 dark:text-gray-200">
+                    Theme
+                  </h3>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <ThemeToggle value={theme} onChange={handleThemeChange} />
+                  </div>
+                </section>
+                {/* Timezone Section */}
+                <section>
+                  <h3 className="text-base font-semibold mb-2 text-gray-700 dark:text-gray-200">
+                    Timezone
+                  </h3>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <TimezoneSelect />
+                  </div>
+                </section>
               </div>
             </div>
           </div>

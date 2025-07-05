@@ -49,7 +49,9 @@ export function ThemeToggle({
 }) {
   return (
     <div className="mt-4 flex justify-center items-center gap-3 text-base">
-      <span className="font-semibold text-gray-700">Theme:</span>
+      <span className="font-semibold text-gray-700 dark:text-gray-200">
+        Theme:
+      </span>
       <button
         className={`rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${value === 'light' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         onClick={() => onChange('light')}

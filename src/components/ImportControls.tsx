@@ -184,7 +184,7 @@ export function ImportControls({
   }
 
   return (
-    <div className="mb-6 no-print space-y-4 relative">
+    <div className="mb-6 no-print relative bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
       {/* Loading overlay */}
       {(isRefreshing || isCalDAVLoading) && (
         <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-lg">
@@ -194,140 +194,144 @@ export function ImportControls({
           </span>
         </div>
       )}
-      {/* Live Calendar Import */}
-      <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
-        <h2 className="text-lg font-semibold mb-2 text-green-800 dark:text-green-200">
-          🔗 Live Calendar Import
-        </h2>
-        <p className="text-sm text-green-700 dark:text-green-300 mb-3">
-          Connect directly to your Apple Calendar for real-time updates
-          (requires app-specific password).
-        </p>
-        {!showCalDAVForm ? (
-          <button
-            onClick={() => setShowCalDAVForm(true)}
-            className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-green-600 hover:bg-green-700 text-white"
-          >
-            Connect to Apple Calendar
-          </button>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-green-700 mb-1">
-                Apple ID Email
-              </label>
-              <input
-                type="email"
-                value={calDAVCredentials.username}
-                onChange={(e) => {
-                  const newCreds = {
-                    ...calDAVCredentials,
-                    username: e.target.value,
-                  }
-                  setCalDAVCredentials(newCreds)
-                }}
-                placeholder="your@icloud.com"
-                className="rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white border border-gray-300"
-              />
+      <div className="space-y-4">
+        <div>
+          <h4 className="text-sm font-semibold mb-1 text-gray-700 dark:text-gray-200">
+            Apple Calendar
+          </h4>
+          <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+            Connect directly to your Apple Calendar for real-time updates
+            (requires app-specific password).
+          </p>
+          {!showCalDAVForm ? (
+            <button
+              onClick={() => setShowCalDAVForm(true)}
+              className="rounded-md px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Connect to Apple Calendar
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Apple ID Email
+                </label>
+                <input
+                  type="email"
+                  value={calDAVCredentials.username}
+                  onChange={(e) => {
+                    const newCreds = {
+                      ...calDAVCredentials,
+                      username: e.target.value,
+                    }
+                    setCalDAVCredentials(newCreds)
+                  }}
+                  placeholder="your@icloud.com"
+                  className="rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  App-Specific Password
+                </label>
+                <input
+                  type="password"
+                  value={calDAVCredentials.password}
+                  onChange={(e) => {
+                    const newCreds = {
+                      ...calDAVCredentials,
+                      password: e.target.value,
+                    }
+                    setCalDAVCredentials(newCreds)
+                  }}
+                  placeholder="xxxx-xxxx-xxxx-xxxx"
+                  className="rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Generate at: appleid.apple.com → Security → App-Specific
+                  Passwords
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleCalDAVConnect}
+                  disabled={isCalDAVLoading}
+                  className="rounded-md px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:opacity-60 text-white"
+                >
+                  {isCalDAVLoading ? 'Connecting...' : 'Import Calendar'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCalDAVForm(false)
+                    setCalDAVCredentials({
+                      username: '',
+                      password: '',
+                      serverUrl: '',
+                    })
+                    localStorage.removeItem(
+                      'linear-calendar-caldav-credentials',
+                    )
+                  }}
+                  className="rounded-md px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
+                >
+                  Cancel & Forget Credentials
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-green-700 mb-1">
-                App-Specific Password
-              </label>
-              <input
-                type="password"
-                value={calDAVCredentials.password}
-                onChange={(e) => {
-                  const newCreds = {
-                    ...calDAVCredentials,
-                    password: e.target.value,
-                  }
-                  setCalDAVCredentials(newCreds)
-                }}
-                placeholder="xxxx-xxxx-xxxx-xxxx"
-                className="rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white border border-gray-300"
-              />
-              <p className="text-xs text-green-600 mt-1">
-                Generate at: appleid.apple.com → Security → App-Specific
-                Passwords
+          )}
+        </div>
+        {/* File Upload Import */}
+        <div>
+          <h4 className="text-sm font-semibold mb-1 text-gray-700 dark:text-gray-200">
+            File Import
+          </h4>
+          <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+            Export your calendar as an ICS file and upload it here (one-time
+            import).
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".ics"
+            onChange={handleFileImport}
+            className="rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700"
+          />
+        </div>
+        {/* Import Status */}
+        {events.length > 0 && (
+          <div>
+            <h4 className="text-sm font-semibold mb-1 text-gray-700 dark:text-gray-200">
+              Import Status
+            </h4>
+            <div className="space-y-1">
+              <p className="text-xs text-green-600">
+                ✅ Loaded {events.length} events from your calendar
               </p>
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={handleCalDAVConnect}
-                disabled={isCalDAVLoading}
-                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:opacity-60 text-white"
-              >
-                {isCalDAVLoading ? 'Connecting...' : 'Import Calendar'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowCalDAVForm(false)
-                  setCalDAVCredentials({
-                    username: '',
-                    password: '',
-                    serverUrl: '',
-                  })
-                  localStorage.removeItem('linear-calendar-caldav-credentials')
-                }}
-                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 hover:bg-gray-200 text-gray-700"
-              >
-                Cancel & Forget Credentials
-              </button>
+              {lastImportInfo && (
+                <p className="text-xs text-gray-500">
+                  Last imported: {lastImportInfo.fileName} on{' '}
+                  {lastImportInfo.importDate}
+                </p>
+              )}
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={refreshEvents}
+                  disabled={isRefreshing || !lastImportInfo}
+                  className="rounded-md px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
+                >
+                  {isRefreshing ? '🔄 Refreshing...' : '🔄 Refresh Events'}
+                </button>
+                <button
+                  onClick={clearAllEvents}
+                  className="rounded-md px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Clear stored calendar data
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* File Upload Import */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h2 className="text-lg font-semibold mb-2 text-blue-800">
-          📁 File Import
-        </h2>
-        <p className="text-sm text-blue-700 mb-3">
-          Export your calendar as an ICS file and upload it here (one-time
-          import).
-        </p>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".ics"
-          onChange={handleFileImport}
-          className="rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 bg-white border border-gray-300"
-        />
-      </div>
-
-      {/* Import Status */}
-      {events.length > 0 && (
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <div className="space-y-1">
-            <p className="text-sm text-green-600">
-              ✅ Loaded {events.length} events from your calendar
-            </p>
-            {lastImportInfo && (
-              <p className="text-xs text-gray-500">
-                Last imported: {lastImportInfo.fileName} on{' '}
-                {lastImportInfo.importDate}
-              </p>
-            )}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={refreshEvents}
-                disabled={isRefreshing || !lastImportInfo}
-                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-60"
-              >
-                {isRefreshing ? '🔄 Refreshing...' : '🔄 Refresh Events'}
-              </button>
-              <button
-                onClick={clearAllEvents}
-                className="rounded-lg px-4 py-2 font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 bg-red-600 hover:bg-red-700 text-white"
-              >
-                Clear stored calendar data
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
