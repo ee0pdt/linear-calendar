@@ -33,6 +33,7 @@ export const MonthRing: React.FC<MonthRingProps> = ({
 
   return (
     <div
+      className="text-gray-900 dark:text-gray-100"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -67,13 +68,13 @@ export const MonthRing: React.FC<MonthRingProps> = ({
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={size < 60 ? '0.8em' : size < 80 ? '1.0em' : '1.5em'}
-          fill="#333"
+          fill="currentColor"
         >
           {percent}%
         </text>
       </svg>
-      <div style={{ marginTop: 4, fontWeight: 500, fontSize: 12 }}>Month</div>
-      <div style={{ fontSize: 10, color: '#888' }}>
+      <div className="mt-1 font-medium text-xs sm:text-sm">Month</div>
+      <div className="text-xs text-gray-600 dark:text-gray-300">
         {day} / {totalDays}
       </div>
     </div>

@@ -20,21 +20,23 @@ export function CalendarFooter({
   children,
 }: CalendarFooterProps) {
   return (
-    <>
-      {/* Footer info */}
-      <div className="mt-8 text-center text-gray-500 calendar-footer no-print">
-        <p>
-          Linear Calendar for {currentYear} • {totalDays} days total
-        </p>
-        <p className="text-sm">
-          Print this page (Ctrl+P / Cmd+P) to create your physical calendar
-        </p>
-        <p className="text-xs mt-2">
-          💡 Tip: Use "Print to PDF" to save a digital copy
-        </p>
-        {children}
+    <footer className="calendar-footer mt-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-center text-sm select-none">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div>
+          <span className="font-semibold">{currentYear}</span> — {totalDays}{' '}
+          days
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onJumpToToday}
+            className="px-3 py-2 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg transition-colors font-semibold"
+          >
+            Jump to Today
+          </button>
+          {children}
+        </div>
       </div>
-    </>
+    </footer>
   )
 }
 

@@ -187,19 +187,19 @@ export function ImportControls({
     <div className="mb-6 no-print space-y-4 relative">
       {/* Loading overlay */}
       {(isRefreshing || isCalDAVLoading) && (
-        <div className="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-lg">
+        <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-lg">
           <Loader2 className="animate-spin w-8 h-8 text-blue-600 mb-2" />
-          <span className="text-blue-700 font-semibold text-sm">
+          <span className="text-blue-700 dark:text-blue-300 font-semibold text-sm">
             {isRefreshing ? 'Refreshing events...' : 'Connecting...'}
           </span>
         </div>
       )}
       {/* Live Calendar Import */}
-      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-        <h2 className="text-lg font-semibold mb-2 text-green-800">
+      <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
+        <h2 className="text-lg font-semibold mb-2 text-green-800 dark:text-green-200">
           🔗 Live Calendar Import
         </h2>
-        <p className="text-sm text-green-700 mb-3">
+        <p className="text-sm text-green-700 dark:text-green-300 mb-3">
           Connect directly to your Apple Calendar for real-time updates
           (requires app-specific password).
         </p>

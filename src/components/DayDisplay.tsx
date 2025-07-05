@@ -64,13 +64,20 @@ export function DayDisplay({ dayInfo, isToday, ref }: DayDisplayProps) {
   return (
     <div
       ref={isToday ? ref : undefined}
-      className={getDayClasses()}
+      className={
+        getDayClasses() +
+        ' bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700'
+      }
       data-date={date.toISOString().split('T')[0]}
     >
-      <div className="day-header">
-        <span className="day-date">{formatDayDate(date)}</span>
+      <div className="day-header bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <span className="day-date text-gray-800 dark:text-gray-100">
+          {formatDayDate(date)}
+        </span>
         {events.length > 0 && (
-          <span className="event-count">({events.length})</span>
+          <span className="event-count text-gray-500 dark:text-gray-300">
+            ({events.length})
+          </span>
         )}
       </div>
 

@@ -35,11 +35,16 @@ export function LinearCalendar() {
   )
 
   useEffect(() => {
-    // Apply theme class to <body>
+    // Apply theme class to <body> and <html>
     const body = document.body
+    const html = document.documentElement
     body.classList.remove('theme-light', 'theme-dark')
+    html.classList.remove('dark')
     if (theme === 'light') body.classList.add('theme-light')
-    else if (theme === 'dark') body.classList.add('theme-dark')
+    else if (theme === 'dark') {
+      body.classList.add('theme-dark')
+      html.classList.add('dark')
+    }
     // Update theme-color meta
     const meta = document.querySelector('meta[name="theme-color"]')
     if (meta) {
@@ -49,6 +54,9 @@ export function LinearCalendar() {
         // system: match media
         const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
         meta.setAttribute('content', dark ? '#181c20' : '#4f8cff')
+        html.classList.toggle('dark', dark)
+        body.classList.toggle('theme-dark', dark)
+        body.classList.toggle('theme-light', !dark)
       }
     }
     // Listen for system changes if "system" is selected
@@ -57,6 +65,7 @@ export function LinearCalendar() {
       if (theme === 'system' && meta) {
         const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
         meta.setAttribute('content', dark ? '#181c20' : '#4f8cff')
+        html.classList.toggle('dark', dark)
         body.classList.toggle('theme-dark', dark)
         body.classList.toggle('theme-light', !dark)
       }
@@ -81,22 +90,22 @@ export function LinearCalendar() {
   return (
     <>
       {/* Unified layout: Mobile-first with responsive styling */}
-      <div className="h-screen flex flex-col">
+      <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
         {/* Panel 1: Fixed header with rings and controls */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
           {/* Time rings */}
-          <div className="flex justify-center gap-6 p-3 sm:p-4 border-b border-gray-100">
-            <DayRing size={56} />
-            <WeekRing size={56} />
-            <MonthRing size={56} />
-            <YearRing size={56} />
+          <div className="flex justify-center gap-6 p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700">
+            <DayRing size={56} className="text-gray-900 dark:text-gray-100" />
+            <WeekRing size={56} className="text-gray-900 dark:text-gray-100" />
+            <MonthRing size={56} className="text-gray-900 dark:text-gray-100" />
+            <YearRing size={56} className="text-gray-900 dark:text-gray-100" />
           </div>
 
           {/* Calendar header and settings toggle */}
           <div className="px-4 py-2 sm:px-6 sm:py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
                   {currentYear} Calendar
                 </h1>
               </div>
@@ -104,7 +113,7 @@ export function LinearCalendar() {
                 {/* Jump to Today button (text) */}
                 <button
                   onClick={() => jumpToToday()}
-                  className="px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-semibold"
+                  className="px-3 py-2 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg transition-colors font-semibold"
                   aria-label="Jump to today"
                   title="Jump to Today"
                 >
@@ -113,7 +122,7 @@ export function LinearCalendar() {
                 {/* Settings panel toggle (cog icon) */}
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                   aria-label="Open settings"
                   title="Settings"
                 >

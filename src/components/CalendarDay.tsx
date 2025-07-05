@@ -52,14 +52,13 @@ export function CalendarDay({
   return (
     <div
       ref={isTodayProp ? todayRef : undefined}
-      className={`day-entry border-b border-gray-200 transition-colors relative
-        ${isTodayProp ? 'today-highlight bg-gray-50 border-l-4 sm:border-l-8 border-blue-500 shadow-lg font-bold z-10' : ''}
-        ${isWeekendDay && !isHoliday ? 'weekend-highlight' : ''}
-        ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight' : ''}
-        ${isHoliday && !isWeekendDay ? 'holiday-highlight' : ''}
-        ${isPast ? 'past-day' : ''}
-        p-3 sm:p-4 min-h-[3rem] sm:min-h-[4rem]
-      `}
+      className={`day-entry border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors relative
+        ${isTodayProp ? 'today-highlight bg-gray-50 dark:bg-gray-800 border-l-4 sm:border-l-8 border-blue-500 dark:border-blue-400 shadow-lg font-bold z-10' : ''}
+        ${isWeekendDay && !isHoliday ? 'weekend-highlight bg-gray-100 dark:bg-gray-800' : ''}
+        ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight bg-blue-50 dark:bg-gray-800' : ''}
+        ${isHoliday && !isWeekendDay ? 'holiday-highlight bg-green-50 dark:bg-gray-800' : ''}
+        ${isPast ? 'past-day dark:opacity-70' : ''}
+        p-3 sm:p-4 min-h-[3rem] sm:min-h-[4rem]`}
       style={isTodayProp ? { position: 'relative' } : {}}
     >
       {/* TODAY indicator - responsive */}
