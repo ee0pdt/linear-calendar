@@ -53,7 +53,7 @@ export function CalendarDay({
     <div
       ref={isTodayProp ? todayRef : undefined}
       className={`day-entry border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors relative
-        ${isTodayProp ? 'today-highlight bg-blue-50 dark:bg-blue-900 font-bold z-10' : ''}
+        ${isTodayProp ? 'today-highlight bg-blue-50 dark:bg-blue-900 font-bold z-0' : ''}
         ${isWeekendDay && !isHoliday ? 'weekend-highlight bg-gray-100 dark:bg-gray-800' : ''}
         ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight bg-blue-50 dark:bg-gray-800' : ''}
         ${isHoliday && !isWeekendDay ? 'holiday-highlight bg-green-50 dark:bg-gray-800' : ''}
