@@ -1,172 +1,47 @@
 import { describe, it, expect, vi } from 'vitest'
 import request from 'supertest'
 
-// Mock cross-fetch before importing the app
-vi.mock('cross-fetch', () => {
+// Mock tsdav instead of cross-fetch
+vi.mock('tsdav', () => {
   return {
-    fetch: async (url, options = {}) => {
-      // Log incoming request
-      // eslint-disable-next-line no-console
-      console.log('[MOCK FETCH] URL:', url)
-      // eslint-disable-next-line no-console
-      console.log('[MOCK FETCH] Method:', options.method)
-      // eslint-disable-next-line no-console
-      console.log('[MOCK FETCH] Headers:', options.headers)
-      // eslint-disable-next-line no-console
-      console.log('[MOCK FETCH] Body:', options.body)
+    createDAVClient: vi.fn(async ({ credentials }) => {
+      if (credentials.username === 'wrong@icloud.com') {
+        throw new Error('Invalid credentials')
+      }
+      if (credentials.username === 'nohome@icloud.com') {
+        throw new Error('cannot find homeUrl')
+      }
 
-      let response
-      // Simulate CalDAV discovery (PROPFIND for principal-URL and home-URL)
-      if (
-        url.toString().includes('caldav.icloud.com') &&
-        options.method === 'PROPFIND'
-      ) {
-        // Minimal valid XML for principal discovery
-        if (options.body && options.body.includes('principal-collection-set')) {
-          response = {
-            ok: true,
-            status: 207,
-            url,
-            statusText: 'Multi-Status',
-            headers: {
-              get: (h) => (h === 'content-type' ? 'application/xml' : null),
-            },
-            text: async () =>
-              `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:"><d:response><d:href>/users/test@icloud.com/</d:href><d:propstat><d:prop><d:current-user-principal><d:href>/users/test@icloud.com/</d:href></d:current-user-principal></d:prop></d:propstat></d:response></d:multistatus>`,
-          }
-        } else if (options.body && options.body.includes('calendar-home-set')) {
-          response = {
-            ok: true,
-            status: 207,
-            url,
-            statusText: 'Multi-Status',
-            headers: {
-              get: (h) => (h === 'content-type' ? 'application/xml' : null),
-            },
-            text: async () =>
-              `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:"><d:response><d:href>/users/test@icloud.com/calendars/</d:href><d:propstat><d:prop><d:calendar-home-set><d:href>/users/test@icloud.com/calendars/</d:href></d:calendar-home-set></d:prop></d:propstat></d:response></d:multistatus>`,
-          }
-        } else {
-          response = {
-            ok: true,
-            status: 207,
-            url,
-            statusText: 'Multi-Status',
-            headers: {
-              get: (h) => (h === 'content-type' ? 'application/xml' : null),
-            },
-            text: async () =>
-              `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:"></d:multistatus>`,
-          }
-        }
-      } else if (
-        url.toString().includes('caldav.icloud.com') &&
-        options.method === 'OPTIONS'
-      ) {
-        response = {
-          ok: true,
-          status: 200,
-          url,
-          statusText: 'OK',
-          headers: { get: (h) => (h === 'content-type' ? 'text/plain' : null) },
-          text: async () => '',
-        }
-      } else if (
-        url.toString().includes('caldav.icloud.com') &&
-        options.method === 'GET'
-      ) {
-        response = {
-          ok: true,
-          status: 200,
-          url,
-          statusText: 'OK',
-          headers: {
-            get: (h) => (h === 'content-type' ? 'application/json' : null),
+      return {
+        fetchCalendars: vi.fn(async () => [
+          {
+            displayName: 'Test Calendar',
+            url: 'https://caldav.icloud.com/users/test/calendars/test-calendar/',
+            ctag: 'test-ctag',
+            description: 'Test calendar description',
+            timezone: 'America/New_York',
+            supportedCalendarComponentSet: ['VEVENT'],
           },
-          json: async () => [{ displayName: 'Test Calendar', url: 'test-url' }],
-          text: async () =>
-            JSON.stringify([{ displayName: 'Test Calendar', url: 'test-url' }]),
-        }
-      } else if (
-        url.toString().includes('caldav.icloud.com') &&
-        options.method === 'POST'
-      ) {
-        if (options.body && options.body.includes('wrong@icloud.com')) {
-          response = {
-            ok: false,
-            status: 401,
-            url,
-            statusText: 'Unauthorized',
-            headers: { get: () => null },
-            text: async () => 'Unauthorized',
+        ]),
+        createCalendarObject: vi.fn(async ({ calendar, filename, data }) => {
+          if (data.includes('wrong@icloud.com')) {
+            throw new Error('Authentication failed')
           }
-        } else {
-          response = {
-            ok: true,
-            status: 201,
-            url,
-            statusText: 'Created',
-            headers: { get: () => null },
-            text: async () => 'Created',
+          return { etag: 'test-etag', url: `${calendar.url}${filename}` }
+        }),
+        updateCalendarObject: vi.fn(async ({ calendar, filename, data }) => {
+          if (filename.includes('non-existent-event')) {
+            const error = new Error('Event not found')
+            error.message = '404'
+            throw error
           }
-        }
-      } else if (
-        url.toString().includes('caldav.icloud.com') &&
-        options.method === 'PUT'
-      ) {
-        if (url.toString().includes('non-existent-event')) {
-          response = {
-            ok: false,
-            status: 404,
-            url,
-            statusText: 'Not Found',
-            headers: { get: () => null },
-            text: async () => 'Not Found',
-          }
-        } else {
-          response = {
-            ok: true,
-            status: 200,
-            url,
-            statusText: 'OK',
-            headers: { get: () => null },
-            text: async () => 'OK',
-          }
-        }
-      } else if (
-        url.toString().includes('caldav.icloud.com') &&
-        options.method === 'DELETE'
-      ) {
-        response = {
-          ok: true,
-          status: 200,
-          url,
-          statusText: 'OK',
-          headers: { get: () => null },
-          text: async () => 'OK',
-        }
-      } else {
-        response = {
-          ok: false,
-          status: 500,
-          url,
-          statusText: 'Unknown',
-          headers: { get: () => null },
-          text: async () => 'Unknown',
-        }
+          return { etag: 'updated-etag' }
+        }),
+        deleteCalendarObject: vi.fn(async () => {
+          return { status: 200 }
+        }),
       }
-
-      // Log outgoing response
-      // eslint-disable-next-line no-console
-      console.log('[MOCK FETCH] Response status:', response.status)
-      // eslint-disable-next-line no-console
-      if (response.text) {
-        const body = await response.text()
-        // eslint-disable-next-line no-console
-        console.log('[MOCK FETCH] Response body:', body)
-      }
-      return response
-    },
+    }),
   }
 })
 

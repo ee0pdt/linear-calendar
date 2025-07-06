@@ -401,16 +401,39 @@ app.post('/api/calendar/events', async (req, res) => {
     // Generate a UID and filename
     const uid = event.uid || `event-${Date.now()}`
     const filename = `${uid}.ics`
-    // Create a simple iCal VEVENT string
+    // Create a simple iCal VEVENT string with proper formatting
+    const formatDateTime = (dateStr, allDay = false) => {
+      if (allDay) {
+        // For all-day events, use DATE format (YYYYMMDD)
+        return dateStr.replace(/-/g, '').substring(0, 8)
+      } else {
+        // For timed events, use DATETIME format (YYYYMMDDTHHMMSSZ)
+        return dateStr.replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+      }
+    }
+
     const dtStart = event.allDay
-      ? `DTSTART;VALUE=DATE:${event.start.replace(/-/g, '')}`
-      : `DTSTART:${event.start.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+      ? `DTSTART;VALUE=DATE:${formatDateTime(event.start, true)}`
+      : `DTSTART:${formatDateTime(event.start)}`
     const dtEnd = event.end
       ? event.allDay
-        ? `DTEND;VALUE=DATE:${event.end.replace(/-/g, '')}`
-        : `DTEND:${event.end.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+        ? `DTEND;VALUE=DATE:${formatDateTime(event.end, true)}`
+        : `DTEND:${formatDateTime(event.end)}`
       : ''
-    const vevent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${uid}\nSUMMARY:${event.title}\n${dtStart}\n${dtEnd}\nEND:VEVENT\nEND:VCALENDAR`
+    
+    const vevent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Linear Calendar//Calendar 1.0//EN',
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `SUMMARY:${event.title}`,
+      dtStart,
+      dtEnd,
+      `DTSTAMP:${formatDateTime(new Date().toISOString())}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n')
     await client.createCalendarObject({ calendar, filename, data: vevent })
     res.json({ success: true, eventId: uid })
   } catch (error) {
@@ -419,7 +442,12 @@ app.post('/api/calendar/events', async (req, res) => {
       error,
       error && error.stack,
     )
-    if (error.message && error.message.includes('401')) {
+    if (error.message && (error.message.includes('Invalid credentials') || error.message.includes('401'))) {
+      return res
+        .status(401)
+        .json({ success: false, error: 'Authentication failed' })
+    }
+    if (error.message && error.message.includes('cannot find homeUrl')) {
       return res
         .status(401)
         .json({ success: false, error: 'Authentication failed' })
@@ -454,16 +482,38 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
         .json({ success: false, error: 'No calendars found' })
     }
     const filename = `${eventId}.ics`
-    // Create updated VEVENT string
+    
+    // Create updated VEVENT string with proper formatting
+    const formatDateTime = (dateStr, allDay = false) => {
+      if (allDay) {
+        return dateStr.replace(/-/g, '').substring(0, 8)
+      } else {
+        return dateStr.replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+      }
+    }
+
     const dtStart = event.allDay
-      ? `DTSTART;VALUE=DATE:${event.start.replace(/-/g, '')}`
-      : `DTSTART:${event.start.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+      ? `DTSTART;VALUE=DATE:${formatDateTime(event.start, true)}`
+      : `DTSTART:${formatDateTime(event.start)}`
     const dtEnd = event.end
       ? event.allDay
-        ? `DTEND;VALUE=DATE:${event.end.replace(/-/g, '')}`
-        : `DTEND:${event.end.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+        ? `DTEND;VALUE=DATE:${formatDateTime(event.end, true)}`
+        : `DTEND:${formatDateTime(event.end)}`
       : ''
-    const vevent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${eventId}\nSUMMARY:${event.title}\n${dtStart}\n${dtEnd}\nEND:VEVENT\nEND:VCALENDAR`
+    
+    const vevent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Linear Calendar//Calendar 1.0//EN',
+      'BEGIN:VEVENT',
+      `UID:${eventId}`,
+      `SUMMARY:${event.title}`,
+      dtStart,
+      dtEnd,
+      `DTSTAMP:${formatDateTime(new Date().toISOString())}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n')
     await client.updateCalendarObject({ calendar, filename, data: vevent })
     res.json({ success: true })
   } catch (error) {
@@ -472,6 +522,16 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
       error,
       error && error.stack,
     )
+    if (error.message && (error.message.includes('Invalid credentials') || error.message.includes('401'))) {
+      return res
+        .status(401)
+        .json({ success: false, error: 'Authentication failed' })
+    }
+    if (error.message && error.message.includes('cannot find homeUrl')) {
+      return res
+        .status(401)
+        .json({ success: false, error: 'Authentication failed' })
+    }
     if (error.message && error.message.includes('404')) {
       return res.status(404).json({ success: false, error: 'Event not found' })
     }
