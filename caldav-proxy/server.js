@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3001
 function preprocessICALData(icalData) {
   // Add London timezone definition to the calendar if not present
   let processedData = icalData
-  
+
   if (!processedData.includes('BEGIN:VTIMEZONE')) {
     // Add Europe/London timezone definition
     const londonTz = `BEGIN:VTIMEZONE
@@ -37,17 +37,17 @@ END:VTIMEZONE
     // Insert timezone after BEGIN:VCALENDAR
     processedData = processedData.replace(
       /(BEGIN:VCALENDAR[\s\S]*?\n)/,
-      `$1${londonTz}`
+      `$1${londonTz}`,
     )
   }
-  
+
   // Fix floating time datetime values by adding TZID parameter
   // Match DTSTART and DTEND without TZID that have time components
   processedData = processedData.replace(
     /^(DTSTART|DTEND):(\d{8}T\d{6})$/gm,
-    '$1;TZID=Europe/London:$2'
+    '$1;TZID=Europe/London:$2',
   )
-  
+
   return processedData
 }
 
@@ -198,12 +198,14 @@ app.get('/api/calendar', async (req, res) => {
                     // Check if both times look like midnight (without creating Date objects)
                     const startStr = event.start.toString()
                     const endStr = event.end.toString()
-                    
+
                     // Look for patterns that indicate midnight times (00:00:00 or T00:00:00)
-                    const isMidnightStart = 
-                      startStr.includes('T00:00:00') || startStr.includes(' 00:00:00')
-                    const isMidnightEnd = 
-                      endStr.includes('T00:00:00') || endStr.includes(' 00:00:00')
+                    const isMidnightStart =
+                      startStr.includes('T00:00:00') ||
+                      startStr.includes(' 00:00:00')
+                    const isMidnightEnd =
+                      endStr.includes('T00:00:00') ||
+                      endStr.includes(' 00:00:00')
 
                     if (isMidnightStart && isMidnightEnd) {
                       isAllDay = true
@@ -217,10 +219,17 @@ app.get('/api/calendar', async (req, res) => {
                   // Now that floating times are preprocessed, Date objects should be consistent
                   const calendarEvent = {
                     title: event.summary || 'Untitled Event',
-                    start: event.start instanceof Date ? event.start.toISOString() : event.start,
-                    end: event.end 
-                      ? (event.end instanceof Date ? event.end.toISOString() : event.end)
-                      : (event.start instanceof Date ? event.start.toISOString() : event.start),
+                    start:
+                      event.start instanceof Date
+                        ? event.start.toISOString()
+                        : event.start,
+                    end: event.end
+                      ? event.end instanceof Date
+                        ? event.end.toISOString()
+                        : event.end
+                      : event.start instanceof Date
+                        ? event.start.toISOString()
+                        : event.start,
                     allDay: isAllDay,
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
@@ -363,6 +372,142 @@ app.get('/', (req, res) => {
   })
 })
 
+app.post('/api/calendar/events', async (req, res) => {
+  const { username, password, event } = req.body
+  if (!username || !password || !event) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Missing credentials or event data' })
+  }
+  if (!event.title || !event.start) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Event must have a title and start date' })
+  }
+  try {
+    const client = await createDAVClient({
+      serverUrl: 'https://caldav.icloud.com',
+      credentials: { username, password },
+      authMethod: 'Basic',
+      defaultAccountType: 'caldav',
+    })
+    const calendars = await client.fetchCalendars()
+    const calendar = calendars[0] // Use first calendar for now
+    if (!calendar) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'No calendars found' })
+    }
+    // Generate a UID and filename
+    const uid = event.uid || `event-${Date.now()}`
+    const filename = `${uid}.ics`
+    // Create a simple iCal VEVENT string
+    const dtStart = event.allDay
+      ? `DTSTART;VALUE=DATE:${event.start.replace(/-/g, '')}`
+      : `DTSTART:${event.start.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+    const dtEnd = event.end
+      ? event.allDay
+        ? `DTEND;VALUE=DATE:${event.end.replace(/-/g, '')}`
+        : `DTEND:${event.end.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+      : ''
+    const vevent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${uid}\nSUMMARY:${event.title}\n${dtStart}\n${dtEnd}\nEND:VEVENT\nEND:VCALENDAR`
+    await client.createCalendarObject({ calendar, filename, data: vevent })
+    res.json({ success: true, eventId: uid })
+  } catch (error) {
+    if (error.message && error.message.includes('401')) {
+      return res
+        .status(401)
+        .json({ success: false, error: 'Authentication failed' })
+    }
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to create event',
+    })
+  }
+})
+
+app.put('/api/calendar/events/:eventId', async (req, res) => {
+  const { username, password, event } = req.body
+  const { eventId } = req.params
+  if (!username || !password || !event) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Missing credentials or event data' })
+  }
+  try {
+    const client = await createDAVClient({
+      serverUrl: 'https://caldav.icloud.com',
+      credentials: { username, password },
+      authMethod: 'Basic',
+      defaultAccountType: 'caldav',
+    })
+    const calendars = await client.fetchCalendars()
+    const calendar = calendars[0]
+    if (!calendar) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'No calendars found' })
+    }
+    const filename = `${eventId}.ics`
+    // Create updated VEVENT string
+    const dtStart = event.allDay
+      ? `DTSTART;VALUE=DATE:${event.start.replace(/-/g, '')}`
+      : `DTSTART:${event.start.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+    const dtEnd = event.end
+      ? event.allDay
+        ? `DTEND;VALUE=DATE:${event.end.replace(/-/g, '')}`
+        : `DTEND:${event.end.replace(/[-:]/g, '').replace('T', 'T').replace('Z', 'Z')}`
+      : ''
+    const vevent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${eventId}\nSUMMARY:${event.title}\n${dtStart}\n${dtEnd}\nEND:VEVENT\nEND:VCALENDAR`
+    await client.updateCalendarObject({ calendar, filename, data: vevent })
+    res.json({ success: true })
+  } catch (error) {
+    if (error.message && error.message.includes('404')) {
+      return res.status(404).json({ success: false, error: 'Event not found' })
+    }
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to update event',
+    })
+  }
+})
+
+app.delete('/api/calendar/events/:eventId', async (req, res) => {
+  const { username, password } = req.query
+  const { eventId } = req.params
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Missing credentials' })
+  }
+  try {
+    const client = await createDAVClient({
+      serverUrl: 'https://caldav.icloud.com',
+      credentials: { username, password },
+      authMethod: 'Basic',
+      defaultAccountType: 'caldav',
+    })
+    const calendars = await client.fetchCalendars()
+    const calendar = calendars[0]
+    if (!calendar) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'No calendars found' })
+    }
+    const filename = `${eventId}.ics`
+    await client.deleteCalendarObject({ calendar, filename })
+    res.json({ success: true })
+  } catch (error) {
+    if (error.message && error.message.includes('404')) {
+      return res.status(404).json({ success: false, error: 'Event not found' })
+    }
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to delete event',
+    })
+  }
+})
+
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error('Server Error:', error)
@@ -373,13 +518,16 @@ app.use((error, req, res, next) => {
   })
 })
 
-// 404 handler
+// Move 404 handler to the very end
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not found',
     message: `Endpoint ${req.originalUrl} not found`,
   })
 })
+
+// Export app for testing
+export { app }
 
 app.listen(PORT, () => {
   console.log(`🚀 CalDAV Proxy Server running on port ${PORT}`)
