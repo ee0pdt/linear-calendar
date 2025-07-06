@@ -11,7 +11,8 @@ export function useScrollToToday() {
       const eventsPanel = document.querySelector('.events-panel')
       if (eventsPanel) {
         const elementPosition = element.offsetTop
-        const offsetPosition = elementPosition - 220 // Reset to original header height
+        const offsetPosition = elementPosition - 216
+        // Reset to original header height
 
         eventsPanel.scrollTo({
           top: offsetPosition,
