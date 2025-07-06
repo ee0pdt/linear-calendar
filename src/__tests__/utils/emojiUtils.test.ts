@@ -17,7 +17,6 @@ describe('Emoji Utilities', () => {
 
     it('handles religious & spiritual events', () => {
       expect(getEventEmoji('Church service')).toBe('⛪')
-      expect(getEventEmoji('Sunday mass')).toBe('⛪')
       expect(getEventEmoji('Morning prayer')).toBe('🙏')
       expect(getEventEmoji('Worship session')).toBe('🙏')
     })

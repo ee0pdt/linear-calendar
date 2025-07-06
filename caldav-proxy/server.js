@@ -414,6 +414,11 @@ app.post('/api/calendar/events', async (req, res) => {
     await client.createCalendarObject({ calendar, filename, data: vevent })
     res.json({ success: true, eventId: uid })
   } catch (error) {
+    console.error(
+      'POST /api/calendar/events error:',
+      error,
+      error && error.stack,
+    )
     if (error.message && error.message.includes('401')) {
       return res
         .status(401)
@@ -462,6 +467,11 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
     await client.updateCalendarObject({ calendar, filename, data: vevent })
     res.json({ success: true })
   } catch (error) {
+    console.error(
+      'PUT /api/calendar/events/:eventId error:',
+      error,
+      error && error.stack,
+    )
     if (error.message && error.message.includes('404')) {
       return res.status(404).json({ success: false, error: 'Event not found' })
     }
@@ -498,6 +508,11 @@ app.delete('/api/calendar/events/:eventId', async (req, res) => {
     await client.deleteCalendarObject({ calendar, filename })
     res.json({ success: true })
   } catch (error) {
+    console.error(
+      'DELETE /api/calendar/events/:eventId error:',
+      error,
+      error && error.stack,
+    )
     if (error.message && error.message.includes('404')) {
       return res.status(404).json({ success: false, error: 'Event not found' })
     }

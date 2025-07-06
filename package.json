@@ -33,6 +33,7 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/ui": "^3.2.1",
+    "fetch-mock": "^12.5.3",
     "jsdom": "^26.0.0",
     "prettier": "^3.5.3",
     "typescript": "^5.7.2",
