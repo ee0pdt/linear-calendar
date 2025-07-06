@@ -45,7 +45,7 @@ export const DayRing: React.FC<DayRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#eee"
+          stroke="var(--ring-bg)"
           strokeWidth={stroke}
           fill="none"
         />

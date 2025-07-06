@@ -46,7 +46,7 @@ export const MonthRing: React.FC<MonthRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#eee"
+          stroke="var(--ring-bg)"
           strokeWidth={stroke}
           fill="none"
         />

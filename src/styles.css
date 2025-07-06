@@ -1,6 +1,13 @@
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  --ring-bg: #eee;
+}
+.dark {
+  --ring-bg: #222b3a;
+}
+
 body {
   @apply m-0;
   font-family:
