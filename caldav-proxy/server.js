@@ -218,6 +218,7 @@ app.get('/api/calendar', async (req, res) => {
                   // Create calendar event with proper format
                   // Now that floating times are preprocessed, Date objects should be consistent
                   const calendarEvent = {
+                    id: event.uid, // Use the original CalDAV UID as the ID
                     title: event.summary || 'Untitled Event',
                     start:
                       event.start instanceof Date
@@ -234,6 +235,7 @@ app.get('/api/calendar', async (req, res) => {
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
                     calendarName: calendar.displayName,
+                    calendarUrl: calendar.url, // Save the calendar URL for later syncing
                   }
 
                   console.log(
@@ -385,19 +387,30 @@ app.post('/api/calendar/events', async (req, res) => {
       .json({ success: false, error: 'Event must have a title and start date' })
   }
   try {
+    console.log('Creating CalDAV client for user:', username)
     const client = await createDAVClient({
       serverUrl: 'https://caldav.icloud.com',
       credentials: { username, password },
       authMethod: 'Basic',
       defaultAccountType: 'caldav',
     })
+    console.log('CalDAV client created successfully')
     const calendars = await client.fetchCalendars()
-    const calendar = calendars[0] // Use first calendar for now
-    if (!calendar) {
+    // Filter out non-calendar objects like Reminders
+    const actualCalendars = calendars.filter(cal => 
+      cal.url && 
+      cal.displayName && 
+      !cal.displayName.toLowerCase().includes('reminder') &&
+      cal.url.includes('/calendars/')
+    )
+    
+    if (actualCalendars.length === 0) {
       return res
         .status(404)
-        .json({ success: false, error: 'No calendars found' })
+        .json({ success: false, error: 'No actual calendars found (only found Reminders or other non-calendar objects)' })
     }
+    
+    const calendar = actualCalendars[0] // Use first actual calendar
     // Generate a UID and filename
     const uid = event.uid || `event-${Date.now()}`
     const filename = `${uid}.ics`
@@ -420,7 +433,7 @@ app.post('/api/calendar/events', async (req, res) => {
         ? `DTEND;VALUE=DATE:${formatDateTime(event.end, true)}`
         : `DTEND:${formatDateTime(event.end)}`
       : ''
-    
+
     const vevent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -432,8 +445,10 @@ app.post('/api/calendar/events', async (req, res) => {
       dtEnd,
       `DTSTAMP:${formatDateTime(new Date().toISOString())}`,
       'END:VEVENT',
-      'END:VCALENDAR'
-    ].filter(Boolean).join('\r\n')
+      'END:VCALENDAR',
+    ]
+      .filter(Boolean)
+      .join('\r\n')
     await client.createCalendarObject({ calendar, filename, data: vevent })
     res.json({ success: true, eventId: uid })
   } catch (error) {
@@ -442,7 +457,11 @@ app.post('/api/calendar/events', async (req, res) => {
       error,
       error && error.stack,
     )
-    if (error.message && (error.message.includes('Invalid credentials') || error.message.includes('401'))) {
+    if (
+      error.message &&
+      (error.message.includes('Invalid credentials') ||
+        error.message.includes('401'))
+    ) {
       return res
         .status(401)
         .json({ success: false, error: 'Authentication failed' })
@@ -459,6 +478,145 @@ app.post('/api/calendar/events', async (req, res) => {
   }
 })
 
+// New endpoint that uses the calendar URL from the event data
+app.post('/api/calendar/events/update', async (req, res) => {
+  const { username, password, eventId, event } = req.body
+  if (!username || !password || !eventId || !event) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Missing credentials, eventId, or event data' })
+  }
+  
+  if (!event.calendarUrl) {
+    return res
+      .status(400)
+      .json({ success: false, error: 'Event missing calendarUrl - cannot determine which calendar to update' })
+  }
+  
+  try {
+    console.log('Creating CalDAV client for user:', username)
+    const client = await createDAVClient({
+      serverUrl: 'https://caldav.icloud.com',
+      credentials: { username, password },
+      authMethod: 'Basic',
+      defaultAccountType: 'caldav',
+    })
+    console.log('CalDAV client created successfully')
+    
+    // We need to fetch calendars to get the full calendar object that matches our URL
+    const calendars = await client.fetchCalendars()
+    const calendar = calendars.find(cal => cal.url === event.calendarUrl)
+    
+    if (!calendar) {
+      return res
+        .status(404)
+        .json({ success: false, error: `Calendar not found with URL: ${event.calendarUrl}` })
+    }
+    
+    console.log('Found matching calendar:', calendar.displayName, 'with URL:', calendar.url)
+    console.log('Calendar object properties:', Object.keys(calendar))
+    console.log('Full calendar object:', JSON.stringify(calendar, null, 2))
+    
+    const filename = `${eventId}.ics`
+    console.log('Looking for event with filename:', filename)
+
+    // Create updated VEVENT string with proper formatting
+    const formatDateTime = (dateStr, allDay = false) => {
+      if (allDay) {
+        return dateStr.replace(/-/g, '').substring(0, 8)
+      } else {
+        return dateStr.replace(/[-:]/g, '').replace(/\\.\\d{3}/, '')
+      }
+    }
+
+    const dtStart = event.allDay
+      ? `DTSTART;VALUE=DATE:${formatDateTime(event.start, true)}`
+      : `DTSTART:${formatDateTime(event.start)}`
+    const dtEnd = event.end
+      ? event.allDay
+        ? `DTEND;VALUE=DATE:${formatDateTime(event.end, true)}`
+        : `DTEND:${formatDateTime(event.end)}`
+      : ''
+
+    const vevent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Linear Calendar//Calendar 1.0//EN',
+      'BEGIN:VEVENT',
+      `UID:${eventId}`,
+      `SUMMARY:${event.title}`,
+      dtStart,
+      dtEnd,
+      `DTSTAMP:${formatDateTime(new Date().toISOString())}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ]
+      .filter(Boolean)
+      .join('\r\n')
+    
+    console.log('About to call updateCalendarObject with:')
+    console.log('- calendar:', calendar)
+    console.log('- filename:', filename)
+    console.log('- data length:', vevent.length)
+    
+    // Fix: updateCalendarObject expects a calendarObject with url, data, and etag
+    // First, get the existing calendar object to get its etag
+    const calendarObjectUrl = `${calendar.url}${filename}`
+    console.log('Getting existing calendar object from:', calendarObjectUrl)
+    
+    const existingObjects = await client.fetchCalendarObjects({
+      calendar,
+      objectUrls: [calendarObjectUrl]
+    })
+    
+    if (existingObjects.length === 0) {
+      throw new Error(`Calendar object not found at ${calendarObjectUrl}`)
+    }
+    
+    const existingObject = existingObjects[0]
+    console.log('Found existing object with etag:', existingObject.etag)
+    
+    // Now update using the correct tsdav signature
+    await client.updateCalendarObject({
+      calendarObject: {
+        url: calendarObjectUrl,
+        data: vevent,
+        etag: existingObject.etag
+      }
+    })
+    console.log('updateCalendarObject completed successfully')
+    
+    res.json({ success: true })
+  } catch (error) {
+    console.error(
+      'POST /api/calendar/events/update error:',
+      error,
+      error && error.stack,
+    )
+    if (
+      error.message &&
+      (error.message.includes('Invalid credentials') ||
+        error.message.includes('401'))
+    ) {
+      return res
+        .status(401)
+        .json({ success: false, error: 'Authentication failed' })
+    }
+    if (error.message && error.message.includes('cannot find homeUrl')) {
+      return res
+        .status(401)
+        .json({ success: false, error: 'Authentication failed' })
+    }
+    if (error.message && error.message.includes('404')) {
+      return res.status(404).json({ success: false, error: 'Event not found' })
+    }
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to update event',
+    })
+  }
+})
+
 app.put('/api/calendar/events/:eventId', async (req, res) => {
   const { username, password, event } = req.body
   const { eventId } = req.params
@@ -468,21 +626,36 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
       .json({ success: false, error: 'Missing credentials or event data' })
   }
   try {
+    console.log('Creating CalDAV client for user:', username)
     const client = await createDAVClient({
       serverUrl: 'https://caldav.icloud.com',
       credentials: { username, password },
       authMethod: 'Basic',
       defaultAccountType: 'caldav',
     })
+    console.log('CalDAV client created successfully')
     const calendars = await client.fetchCalendars()
-    const calendar = calendars[0]
-    if (!calendar) {
+    console.log('Fetched calendars:', calendars?.length || 0, 'calendars')
+    
+    // Filter out non-calendar objects like Reminders
+    const actualCalendars = calendars.filter(cal => 
+      cal.url && 
+      cal.displayName && 
+      !cal.displayName.toLowerCase().includes('reminder') &&
+      cal.url.includes('/calendars/')
+    )
+    console.log('Actual calendars after filtering:', actualCalendars?.length || 0)
+    
+    if (actualCalendars.length === 0) {
       return res
         .status(404)
-        .json({ success: false, error: 'No calendars found' })
+        .json({ success: false, error: 'No actual calendars found (only found Reminders or other non-calendar objects)' })
     }
-    const filename = `${eventId}.ics`
     
+    const calendar = actualCalendars[0]
+    console.log('Using calendar:', calendar?.displayName || 'Unknown')
+    const filename = `${eventId}.ics`
+
     // Create updated VEVENT string with proper formatting
     const formatDateTime = (dateStr, allDay = false) => {
       if (allDay) {
@@ -500,7 +673,7 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
         ? `DTEND;VALUE=DATE:${formatDateTime(event.end, true)}`
         : `DTEND:${formatDateTime(event.end)}`
       : ''
-    
+
     const vevent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -512,8 +685,10 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
       dtEnd,
       `DTSTAMP:${formatDateTime(new Date().toISOString())}`,
       'END:VEVENT',
-      'END:VCALENDAR'
-    ].filter(Boolean).join('\r\n')
+      'END:VCALENDAR',
+    ]
+      .filter(Boolean)
+      .join('\r\n')
     await client.updateCalendarObject({ calendar, filename, data: vevent })
     res.json({ success: true })
   } catch (error) {
@@ -522,7 +697,11 @@ app.put('/api/calendar/events/:eventId', async (req, res) => {
       error,
       error && error.stack,
     )
-    if (error.message && (error.message.includes('Invalid credentials') || error.message.includes('401'))) {
+    if (
+      error.message &&
+      (error.message.includes('Invalid credentials') ||
+        error.message.includes('401'))
+    ) {
       return res
         .status(401)
         .json({ success: false, error: 'Authentication failed' })
@@ -551,19 +730,34 @@ app.delete('/api/calendar/events/:eventId', async (req, res) => {
       .json({ success: false, error: 'Missing credentials' })
   }
   try {
+    console.log('Creating CalDAV client for user:', username)
     const client = await createDAVClient({
       serverUrl: 'https://caldav.icloud.com',
       credentials: { username, password },
       authMethod: 'Basic',
       defaultAccountType: 'caldav',
     })
+    console.log('CalDAV client created successfully')
     const calendars = await client.fetchCalendars()
-    const calendar = calendars[0]
-    if (!calendar) {
+    console.log('Fetched calendars:', calendars?.length || 0, 'calendars')
+    
+    // Filter out non-calendar objects like Reminders
+    const actualCalendars = calendars.filter(cal => 
+      cal.url && 
+      cal.displayName && 
+      !cal.displayName.toLowerCase().includes('reminder') &&
+      cal.url.includes('/calendars/')
+    )
+    console.log('Actual calendars after filtering:', actualCalendars?.length || 0)
+    
+    if (actualCalendars.length === 0) {
       return res
         .status(404)
-        .json({ success: false, error: 'No calendars found' })
+        .json({ success: false, error: 'No actual calendars found (only found Reminders or other non-calendar objects)' })
     }
+    
+    const calendar = actualCalendars[0]
+    console.log('Using calendar:', calendar?.displayName || 'Unknown')
     const filename = `${eventId}.ics`
     await client.deleteCalendarObject({ calendar, filename })
     res.json({ success: true })

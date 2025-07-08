@@ -1,11 +1,14 @@
 // Event Types
 export interface CalendarEvent {
+  id?: string
   title: string
   start: Date
   end?: Date
   allDay: boolean
   isRecurring?: boolean
   rrule?: string
+  calendarUrl?: string // CalDAV calendar URL for syncing
+  calendarName?: string // Display name of the calendar
 }
 
 // Import Information

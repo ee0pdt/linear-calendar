@@ -26,7 +26,14 @@ export function LinearCalendar() {
   const [showSettings, setShowSettings] = useState(false)
 
   // Custom hooks for state management
-  const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
+  const {
+    events,
+    setEvents,
+    updateEvent,
+    deleteEvent,
+    lastImportInfo,
+    setLastImportInfo,
+  } = useEvents()
   const { todayRef, jumpToToday } = useScrollToToday()
 
   // THEME STATE
@@ -143,6 +150,8 @@ export function LinearCalendar() {
               currentYear={currentYear}
               events={events}
               todayRef={todayRef}
+              onUpdateEvent={updateEvent}
+              onDeleteEvent={deleteEvent}
             />
 
             <CalendarFooter

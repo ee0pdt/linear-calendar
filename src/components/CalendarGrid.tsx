@@ -6,12 +6,16 @@ interface CalendarGridProps {
   currentYear: number
   events: Array<CalendarEvent>
   todayRef?: React.RefObject<HTMLDivElement | null>
+  onUpdateEvent: (originalEvent: CalendarEvent, updatedEvent: CalendarEvent) => Promise<void>
+  onDeleteEvent: (eventToDelete: CalendarEvent) => Promise<void>
 }
 
 export function CalendarGrid({
   currentYear,
   events,
   todayRef,
+  onUpdateEvent,
+  onDeleteEvent,
 }: CalendarGridProps) {
   const yearDays = generateYearDays(currentYear)
 
@@ -37,6 +41,8 @@ export function CalendarGrid({
           daysInMonth={daysInMonth}
           events={events}
           todayRef={todayRef}
+          onUpdateEvent={onUpdateEvent}
+          onDeleteEvent={onDeleteEvent}
         />
       ))}
     </div>

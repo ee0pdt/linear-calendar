@@ -1,15 +1,20 @@
+import { useState } from 'react'
 import { formatDate, isPastDay, isWeekend } from '../utils/dateUtils'
 import { getSchoolHolidayInfo, isSchoolHoliday } from '../utils/holidayUtils'
 import { getEventEmoji } from '../utils/emojiUtils'
 import { getEventDisplayForDate, getEventsForDate } from '../utils/eventUtils'
 import type { CalendarEvent } from '../types'
 import { useVerseOfTheDay } from '../hooks/useVerseOfTheDay'
+import { EventDetailsModal } from './EventDetailsModal'
+import { EventEditModal } from './EventEditModal'
 
 interface CalendarDayProps {
   date: Date
   events: Array<CalendarEvent>
   isToday: boolean
   todayRef?: React.RefObject<HTMLDivElement | null>
+  onUpdateEvent: (originalEvent: CalendarEvent, updatedEvent: CalendarEvent) => Promise<void>
+  onDeleteEvent: (eventToDelete: CalendarEvent) => Promise<void>
 }
 
 export function CalendarDay({
@@ -17,13 +22,53 @@ export function CalendarDay({
   events,
   isToday: isTodayProp,
   todayRef,
+  onUpdateEvent,
+  onDeleteEvent,
 }: CalendarDayProps) {
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+
   const { dayName, dayNumberOrdinal, monthName } = formatDate(date)
   const isPast = isPastDay(date)
   const isWeekendDay = isWeekend(date)
   const isHoliday = isSchoolHoliday(date)
   const holidayInfo = getSchoolHolidayInfo(date)
   const { verse, loading: verseLoading, error: verseError } = useVerseOfTheDay()
+
+  const handleEventClick = (event: CalendarEvent) => {
+    console.log('Event clicked:', event)
+    setSelectedEvent(event)
+    setShowDetailsModal(true)
+  }
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    setSelectedEvent(event)
+    setShowDetailsModal(false)
+    setShowEditModal(true)
+  }
+
+  const handleSaveEvent = async (updatedEvent: CalendarEvent) => {
+    console.log('CalendarDay handleSaveEvent called:', { selectedEvent, updatedEvent })
+    if (selectedEvent) {
+      console.log('Calling onUpdateEvent with:', selectedEvent, updatedEvent)
+      await onUpdateEvent(selectedEvent, updatedEvent)
+      setShowEditModal(false)
+      setSelectedEvent(null)
+    }
+  }
+
+  const handleDeleteEvent = async (eventToDelete: CalendarEvent) => {
+    await onDeleteEvent(eventToDelete)
+    setShowDetailsModal(false)
+    setSelectedEvent(null)
+  }
+
+  const handleCloseModals = () => {
+    setShowDetailsModal(false)
+    setShowEditModal(false)
+    setSelectedEvent(null)
+  }
 
   const dayEvents = getEventsForDate(events, date)
   // Sort events by time (all-day events first, then by start time)
@@ -124,7 +169,7 @@ export function CalendarDay({
                   <div key={i}>
                     {event.allDay ? (
                       <span
-                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-help ${
+                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-pointer hover:opacity-80 transition-opacity ${
                           event.isRecurring
                             ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
                             : 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-2 border-purple-300 dark:border-purple-700'
@@ -132,6 +177,7 @@ export function CalendarDay({
                         title={
                           event.title.length > 15 ? event.title : undefined
                         }
+                        onClick={() => handleEventClick(event)}
                       >
                         {(() => {
                           const dayProgress = getEventDisplayForDate(
@@ -153,7 +199,7 @@ export function CalendarDay({
                       </span>
                     ) : (
                       <div
-                        className={`cursor-help ${
+                        className={`cursor-pointer hover:opacity-80 transition-opacity ${
                           event.isRecurring
                             ? 'text-blue-700 dark:text-blue-200'
                             : 'text-purple-700 dark:text-purple-200'
@@ -161,6 +207,7 @@ export function CalendarDay({
                         title={
                           event.title.length > 22 ? event.title : undefined
                         }
+                        onClick={() => handleEventClick(event)}
                       >
                         {!event.isRecurring && (
                           <span className="text-purple-600 font-medium mr-1 dark:text-purple-200">
@@ -265,12 +312,13 @@ export function CalendarDay({
                 <div key={i} className="w-full">
                   {event.allDay ? (
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded-full block text-center cursor-help ${
+                      className={`text-xs font-medium px-2 py-1 rounded-full block text-center cursor-pointer hover:opacity-80 transition-opacity ${
                         event.isRecurring
                           ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
                           : 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-2 border-purple-300 dark:border-purple-700'
                       }`}
                       title={event.title.length > 25 ? event.title : undefined}
+                      onClick={() => handleEventClick(event)}
                     >
                       {(() => {
                         const dayProgress = getEventDisplayForDate(event, date)
@@ -287,12 +335,13 @@ export function CalendarDay({
                     </span>
                   ) : (
                     <div
-                      className={`text-xs cursor-help text-center p-1 rounded ${
+                      className={`text-xs cursor-pointer hover:opacity-80 transition-opacity text-center p-1 rounded ${
                         event.isRecurring
                           ? 'text-blue-700 dark:text-blue-200'
                           : 'text-purple-700 dark:text-purple-200'
                       }`}
                       title={event.title.length > 30 ? event.title : undefined}
+                      onClick={() => handleEventClick(event)}
                     >
                       {!event.isRecurring && (
                         <span className="text-purple-600 font-medium mr-1 dark:text-purple-200">
@@ -320,6 +369,22 @@ export function CalendarDay({
           </div>
         )}
       </div>
+
+      {/* Event Details and Edit Modals */}
+      <EventDetailsModal
+        event={selectedEvent}
+        isOpen={showDetailsModal}
+        onClose={handleCloseModals}
+        onEdit={handleEditEvent}
+        onDelete={handleDeleteEvent}
+      />
+
+      <EventEditModal
+        event={selectedEvent}
+        isOpen={showEditModal}
+        onClose={handleCloseModals}
+        onSave={handleSaveEvent}
+      />
     </div>
   )
 }

@@ -6,12 +6,16 @@ interface CalendarMonthProps {
   daysInMonth: Array<Date>
   events: Array<CalendarEvent>
   todayRef?: React.RefObject<HTMLDivElement | null>
+  onUpdateEvent: (originalEvent: CalendarEvent, updatedEvent: CalendarEvent) => Promise<void>
+  onDeleteEvent: (eventToDelete: CalendarEvent) => Promise<void>
 }
 
 export function CalendarMonth({
   daysInMonth,
   events,
   todayRef,
+  onUpdateEvent,
+  onDeleteEvent,
 }: CalendarMonthProps) {
   const firstDay = daysInMonth[0]
   const monthName = firstDay.toLocaleString('default', { month: 'long' })
@@ -31,6 +35,8 @@ export function CalendarMonth({
             events={events}
             isToday={isToday(date)}
             todayRef={isToday(date) ? todayRef : undefined}
+            onUpdateEvent={onUpdateEvent}
+            onDeleteEvent={onDeleteEvent}
           />
         ))}
       </div>
