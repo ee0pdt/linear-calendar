@@ -7,7 +7,6 @@ Your Linear Calendar application is now fully deployed on Railway with both comp
 ### 🎯 Live Applications
 
 1. **Linear Calendar UI**: https://linear-calendar-production.up.railway.app
-
    - Main calendar interface
    - All features functional
    - Print-optimized design

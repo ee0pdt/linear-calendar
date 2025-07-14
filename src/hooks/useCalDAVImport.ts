@@ -1,30 +1,25 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { importFromCalDAV } from '../utils/caldavUtils'
+import {
+  clearCalDAVCredentials,
+  loadCalDAVCredentials,
+  saveCalDAVCredentials,
+} from '../utils/storageUtils'
 import type { CalDAVCredentials, CalendarEvent } from '../types'
 
 export function useCalDAVImport() {
   const [isCalDAVLoading, setIsCalDAVLoading] = useState(false)
   const [calDAVCredentials, _setCalDAVCredentials] =
     useState<CalDAVCredentials>(() => {
-      const saved = localStorage.getItem('linear-calendar-caldav-credentials')
-      if (saved) {
-        try {
-          return JSON.parse(saved)
-        } catch {
-          return { username: '', password: '', serverUrl: '' }
-        }
-      }
-      return { username: '', password: '', serverUrl: '' }
+      const saved = loadCalDAVCredentials()
+      return saved || { username: '', password: '', serverUrl: '' }
     })
   const [showCalDAVForm, setShowCalDAVForm] = useState(false)
 
   // Always sync credentials to localStorage
   const setCalDAVCredentials = useCallback((creds: CalDAVCredentials) => {
     _setCalDAVCredentials(creds)
-    localStorage.setItem(
-      'linear-calendar-caldav-credentials',
-      JSON.stringify(creds),
-    )
+    saveCalDAVCredentials(creds)
   }, [])
 
   const handleCalDAVImport = async (
@@ -56,11 +51,12 @@ export function useCalDAVImport() {
 
   const resetCalDAVState = () => {
     setShowCalDAVForm(false)
-    setCalDAVCredentials({
+    _setCalDAVCredentials({
       username: '',
       password: '',
       serverUrl: '',
     })
+    clearCalDAVCredentials()
     setIsCalDAVLoading(false)
   }
 

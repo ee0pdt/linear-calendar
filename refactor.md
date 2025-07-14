@@ -358,13 +358,11 @@ import { describe, it, expect } from 'vitest'
 ### Test Implementation Priority
 
 1. **Utility Functions** (2-3 hours)
-
    - Start with pure functions - easiest to test
    - High test coverage for date/holiday/emoji logic
    - Create comprehensive test cases
 
 2. **ICS Parser** (1-2 hours)
-
    - Test with real-world ICS examples
    - Edge cases (malformed files, different formats)
    - Recurring event expansion

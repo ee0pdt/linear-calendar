@@ -3,27 +3,33 @@
 ## 🚂 Railway Deployment Steps
 
 ### 1. Install Railway CLI
+
 ```bash
 npm install -g @railway/cli
 ```
 
 ### 2. Login to Railway
+
 ```bash
 railway login
 ```
 
 ### 3. Create New Project
+
 From the `caldav-proxy` directory:
+
 ```bash
 railway init
 ```
 
 ### 4. Deploy
+
 ```bash
 railway up
 ```
 
 ### 5. Set Environment Variables
+
 ```bash
 # Set your React app URL for CORS
 railway variables set FRONTEND_URL=https://your-linear-calendar.vercel.app
@@ -33,6 +39,7 @@ railway variables set FRONTEND_URL=http://localhost:5173
 ```
 
 ### 6. Get Your Deployment URL
+
 ```bash
 railway status
 ```
@@ -42,12 +49,15 @@ railway status
 Update your React app's environment variables:
 
 ### Development (.env.local)
+
 ```bash
 REACT_APP_CALDAV_PROXY_URL=http://localhost:3001
 ```
 
-### Production 
+### Production
+
 Set in Vercel/Netlify dashboard:
+
 ```bash
 REACT_APP_CALDAV_PROXY_URL=https://your-railway-app.railway.app
 ```
@@ -55,6 +65,7 @@ REACT_APP_CALDAV_PROXY_URL=https://your-railway-app.railway.app
 ## 🧪 Testing
 
 ### Test Locally
+
 ```bash
 # Start proxy server
 npm run dev
@@ -64,6 +75,7 @@ curl "http://localhost:3001/api/calendar?username=test@icloud.com&password=test-
 ```
 
 ### Test Production
+
 ```bash
 curl "https://your-railway-app.railway.app/health"
 ```
@@ -88,6 +100,7 @@ curl "https://your-railway-app.railway.app/health"
 
 1. **CORS Errors**: Make sure `FRONTEND_URL` is set correctly
    - Add all your frontend URLs to the CORS whitelist
+
    ```bash
    # For multiple frontend URLs
    railway variables set FRONTEND_URL="https://app1.com,https://app2.com"
@@ -111,12 +124,14 @@ curl "https://your-railway-app.railway.app/health"
    railway status
    railway logs
    ```
+
    - Restart service if needed
    ```bash
    railway service restart
    ```
 
 ### Viewing Logs
+
 ```bash
 # View recent logs
 railway logs
