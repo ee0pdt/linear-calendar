@@ -36,7 +36,10 @@ export function LinearCalendar() {
 
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
-  const { todayRef, jumpToToday } = useScrollToToday()
+  const { todayRef, jumpToToday } = useScrollToToday({
+    dateRange,
+    setDateRange,
+  })
 
   // Auto-refresh hook
   const autoRefresh = useAutoRefresh(setEvents)
@@ -268,10 +271,12 @@ export function LinearCalendar() {
       {showNavigation && (
         <NavigationModal
           currentYear={currentYear}
+          dateRange={dateRange}
           onYearChange={(year) => {
+            // Expand range to include the selected year
             setDateRange({
-              startYear: year,
-              endYear: year,
+              startYear: Math.min(dateRange.startYear, year),
+              endYear: Math.max(dateRange.endYear, year),
             })
           }}
           onClose={() => setShowNavigation(false)}

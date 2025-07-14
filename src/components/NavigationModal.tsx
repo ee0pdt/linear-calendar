@@ -6,17 +6,38 @@ interface NavigationModalProps {
   currentYear: number
   onYearChange: (year: number) => void
   onClose: () => void
+  dateRange: { startYear: number; endYear: number }
 }
 
 export function NavigationModal({
   currentYear,
   onYearChange,
   onClose,
+  dateRange,
 }: NavigationModalProps) {
   const [selectedYear, setSelectedYear] = useState(currentYear)
 
   const handleMonthClick = (monthIndex: number) => {
-    // Scroll to the selected month
+    // Check if the selected year is in the current date range
+    const isYearInRange =
+      selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
+
+    if (!isYearInRange) {
+      // If the year is not in range, expand the range to include it
+      onYearChange(selectedYear)
+
+      // Wait for the component to re-render, then scroll
+      setTimeout(() => {
+        scrollToMonth(monthIndex)
+      }, 100)
+    } else {
+      // Year is already in range, just scroll
+      scrollToMonth(monthIndex)
+    }
+    onClose()
+  }
+
+  const scrollToMonth = (monthIndex: number) => {
     const monthElement = document.querySelector(
       `[data-month="${selectedYear}-${monthIndex + 1}"]`,
     )
@@ -33,7 +54,6 @@ export function NavigationModal({
         })
       }
     }
-    onClose()
   }
 
   const handleYearChange = (year: number) => {
