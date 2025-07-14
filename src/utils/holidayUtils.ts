@@ -43,7 +43,9 @@ export const getSchoolHolidays = (year: number): Array<Holiday> => {
  * Gets school holidays with support for dynamic fetching
  * In the future, this could fetch from external sources
  */
-export const getSchoolHolidaysWithFetch = async (year: number): Promise<Array<Holiday>> => {
+export const getSchoolHolidaysWithFetch = async (
+  year: number,
+): Promise<Array<Holiday>> => {
   // For now, return static data
   // In the future, this could try to fetch from external sources
   return getSchoolHolidays(year)

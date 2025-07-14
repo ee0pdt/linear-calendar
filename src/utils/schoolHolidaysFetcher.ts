@@ -10,13 +10,17 @@ interface OxfordshireHolidayPeriod {
  * Fetches school holidays for Oxfordshire from the official website
  * This function would need to be implemented to scrape or fetch from the official API
  */
-export const fetchOxfordshireHolidays = async (year: number): Promise<Holiday[]> => {
+export const fetchOxfordshireHolidays = async (
+  year: number,
+): Promise<Holiday[]> => {
   // For now, we'll return the static data we have
   // In a real implementation, this would fetch from the official website
-  
+
   // This is a placeholder implementation that would need to be replaced with actual fetching
-  console.log(`Fetching school holidays for ${year} from Oxfordshire County Council`)
-  
+  console.log(
+    `Fetching school holidays for ${year} from Oxfordshire County Council`,
+  )
+
   // Static fallback data for demonstration
   const fallbackHolidays: Record<number, Holiday[]> = {
     2024: [
@@ -55,11 +59,13 @@ export const fetchOxfordshireHolidays = async (year: number): Promise<Holiday[]>
  * Attempts to fetch dynamic school holidays from the official Oxfordshire website
  * This is a future implementation that would use web scraping or API calls
  */
-export const fetchDynamicOxfordshireHolidays = async (year: number): Promise<Holiday[]> => {
+export const fetchDynamicOxfordshireHolidays = async (
+  year: number,
+): Promise<Holiday[]> => {
   try {
     // In a real implementation, this would fetch from:
     // https://www.oxfordshire.gov.uk/schools/term-dates-and-holidays
-    
+
     // For now, we'll use the fallback data
     return await fetchOxfordshireHolidays(year)
   } catch (error) {

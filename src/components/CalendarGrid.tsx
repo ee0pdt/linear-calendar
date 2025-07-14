@@ -1,29 +1,31 @@
-import { generateYearDays } from '../utils/dateUtils'
+import { generateDateRangeDays } from '../utils/dateUtils'
 import { CalendarMonth } from './CalendarMonth'
 import type { CalendarEvent } from '../types'
 
 interface CalendarGridProps {
-  currentYear: number
+  dateRange: { startYear: number; endYear: number }
   events: Array<CalendarEvent>
   todayRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export function CalendarGrid({
-  currentYear,
+  dateRange,
   events,
   todayRef,
 }: CalendarGridProps) {
-  const yearDays = generateYearDays(currentYear)
+  const allDays = generateDateRangeDays(dateRange.startYear, dateRange.endYear)
 
-  // Group days by month
-  const monthGroups = yearDays.reduce<Record<number, Array<Date>>>(
+  // Group days by year and month for proper organization
+  const monthGroups = allDays.reduce<Record<string, Array<Date>>>(
     (acc, date) => {
+      const year = date.getFullYear()
       const month = date.getMonth() + 1
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (!acc[month]) {
-        acc[month] = []
+      const key = `${year}-${month}`
+
+      if (!acc[key]) {
+        acc[key] = []
       }
-      acc[month].push(date)
+      acc[key].push(date)
       return acc
     },
     {},
@@ -31,9 +33,9 @@ export function CalendarGrid({
 
   return (
     <div className="day-list">
-      {Object.entries(monthGroups).map(([_, daysInMonth]) => (
+      {Object.entries(monthGroups).map(([monthKey, daysInMonth]) => (
         <CalendarMonth
-          key={daysInMonth[0].getMonth()}
+          key={monthKey}
           daysInMonth={daysInMonth}
           events={events}
           todayRef={todayRef}
