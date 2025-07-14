@@ -18,7 +18,13 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["caldav", "calendar", "proxy", "apple", "icloud"],
+  "keywords": [
+    "caldav",
+    "calendar",
+    "proxy",
+    "apple",
+    "icloud"
+  ],
   "author": "Linear Calendar",
   "license": "MIT"
 }

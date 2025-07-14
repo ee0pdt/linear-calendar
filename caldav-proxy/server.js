@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3001
 function preprocessICALData(icalData) {
   // Add London timezone definition to the calendar if not present
   let processedData = icalData
-  
+
   if (!processedData.includes('BEGIN:VTIMEZONE')) {
     // Add Europe/London timezone definition
     const londonTz = `BEGIN:VTIMEZONE
@@ -37,17 +37,17 @@ END:VTIMEZONE
     // Insert timezone after BEGIN:VCALENDAR
     processedData = processedData.replace(
       /(BEGIN:VCALENDAR[\s\S]*?\n)/,
-      `$1${londonTz}`
+      `$1${londonTz}`,
     )
   }
-  
+
   // Fix floating time datetime values by adding TZID parameter
   // Match DTSTART and DTEND without TZID that have time components
   processedData = processedData.replace(
     /^(DTSTART|DTEND):(\d{8}T\d{6})$/gm,
-    '$1;TZID=Europe/London:$2'
+    '$1;TZID=Europe/London:$2',
   )
-  
+
   return processedData
 }
 
@@ -198,12 +198,14 @@ app.get('/api/calendar', async (req, res) => {
                     // Check if both times look like midnight (without creating Date objects)
                     const startStr = event.start.toString()
                     const endStr = event.end.toString()
-                    
+
                     // Look for patterns that indicate midnight times (00:00:00 or T00:00:00)
-                    const isMidnightStart = 
-                      startStr.includes('T00:00:00') || startStr.includes(' 00:00:00')
-                    const isMidnightEnd = 
-                      endStr.includes('T00:00:00') || endStr.includes(' 00:00:00')
+                    const isMidnightStart =
+                      startStr.includes('T00:00:00') ||
+                      startStr.includes(' 00:00:00')
+                    const isMidnightEnd =
+                      endStr.includes('T00:00:00') ||
+                      endStr.includes(' 00:00:00')
 
                     if (isMidnightStart && isMidnightEnd) {
                       isAllDay = true
@@ -217,10 +219,17 @@ app.get('/api/calendar', async (req, res) => {
                   // Now that floating times are preprocessed, Date objects should be consistent
                   const calendarEvent = {
                     title: event.summary || 'Untitled Event',
-                    start: event.start instanceof Date ? event.start.toISOString() : event.start,
-                    end: event.end 
-                      ? (event.end instanceof Date ? event.end.toISOString() : event.end)
-                      : (event.start instanceof Date ? event.start.toISOString() : event.start),
+                    start:
+                      event.start instanceof Date
+                        ? event.start.toISOString()
+                        : event.start,
+                    end: event.end
+                      ? event.end instanceof Date
+                        ? event.end.toISOString()
+                        : event.end
+                      : event.start instanceof Date
+                        ? event.start.toISOString()
+                        : event.start,
                     allDay: isAllDay,
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,

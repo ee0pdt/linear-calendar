@@ -32,6 +32,7 @@ This is a React application built with:
 ### Router Configuration
 
 The router is configured with:
+
 - Intent-based preloading
 - Scroll restoration
 - Structural sharing enabled

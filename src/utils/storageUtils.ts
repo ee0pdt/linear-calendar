@@ -1,5 +1,9 @@
-import { IMPORT_INFO_KEY, STORAGE_KEY } from '../constants'
-import type { CalendarEvent, ImportInfo } from '../types'
+import {
+  CALDAV_CREDENTIALS_KEY,
+  IMPORT_INFO_KEY,
+  STORAGE_KEY,
+} from '../constants'
+import type { CalDAVCredentials, CalendarEvent, ImportInfo } from '../types'
 
 /**
  * Saves events to localStorage with metadata
@@ -71,6 +75,7 @@ export const loadImportInfoFromStorage = (): ImportInfo | null => {
 export const clearStoredData = (): void => {
   localStorage.removeItem(STORAGE_KEY)
   localStorage.removeItem(IMPORT_INFO_KEY)
+  localStorage.removeItem(CALDAV_CREDENTIALS_KEY)
 }
 
 export type ThemePreference = 'light' | 'dark' | 'system'
@@ -85,4 +90,37 @@ export function getStoredThemePreference(): ThemePreference {
 
 export function setStoredThemePreference(pref: ThemePreference) {
   localStorage.setItem(THEME_KEY, pref)
+}
+
+/**
+ * Saves CalDAV credentials to localStorage
+ */
+export const saveCalDAVCredentials = (credentials: CalDAVCredentials): void => {
+  try {
+    localStorage.setItem(CALDAV_CREDENTIALS_KEY, JSON.stringify(credentials))
+  } catch (error) {
+    console.error('Error saving CalDAV credentials:', error)
+    throw new Error('Unable to save CalDAV credentials')
+  }
+}
+
+/**
+ * Loads CalDAV credentials from localStorage
+ */
+export const loadCalDAVCredentials = (): CalDAVCredentials | null => {
+  try {
+    const credentials = localStorage.getItem(CALDAV_CREDENTIALS_KEY)
+    return credentials ? JSON.parse(credentials) : null
+  } catch (error) {
+    console.error('Error loading CalDAV credentials:', error)
+    localStorage.removeItem(CALDAV_CREDENTIALS_KEY)
+    return null
+  }
+}
+
+/**
+ * Clears CalDAV credentials from localStorage
+ */
+export const clearCalDAVCredentials = (): void => {
+  localStorage.removeItem(CALDAV_CREDENTIALS_KEY)
 }

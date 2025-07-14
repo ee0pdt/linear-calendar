@@ -1,21 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { CalendarFooter } from '../components/CalendarFooter'
+import { useEffect, useState } from 'react'
+import { Settings2, X } from 'lucide-react'
+import { AutoRefreshIndicator } from '../components/AutoRefreshIndicator'
+import { CalendarFooter, ThemeToggle } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { ImportControls } from '../components/ImportControls'
+import { DayRing, MonthRing, WeekRing, YearRing } from '../components/TimeRings'
+import { TimezoneSelect } from '../components/TimezoneSelect'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
-
 import { useScrollToToday } from '../hooks/useScrollToToday'
 import { generateYearDays } from '../utils/dateUtils'
-import { DayRing, MonthRing, WeekRing, YearRing } from '../components/TimeRings'
 import {
   getStoredThemePreference,
   setStoredThemePreference,
 } from '../utils/storageUtils'
 import type { ThemePreference } from '../utils/storageUtils'
-import { ThemeToggle } from '../components/CalendarFooter'
-import { Settings2, X } from 'lucide-react'
-import { TimezoneSelect } from '../components/TimezoneSelect'
 
 export const Route = createFileRoute('/')({
   component: LinearCalendar,
@@ -28,6 +28,9 @@ export function LinearCalendar() {
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
   const { todayRef, jumpToToday } = useScrollToToday()
+
+  // Auto-refresh hook
+  const autoRefresh = useAutoRefresh(setEvents)
 
   // THEME STATE
   const [theme, setTheme] = useState<ThemePreference>(() =>
@@ -113,6 +116,13 @@ export function LinearCalendar() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
+                {/* Auto-refresh indicator */}
+                <AutoRefreshIndicator
+                  isRefreshing={autoRefresh.isRefreshing}
+                  refreshStatus={autoRefresh.refreshStatus}
+                  lastRefreshTime={autoRefresh.lastRefreshTime}
+                  error={autoRefresh.error}
+                />
                 {/* Jump to Today button (text) */}
                 <button
                   onClick={() => jumpToToday()}

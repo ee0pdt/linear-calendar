@@ -7,11 +7,13 @@ A simple proxy server that connects to Apple Calendar via CalDAV and provides a 
 ### Local Development
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Start development server:**
+
    ```bash
    npm run dev
    ```
@@ -35,16 +37,20 @@ A simple proxy server that connects to Apple Calendar via CalDAV and provides a 
 ## 📡 API Endpoints
 
 ### `GET /health`
+
 Health check endpoint
 
 ### `GET /api/calendar`
+
 Fetch all calendar events for the current year
 
 **Query Parameters:**
+
 - `username` - Your iCloud email address
 - `password` - App-specific password from Apple
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -60,6 +66,7 @@ Fetch all calendar events for the current year
 ### Deploy to Railway
 
 1. **Connect Repository:**
+
    ```bash
    # From the caldav-proxy directory
    railway login
@@ -67,6 +74,7 @@ Fetch all calendar events for the current year
    ```
 
 2. **Set Environment Variables:**
+
    ```bash
    railway variables set FRONTEND_URL=https://your-linear-calendar.vercel.app
    ```
@@ -84,23 +92,26 @@ Fetch all calendar events for the current year
 ## 🔒 Security Notes
 
 - Never commit real passwords to git
-- Use app-specific passwords, not your Apple ID password  
+- Use app-specific passwords, not your Apple ID password
 - The proxy doesn't store credentials - they're passed through
 - Consider adding rate limiting for production use
 
 ## 🐛 Troubleshooting
 
 ### Authentication Errors
+
 - Make sure you're using app-specific password
 - Verify your Apple ID has CalDAV enabled
 - Check your internet connection
 
 ### No Events Returned
+
 - Verify you have events in the current year
 - Check that your calendars aren't empty
 - Some calendar types might not be accessible via CalDAV
 
 ### CORS Errors
+
 - Set `FRONTEND_URL` environment variable
 - Make sure your React app URL is correct
 
