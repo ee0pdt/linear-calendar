@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from '../../routeTree.gen'
 
@@ -16,24 +16,36 @@ describe('LinearCalendar Component', () => {
   it('renders the calendar title with current year', () => {
     render(<RouterProvider router={router} />)
 
-    expect(screen.getByText('Linear Calendar 2025')).toBeInTheDocument()
+    expect(screen.getByText('2025 Calendar')).toBeInTheDocument()
   })
 
-  it('renders import sections', () => {
+  it('renders import sections after opening settings', () => {
     render(<RouterProvider router={router} />)
+
+    // Click on settings button to open settings modal
+    const settingsButton = screen.getByLabelText('Open settings')
+    fireEvent.click(settingsButton)
 
     expect(screen.getByText('🔗 Live Calendar Import')).toBeInTheDocument()
     expect(screen.getByText('📁 File Import')).toBeInTheDocument()
   })
 
-  it('renders Connect to Apple Calendar button', () => {
+  it('renders Connect to Apple Calendar button after opening settings', () => {
     render(<RouterProvider router={router} />)
+
+    // Click on settings button to open settings modal
+    const settingsButton = screen.getByLabelText('Open settings')
+    fireEvent.click(settingsButton)
 
     expect(screen.getByText('Connect to Apple Calendar')).toBeInTheDocument()
   })
 
-  it('renders file input for ICS upload', () => {
+  it('renders file input for ICS upload after opening settings', () => {
     render(<RouterProvider router={router} />)
+
+    // Click on settings button to open settings modal
+    const settingsButton = screen.getByLabelText('Open settings')
+    fireEvent.click(settingsButton)
 
     const fileInput =
       screen.getByRole('button', { name: /choose file/i }) ||
