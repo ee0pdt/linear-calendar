@@ -21,7 +21,7 @@ export function CalendarMonth({
   return (
     <div className="month-group">
       <div
-        className="sticky top-[10px] bg-white dark:bg-gray-900 border-b-2 border-gray-300 dark:border-gray-700 py-2 mb-4 z-10 px-4 sm:px-6"
+        className="sticky top-0 bg-white dark:bg-gray-900 border-b-2 border-gray-300 dark:border-gray-700 py-2 mb-4 z-40 px-4 sm:px-6"
         data-month={`${year}-${month}`}
       >
         <h2 className="text-xl font-bold text-gray-800 dark:text-white">
