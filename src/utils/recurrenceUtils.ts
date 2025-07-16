@@ -41,25 +41,26 @@ export const parseRRule = (rrule: string): RecurrenceRule => {
 }
 
 /**
- * Expands a recurring event into individual event instances for a given year
+ * Expands a recurring event into individual event instances for a given year range
  */
 export const expandRecurringEvent = (
   baseEvent: CalendarEvent,
-  year: number,
+  startYear: number,
+  endYear: number,
 ): Array<CalendarEvent> => {
   const events: Array<CalendarEvent> = []
   const rule = parseRRule(baseEvent.rrule!)
 
-  const yearStart = new Date(year, 0, 1)
-  const yearEnd = new Date(year, 11, 31)
+  const rangeStart = new Date(startYear, 0, 1)
+  const rangeEnd = new Date(endYear, 11, 31)
 
   let currentDate = new Date(baseEvent.start) // eslint-disable-line prefer-const
   let count = 0
-  const maxOccurrences = rule.count || 365 // Prevent infinite loops
+  const maxOccurrences = rule.count || 1000 // Prevent infinite loops, increased for multi-year
 
-  while (currentDate <= yearEnd && count < maxOccurrences) {
-    // Only include events that fall within the current year
-    if (currentDate >= yearStart) {
+  while (currentDate <= rangeEnd && count < maxOccurrences) {
+    // Only include events that fall within the specified year range
+    if (currentDate >= rangeStart) {
       const eventDuration = baseEvent.end
         ? baseEvent.end.getTime() - baseEvent.start.getTime()
         : 0

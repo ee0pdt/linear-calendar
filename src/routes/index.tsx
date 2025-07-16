@@ -42,7 +42,7 @@ export function LinearCalendar() {
   })
 
   // Auto-refresh hook
-  const autoRefresh = useAutoRefresh(setEvents)
+  const autoRefresh = useAutoRefresh(setEvents, dateRange.startYear, dateRange.endYear)
 
   // Infinite scroll hook
   const handleScrollNearTop = useCallback(() => {
@@ -242,6 +242,8 @@ export function LinearCalendar() {
                     setEvents={setEvents}
                     lastImportInfo={lastImportInfo}
                     setLastImportInfo={setLastImportInfo}
+                    startYear={dateRange.startYear}
+                    endYear={dateRange.endYear}
                   />
                 </div>
               </section>

@@ -16,6 +16,8 @@ interface UseAutoRefreshReturn extends AutoRefreshState {
 
 export function useAutoRefresh(
   onEventsUpdate: (events: Array<CalendarEvent>, fileName: string) => void,
+  startYear: number,
+  endYear: number,
 ): UseAutoRefreshReturn {
   const [state, setState] = useState<AutoRefreshState>({
     isRefreshing: false,
@@ -55,7 +57,7 @@ export function useAutoRefresh(
     }))
 
     try {
-      const events = await importFromCalDAV(credentials)
+      const events = await importFromCalDAV(credentials, startYear, endYear)
       onEventsUpdate(events, `CalDAV: ${credentials.username}`)
 
       setState((prev) => ({

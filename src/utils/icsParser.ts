@@ -8,7 +8,8 @@ import type { CalendarEvent } from '../types'
  */
 export const parseICSFile = (
   icsContent: string,
-  year: number,
+  startYear: number,
+  endYear: number,
 ): Array<CalendarEvent> => {
   const events: Array<CalendarEvent> = []
   const lines = icsContent.split('\n')
@@ -43,7 +44,8 @@ export const parseICSFile = (
           currentEvent.isRecurring = true
           const expandedEvents = expandRecurringEvent(
             currentEvent as CalendarEvent,
-            year,
+            startYear,
+            endYear,
           )
           events.push(...expandedEvents)
         } else {
@@ -68,6 +70,9 @@ export const parseICSFile = (
     }
   }
 
-  // Filter events for current year
-  return events.filter((event) => event.start.getFullYear() === year)
+  // Filter events for the specified year range
+  return events.filter((event) => {
+    const eventYear = event.start.getFullYear()
+    return eventYear >= startYear && eventYear <= endYear
+  })
 }

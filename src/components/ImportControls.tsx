@@ -1,15 +1,17 @@
 import { useRef, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { parseICSFile } from '../utils/icsParser'
 import { saveEventsToStorage } from '../utils/storageUtils'
 import type { CalendarEvent, ImportInfo } from '../types'
-import { Loader2 } from 'lucide-react'
 
 interface ImportControlsProps {
   events: Array<CalendarEvent>
   setEvents: (events: Array<CalendarEvent>, fileName: string) => void
   lastImportInfo: ImportInfo | null
   setLastImportInfo: (info: ImportInfo | null) => void
+  startYear: number
+  endYear: number
 }
 
 export function ImportControls({
@@ -17,6 +19,8 @@ export function ImportControls({
   setEvents,
   lastImportInfo,
   setLastImportInfo,
+  startYear,
+  endYear,
 }: ImportControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -39,7 +43,7 @@ export function ImportControls({
 
     try {
       const text = await file.text()
-      const parsedEvents = parseICSFile(text, new Date().getFullYear())
+      const parsedEvents = parseICSFile(text, startYear, endYear)
 
       setEvents([...events, ...parsedEvents], file.name)
 
@@ -133,6 +137,8 @@ export function ImportControls({
               'Failed to refresh from CalDAV server. Please check your connection.',
             )
           },
+          startYear,
+          endYear,
         )
       } else {
         // File import - can't refresh automatically since we don't store the file
@@ -180,6 +186,8 @@ export function ImportControls({
           'Failed to connect to CalDAV server. Please check your credentials.',
         )
       },
+      startYear,
+      endYear,
     )
   }
 
