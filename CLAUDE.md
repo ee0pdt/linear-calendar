@@ -80,38 +80,40 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 ### CalDAV Features
 
 - Multi-calendar support with statistics
-- Recurring event handling with RRULE parsing
+- Recurring event handling with RRULE parsing across multiple years
 - All-day event detection and proper display
 - Timezone-aware event processing
 - Auto-refresh with configurable intervals
+- Multi-year event support (2024, 2025, 2026+)
 
 ## Project Structure
 
 ### Key Components
 
-- `src/components/CalendarGrid.tsx` - Main calendar component displaying all 365 days
+- `src/components/CalendarGrid.tsx` - Main calendar component with infinite scroll and multi-year support
 - `src/components/CalendarDay.tsx` - Individual day component with events
 - `src/components/CalendarMonth.tsx` - Month separator with headers
 - `src/components/Header.tsx` - Top navigation with import controls
-- `src/components/ImportControls.tsx` - File upload and CalDAV connection UI
+- `src/components/ImportControls.tsx` - File upload and CalDAV connection UI (supports multi-year imports)
 - `src/components/AutoRefreshIndicator.tsx` - Shows live refresh status
 - `src/components/TimeRings/` - Time visualization components (day, week, month, year rings)
 
 ### Key Utilities
 
-- `src/utils/dateUtils.ts` - Date calculations and formatting
+- `src/utils/dateUtils.ts` - Date calculations and formatting (supports multi-year ranges)
 - `src/utils/eventUtils.ts` - Event processing and sorting
-- `src/utils/icsParser.ts` - ICS file parsing for calendar imports
-- `src/utils/recurrenceUtils.ts` - Recurring event expansion
-- `src/utils/holidayUtils.ts` - UK school holiday data
+- `src/utils/icsParser.ts` - ICS file parsing for calendar imports (supports multi-year processing)
+- `src/utils/recurrenceUtils.ts` - Recurring event expansion across multiple years
+- `src/utils/holidayUtils.ts` - UK school holiday data (2024, 2025, 2026+)
 - `src/utils/storageUtils.ts` - Local storage management
 
 ### Key Hooks
 
 - `src/hooks/useEvents.ts` - Event state management
-- `src/hooks/useCalDAVImport.ts` - CalDAV connection handling
-- `src/hooks/useAutoRefresh.ts` - Automatic refresh functionality
-- `src/hooks/useScrollToToday.ts` - Navigation to current date
+- `src/hooks/useCalDAVImport.ts` - CalDAV connection handling (supports multi-year imports)
+- `src/hooks/useAutoRefresh.ts` - Automatic refresh functionality (supports multi-year range)
+- `src/hooks/useScrollToToday.ts` - Navigation to current date across any year
+- `src/hooks/useInfiniteScroll.ts` - Infinite scroll functionality for multi-year support
 
 ## Application Features
 
@@ -119,14 +121,16 @@ This is a specialized calendar application for ADHD-friendly time management:
 
 ### Core Features
 
-- **Linear 365-day view** - All days of the year displayed vertically
+- **Multi-year linear view** - Infinite scroll through 2024, 2025, 2026+ with all days displayed vertically
 - **Print optimization** - Formats to 4 A4 pages for wall mounting
-- **Live Apple Calendar integration** - Real-time event synchronization
-- **ICS file import** - Alternative to live calendar connection
-- **UK school holidays** - Built-in holiday data for planning
-- **Auto-refresh** - Configurable intervals for live updates
+- **Live Apple Calendar integration** - Real-time event synchronization across all years
+- **ICS file import** - Alternative to live calendar connection (supports multi-year processing)
+- **UK school holidays** - Built-in holiday data for planning (2024-2026+)
+- **Auto-refresh** - Configurable intervals for live updates across full date range
 - **Timezone support** - Configurable timezone handling
 - **Verse of the day** - Daily inspirational content
+- **Infinite scroll** - Dynamic year range expansion as user scrolls
+- **Future year support** - Events and recurring events work correctly for 2026+
 
 ### Visual Design
 
@@ -136,3 +140,32 @@ This is a specialized calendar application for ADHD-friendly time management:
 - **School holidays** - Special border and emoji indicators
 - **Event display** - Inline with times for scheduled events
 - **Print CSS** - Optimized black and white printing
+
+## Multi-Year Architecture
+
+The calendar supports infinite scroll across multiple years with the following architecture:
+
+### Date Range Management
+
+- **Initial Load**: Starts with `currentYear ± 1` (e.g., 2024 shows 2023-2025)
+- **Infinite Scroll**: 
+  - Scrolling near top adds `startYear - 1`
+  - Scrolling near bottom adds `endYear + 1`
+- **Jump to Today**: Expands range to include current year if not already loaded
+- **Navigation**: Expands range to include any selected year
+
+### Event Processing
+
+- **CalDAV Imports**: `importFromCalDAV(credentials, startYear, endYear)` processes events for full displayed range
+- **ICS File Processing**: `parseICSFile(content, startYear, endYear)` handles multi-year imports
+- **Recurring Events**: `expandRecurringEvent(event, startYear, endYear)` generates occurrences across all years
+- **Auto-refresh**: Uses current date range for live updates
+
+### Key Files for Multi-Year Support
+
+- `src/routes/index.tsx` - Main date range state management with infinite scroll
+- `src/utils/icsParser.ts` - Multi-year ICS file processing
+- `src/utils/caldavUtils.ts` - Multi-year CalDAV import processing
+- `src/utils/recurrenceUtils.ts` - Multi-year recurring event expansion
+- `src/hooks/useInfiniteScroll.ts` - Infinite scroll implementation
+- `src/hooks/useScrollToToday.ts` - Cross-year navigation
