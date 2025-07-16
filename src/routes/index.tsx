@@ -1,16 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { Settings2, X } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { Settings2, X, Calendar } from 'lucide-react'
 import { AutoRefreshIndicator } from '../components/AutoRefreshIndicator'
 import { CalendarFooter, ThemeToggle } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
 import { ImportControls } from '../components/ImportControls'
 import { DayRing, MonthRing, WeekRing, YearRing } from '../components/TimeRings'
 import { TimezoneSelect } from '../components/TimezoneSelect'
+import { NavigationModal } from '../components/NavigationModal'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
 import { useScrollToToday } from '../hooks/useScrollToToday'
-import { generateYearDays } from '../utils/dateUtils'
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { getTotalDaysInRange } from '../utils/dateUtils'
 import {
   getStoredThemePreference,
   setStoredThemePreference,
@@ -23,14 +25,45 @@ export const Route = createFileRoute('/')({
 
 export function LinearCalendar() {
   const currentYear = new Date().getFullYear()
+  const [dateRange, setDateRange] = useState(() => {
+    // Start with current year ± 1 year for initial load
+    const startYear = currentYear - 1
+    const endYear = currentYear + 1
+    return { startYear, endYear }
+  })
   const [showSettings, setShowSettings] = useState(false)
+  const [showNavigation, setShowNavigation] = useState(false)
 
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
-  const { todayRef, jumpToToday } = useScrollToToday()
+  const { todayRef, jumpToToday } = useScrollToToday({
+    dateRange,
+    setDateRange,
+  })
 
   // Auto-refresh hook
-  const autoRefresh = useAutoRefresh(setEvents)
+  const autoRefresh = useAutoRefresh(setEvents, dateRange.startYear, dateRange.endYear)
+
+  // Infinite scroll hook
+  const handleScrollNearTop = useCallback(() => {
+    setDateRange((prev) => ({
+      startYear: prev.startYear - 1,
+      endYear: prev.endYear,
+    }))
+  }, [])
+
+  const handleScrollNearBottom = useCallback(() => {
+    setDateRange((prev) => ({
+      startYear: prev.startYear,
+      endYear: prev.endYear + 1,
+    }))
+  }, [])
+
+  useInfiniteScroll({
+    onScrollNearTop: handleScrollNearTop,
+    onScrollNearBottom: handleScrollNearBottom,
+    threshold: 1000,
+  })
 
   // THEME STATE
   const [theme, setTheme] = useState<ThemePreference>(() =>
@@ -88,7 +121,7 @@ export function LinearCalendar() {
     setTheme(pref)
   }
 
-  const yearDays = generateYearDays(currentYear)
+  const totalDays = getTotalDaysInRange(dateRange.startYear, dateRange.endYear)
 
   return (
     <>
@@ -112,7 +145,9 @@ export function LinearCalendar() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {currentYear} Calendar
+                  {dateRange.startYear === dateRange.endYear
+                    ? `${dateRange.startYear} Calendar`
+                    : `${dateRange.startYear}-${dateRange.endYear} Calendar`}
                 </h1>
               </div>
               <div className="flex items-center gap-2">
@@ -132,6 +167,15 @@ export function LinearCalendar() {
                 >
                   Today
                 </button>
+                {/* Navigation button */}
+                <button
+                  onClick={() => setShowNavigation(true)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  aria-label="Open navigation"
+                  title="Navigate to different month/year"
+                >
+                  <Calendar className="w-5 h-5" />
+                </button>
                 {/* Settings panel toggle (cog icon) */}
                 <button
                   onClick={() => setShowSettings(true)}
@@ -150,14 +194,14 @@ export function LinearCalendar() {
         <div className={`flex-1 overflow-y-auto events-panel pt-40 sm:pt-32`}>
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
             <CalendarGrid
-              currentYear={currentYear}
+              dateRange={dateRange}
               events={events}
               todayRef={todayRef}
             />
 
             <CalendarFooter
               currentYear={currentYear}
-              totalDays={yearDays.length}
+              totalDays={totalDays}
               onJumpToToday={() => jumpToToday()}
             >
               {/* No ThemeToggle here, now in settings panel */}
@@ -198,6 +242,8 @@ export function LinearCalendar() {
                     setEvents={setEvents}
                     lastImportInfo={lastImportInfo}
                     setLastImportInfo={setLastImportInfo}
+                    startYear={dateRange.startYear}
+                    endYear={dateRange.endYear}
                   />
                 </div>
               </section>
@@ -222,6 +268,21 @@ export function LinearCalendar() {
             </div>
           </div>
         </div>
+      )}
+      {/* Navigation Modal */}
+      {showNavigation && (
+        <NavigationModal
+          currentYear={currentYear}
+          dateRange={dateRange}
+          onYearChange={(year) => {
+            // Expand range to include the selected year
+            setDateRange({
+              startYear: Math.min(dateRange.startYear, year),
+              endYear: Math.max(dateRange.endYear, year),
+            })
+          }}
+          onClose={() => setShowNavigation(false)}
+        />
       )}
     </>
   )

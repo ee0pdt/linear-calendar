@@ -1,40 +1,65 @@
-import { CURRENT_YEAR } from '../constants'
-
 export interface Holiday {
   start: [number, number] // [month, day]
   end: [number, number] // [month, day]
   name: string
 }
 
-export const schoolHolidays: Array<Holiday> = [
-  // Christmas holidays (late Dec 2024 into Jan 2025)
-  { start: [1, 1], end: [1, 6], name: 'Christmas Holiday' },
+// Multi-year school holidays data
+const schoolHolidaysData: Record<number, Array<Holiday>> = {
+  2024: [
+    { start: [1, 1], end: [1, 5], name: 'Christmas Holiday' },
+    { start: [2, 12], end: [2, 16], name: 'February Half Term' },
+    { start: [3, 29], end: [4, 12], name: 'Easter Holiday' },
+    { start: [5, 27], end: [5, 31], name: 'May Half Term' },
+    { start: [7, 22], end: [9, 2], name: 'Summer Holiday' },
+    { start: [10, 28], end: [11, 1], name: 'October Half Term' },
+    { start: [12, 23], end: [12, 31], name: 'Christmas Holiday' },
+  ],
+  2025: [
+    { start: [1, 1], end: [1, 6], name: 'Christmas Holiday' },
+    { start: [2, 17], end: [2, 21], name: 'February Half Term' },
+    { start: [4, 7], end: [4, 21], name: 'Easter Holiday' },
+    { start: [5, 26], end: [5, 30], name: 'May Half Term' },
+    { start: [7, 21], end: [9, 1], name: 'Summer Holiday' },
+    { start: [10, 27], end: [10, 31], name: 'October Half Term' },
+    { start: [12, 22], end: [12, 31], name: 'Christmas Holiday' },
+  ],
+  2026: [
+    { start: [1, 1], end: [1, 2], name: 'Christmas Holiday' },
+    { start: [2, 16], end: [2, 20], name: 'February Half Term' },
+    { start: [3, 30], end: [4, 10], name: 'Easter Holiday' },
+    { start: [5, 25], end: [5, 29], name: 'May Half Term' },
+    { start: [7, 21], end: [9, 1], name: 'Summer Holiday' },
+    { start: [10, 26], end: [10, 30], name: 'October Half Term' },
+    { start: [12, 21], end: [12, 31], name: 'Christmas Holiday' },
+  ],
+}
 
-  // February half term
-  { start: [2, 17], end: [2, 21], name: 'February Half Term' },
+export const getSchoolHolidays = (year: number): Array<Holiday> => {
+  return schoolHolidaysData[year] || []
+}
 
-  // Easter holidays
-  { start: [4, 7], end: [4, 21], name: 'Easter Holiday' },
-
-  // May half term
-  { start: [5, 26], end: [5, 30], name: 'May Half Term' },
-
-  // Summer holidays
-  { start: [7, 21], end: [9, 1], name: 'Summer Holiday' },
-
-  // October half term
-  { start: [10, 27], end: [10, 31], name: 'October Half Term' },
-
-  // Christmas holidays (end of year)
-  { start: [12, 22], end: [12, 31], name: 'Christmas Holiday' },
-]
+/**
+ * Gets school holidays with support for dynamic fetching
+ * In the future, this could fetch from external sources
+ */
+export const getSchoolHolidaysWithFetch = async (
+  year: number,
+): Promise<Array<Holiday>> => {
+  // For now, return static data
+  // In the future, this could try to fetch from external sources
+  return getSchoolHolidays(year)
+}
 
 /**
  * Checks if a date falls within any school holiday
  */
 export const isSchoolHoliday = (date: Date): boolean => {
+  const year = date.getFullYear()
   const month = date.getMonth() + 1 // 1-12
   const day = date.getDate()
+
+  const schoolHolidays = getSchoolHolidays(year)
 
   return schoolHolidays.some((holiday) => {
     const [startMonth, startDay] = holiday.start
@@ -62,8 +87,11 @@ export const getSchoolHolidayInfo = (
   dayNumber: number
   totalDays: number
 } | null => {
+  const year = date.getFullYear()
   const month = date.getMonth() + 1 // 1-12
   const day = date.getDate()
+
+  const schoolHolidays = getSchoolHolidays(year)
 
   for (const holiday of schoolHolidays) {
     const [startMonth, startDay] = holiday.start
@@ -81,9 +109,9 @@ export const getSchoolHolidayInfo = (
 
     if (isInHoliday) {
       // Calculate the day number and total days
-      const startDate = new Date(CURRENT_YEAR, startMonth - 1, startDay)
-      const endDate = new Date(CURRENT_YEAR, endMonth - 1, endDay)
-      const currentDate = new Date(CURRENT_YEAR, month - 1, day)
+      const startDate = new Date(year, startMonth - 1, startDay)
+      const endDate = new Date(year, endMonth - 1, endDay)
+      const currentDate = new Date(year, month - 1, day)
 
       const dayNumber =
         Math.floor(

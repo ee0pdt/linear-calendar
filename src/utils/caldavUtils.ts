@@ -11,6 +11,8 @@ import type { CalDAVCredentials, CalendarEvent } from '../types'
  */
 export const importFromCalDAV = async (
   credentials: CalDAVCredentials,
+  startYear: number,
+  endYear: number,
 ): Promise<Array<CalendarEvent>> => {
   const url = new URL(`${PROXY_URL}/api/calendar`)
   url.searchParams.append('username', credentials.username)
@@ -26,8 +28,6 @@ export const importFromCalDAV = async (
   const data = await response.json()
 
   if (data.success) {
-    const currentDateInTz = getCurrentDateInTimezone()
-    const currentYear = currentDateInTz.getFullYear()
     const expandedEvents: Array<CalendarEvent> = []
 
     // Process each event and expand recurring events
@@ -51,11 +51,12 @@ export const importFromCalDAV = async (
 
         // Handle recurring events by expanding them
         if (calDAVEvent.rrule && calDAVEvent.isRecurring) {
-          const expanded = expandRecurringEvent(calDAVEvent, currentYear)
+          const expanded = expandRecurringEvent(calDAVEvent, startYear, endYear)
           expandedEvents.push(...expanded)
         } else {
-          // Only include non-recurring events from current year
-          if (calDAVEvent.start.getFullYear() === currentYear) {
+          // Include non-recurring events that fall within the specified year range
+          const eventYear = calDAVEvent.start.getFullYear()
+          if (eventYear >= startYear && eventYear <= endYear) {
             expandedEvents.push(calDAVEvent)
           }
         }

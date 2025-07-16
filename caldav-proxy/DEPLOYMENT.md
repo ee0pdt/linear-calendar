@@ -120,12 +120,14 @@ curl "https://your-railway-app.railway.app/health"
 
 4. **Railway Deployment Errors**:
    - Check application status and logs
+
    ```bash
    railway status
    railway logs
    ```
 
    - Restart service if needed
+
    ```bash
    railway service restart
    ```

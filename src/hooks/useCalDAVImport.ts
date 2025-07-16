@@ -25,6 +25,8 @@ export function useCalDAVImport() {
   const handleCalDAVImport = async (
     onSuccess: (events: Array<CalendarEvent>) => void,
     onError: (error: string) => void,
+    startYear: number,
+    endYear: number,
   ) => {
     if (!calDAVCredentials.username || !calDAVCredentials.password) {
       onError('Username and password are required')
@@ -33,7 +35,7 @@ export function useCalDAVImport() {
 
     setIsCalDAVLoading(true)
     try {
-      const importedEvents = await importFromCalDAV(calDAVCredentials)
+      const importedEvents = await importFromCalDAV(calDAVCredentials, startYear, endYear)
       onSuccess(importedEvents)
       setShowCalDAVForm(false)
       // Keep credentials saved for future imports and refresh functionality

@@ -51,29 +51,34 @@ The router is configured with:
 This application features a sophisticated CalDAV integration for live Apple Calendar synchronization:
 
 ### CalDAV Proxy Server
+
 - **Express.js backend** in `caldav-proxy/` directory
 - **Tech stack**: Express, tsdav, ical, cors
 - **Purpose**: Handles Apple Calendar authentication and data fetching via CalDAV protocol
 - **Deployment**: Configured for Railway with health checks
 
 ### Key CalDAV Files
+
 - `caldav-proxy/server.js` - Main proxy server handling CalDAV requests
 - `src/utils/caldavUtils.ts` - Client-side CalDAV utility functions
 - `src/hooks/useCalDAVImport.ts` - React hook for CalDAV imports
 - `src/hooks/useAutoRefresh.ts` - Auto-refresh functionality for live updates
 
 ### CalDAV Proxy Commands
+
 - `cd caldav-proxy && npm install` - Install proxy dependencies
 - `cd caldav-proxy && npm run dev` - Start proxy in development mode
 - `cd caldav-proxy && npm start` - Start proxy in production mode
 
 ### CalDAV Configuration
+
 - **Development**: Proxy runs on port 3001, UI on port 3000
 - **Production**: Environment variable `CALDAV_PROXY_URL` points to deployed proxy
 - **Authentication**: Uses Apple app-specific passwords for secure access
 - **Timezone**: Defaults to Europe/London, configurable via UI
 
 ### CalDAV Features
+
 - Multi-calendar support with statistics
 - Recurring event handling with RRULE parsing
 - All-day event detection and proper display
@@ -83,6 +88,7 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 ## Project Structure
 
 ### Key Components
+
 - `src/components/CalendarGrid.tsx` - Main calendar component displaying all 365 days
 - `src/components/CalendarDay.tsx` - Individual day component with events
 - `src/components/CalendarMonth.tsx` - Month separator with headers
@@ -92,6 +98,7 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 - `src/components/TimeRings/` - Time visualization components (day, week, month, year rings)
 
 ### Key Utilities
+
 - `src/utils/dateUtils.ts` - Date calculations and formatting
 - `src/utils/eventUtils.ts` - Event processing and sorting
 - `src/utils/icsParser.ts` - ICS file parsing for calendar imports
@@ -100,6 +107,7 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 - `src/utils/storageUtils.ts` - Local storage management
 
 ### Key Hooks
+
 - `src/hooks/useEvents.ts` - Event state management
 - `src/hooks/useCalDAVImport.ts` - CalDAV connection handling
 - `src/hooks/useAutoRefresh.ts` - Automatic refresh functionality
@@ -110,6 +118,7 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 This is a specialized calendar application for ADHD-friendly time management:
 
 ### Core Features
+
 - **Linear 365-day view** - All days of the year displayed vertically
 - **Print optimization** - Formats to 4 A4 pages for wall mounting
 - **Live Apple Calendar integration** - Real-time event synchronization
@@ -120,6 +129,7 @@ This is a specialized calendar application for ADHD-friendly time management:
 - **Verse of the day** - Daily inspirational content
 
 ### Visual Design
+
 - **Past days** - Automatically marked with green checkmarks
 - **Today highlight** - Current day prominently displayed
 - **Weekend styling** - Italicized Saturday/Sunday

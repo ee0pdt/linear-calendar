@@ -21,6 +21,40 @@ export const generateYearDays = (year: number): Array<Date> => {
 }
 
 /**
+ * Generates an array of all days in a date range (multi-year support)
+ */
+export const generateDateRangeDays = (
+  startYear: number,
+  endYear: number,
+): Array<Date> => {
+  const days = []
+
+  for (let year = startYear; year <= endYear; year++) {
+    const yearDays = generateYearDays(year)
+    days.push(...yearDays)
+  }
+
+  return days
+}
+
+/**
+ * Gets the total number of days in a year range
+ */
+export const getTotalDaysInRange = (
+  startYear: number,
+  endYear: number,
+): number => {
+  let totalDays = 0
+
+  for (let year = startYear; year <= endYear; year++) {
+    const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+    totalDays += isLeapYear ? 366 : 365
+  }
+
+  return totalDays
+}
+
+/**
  * Formats a date into day name, day number, and month name
  */
 export const formatDate = (date: Date) => {
