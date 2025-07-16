@@ -8,10 +8,12 @@ A specialized calendar application designed for visual time management and ADHD 
 
 ### 📅 **Linear Time Visualization**
 
+- **Multi-year support** with infinite scroll - view 2024, 2025, 2026 and beyond
 - **All 365 days** displayed vertically in chronological order
 - **Month separators** with clear visual hierarchy
 - **Day counter** showing progress through the year (Day X of 365)
 - **Past days auto-ticked** with green checkboxes for visual progress
+- **Jump to Today** button works across any year
 
 ### 🖨️ **Print-Optimized Design**
 
@@ -24,6 +26,8 @@ A specialized calendar application designed for visual time management and ADHD 
 
 - **Live CalDAV integration** with Apple Calendar (via proxy server)
 - **ICS file import** as alternative to live connection
+- **Multi-year event support** - events from 2024, 2025, 2026+ all display correctly
+- **Recurring events** expand across future years automatically
 - **Multi-day event support** with day-by-day progress tracking
 - **Time display** for scheduled events (hidden for all-day events)
 - **Smart event parsing** handles both timed and all-day events
@@ -31,7 +35,7 @@ A specialized calendar application designed for visual time management and ADHD 
 
 ### 🏫 **Built-in UK School Holidays**
 
-- **2025 school term dates** pre-loaded for UK/Oxfordshire
+- **Multi-year school holidays** - 2024, 2025, 2026+ term dates included
 - **Visual indicators** distinguish school holidays from regular days
 - **Weekend highlighting** with italic styling
 
@@ -79,9 +83,10 @@ npm run serve
 
 ### 1. **View Your Calendar**
 
-- Scroll through all 365 days of the year
+- Scroll through multiple years (2024, 2025, 2026+) with infinite scroll
 - Past days are automatically marked as completed
 - Current day is highlighted (on screen only)
+- Navigate between years seamlessly
 
 ### 2. **Import Your Events**
 
@@ -91,12 +96,14 @@ npm run serve
 - Click "Connect to Apple Calendar" in the app
 - Enter your Apple ID email and app-specific password
 - Your calendar will update automatically with real-time data
+- Events from all years (including future years) will import correctly
 
 #### ICS File Import (Alternative):
 
 - Export your calendar as an ICS file from Apple Calendar, Google Calendar, etc.
 - Click "Choose File" at the top and select your ICS file
 - Events will appear inline with their dates and times
+- Recurring events will expand across multiple years automatically
 
 ### 3. **Print Your Calendar**
 
@@ -108,6 +115,14 @@ npm run serve
 
 - Use the floating blue button to "Jump to Today"
 - Smooth scroll keeps you oriented in time
+- Calendar automatically expands to show future years as you scroll
+
+### 5. **Multi-Year Planning**
+
+- **Infinite scroll** - calendar expands as you scroll up or down
+- **Future events** - plan events in 2025, 2026, and beyond
+- **Recurring events** - automatically generate future occurrences
+- **Long-term planning** - see your entire schedule across multiple years
 
 ## 🎨 Visual Indicators
 
