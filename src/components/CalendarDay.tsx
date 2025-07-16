@@ -4,6 +4,8 @@ import { getEventEmoji } from '../utils/emojiUtils'
 import { getEventDisplayForDate, getEventsForDate } from '../utils/eventUtils'
 import type { CalendarEvent } from '../types'
 import { useVerseOfTheDay } from '../hooks/useVerseOfTheDay'
+import { useReminders } from '../hooks/useReminders'
+import { LearningReminderComponent } from './LearningReminder'
 
 interface CalendarDayProps {
   date: Date
@@ -24,6 +26,8 @@ export function CalendarDay({
   const isHoliday = isSchoolHoliday(date)
   const holidayInfo = getSchoolHolidayInfo(date)
   const { verse, loading: verseLoading, error: verseError } = useVerseOfTheDay()
+  const { getRemindersForDate } = useReminders()
+  const dayReminders = getRemindersForDate(date)
 
   const dayEvents = getEventsForDate(events, date)
   // Sort events by time (all-day events first, then by start time)
@@ -195,6 +199,17 @@ export function CalendarDay({
               })}
             </div>
           )}
+          {dayReminders.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {dayReminders.map(reminder => (
+                <LearningReminderComponent
+                  key={reminder.id}
+                  reminder={reminder}
+                  compact={true}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -317,6 +332,18 @@ export function CalendarDay({
                 </div>
               )
             })}
+          </div>
+        )}
+        {/* Reminders - full width on mobile */}
+        {dayReminders.length > 0 && (
+          <div className="space-y-1">
+            {dayReminders.map(reminder => (
+              <LearningReminderComponent
+                key={reminder.id}
+                reminder={reminder}
+                compact={true}
+              />
+            ))}
           </div>
         )}
       </div>

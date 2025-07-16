@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState, useCallback } from 'react'
-import { Settings2, X, Calendar } from 'lucide-react'
+import { Settings2, X, Calendar, Lightbulb } from 'lucide-react'
 import { AutoRefreshIndicator } from '../components/AutoRefreshIndicator'
 import { CalendarFooter, ThemeToggle } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
@@ -8,6 +8,7 @@ import { ImportControls } from '../components/ImportControls'
 import { DayRing, MonthRing, WeekRing, YearRing } from '../components/TimeRings'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 import { NavigationModal } from '../components/NavigationModal'
+import { ReminderPanel } from '../components/ReminderPanel'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
 import { useScrollToToday } from '../hooks/useScrollToToday'
@@ -33,6 +34,7 @@ export function LinearCalendar() {
   })
   const [showSettings, setShowSettings] = useState(false)
   const [showNavigation, setShowNavigation] = useState(false)
+  const [showReminders, setShowReminders] = useState(false)
 
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
@@ -176,6 +178,15 @@ export function LinearCalendar() {
                 >
                   <Calendar className="w-5 h-5" />
                 </button>
+                {/* Learning Reminders button */}
+                <button
+                  onClick={() => setShowReminders(true)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  aria-label="Open learning reminders"
+                  title="Learning Reminders"
+                >
+                  <Lightbulb className="w-5 h-5" />
+                </button>
                 {/* Settings panel toggle (cog icon) */}
                 <button
                   onClick={() => setShowSettings(true)}
@@ -282,6 +293,11 @@ export function LinearCalendar() {
           onClose={() => setShowNavigation(false)}
         />
       )}
+      {/* Learning Reminders Panel */}
+      <ReminderPanel
+        isOpen={showReminders}
+        onClose={() => setShowReminders(false)}
+      />
     </>
   )
 }

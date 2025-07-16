@@ -40,3 +40,18 @@ export interface CalDAVCredentials {
   password: string
   serverUrl: string
 }
+
+// Learning Reminder Types
+export interface LearningReminder {
+  id: string
+  title: string
+  snippet: string
+  fullContent?: string
+  externalLink?: string
+  tags: string[]
+  category: string
+  dateCreated: Date
+  dateToShow?: Date
+  color: string
+  isArchived: boolean
+}

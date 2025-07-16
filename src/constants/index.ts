@@ -2,6 +2,7 @@
 export const STORAGE_KEY = 'linear-calendar-events'
 export const IMPORT_INFO_KEY = 'linear-calendar-import-info'
 export const CALDAV_CREDENTIALS_KEY = 'linear-calendar-caldav-credentials'
+export const REMINDERS_STORAGE_KEY = 'linear-calendar-learning-reminders'
 
 // Date Constants
 export const MONTHS = [

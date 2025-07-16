@@ -1,9 +1,10 @@
 import {
   CALDAV_CREDENTIALS_KEY,
   IMPORT_INFO_KEY,
+  REMINDERS_STORAGE_KEY,
   STORAGE_KEY,
 } from '../constants'
-import type { CalDAVCredentials, CalendarEvent, ImportInfo } from '../types'
+import type { CalDAVCredentials, CalendarEvent, ImportInfo, LearningReminder } from '../types'
 
 /**
  * Saves events to localStorage with metadata
@@ -123,4 +124,44 @@ export const loadCalDAVCredentials = (): CalDAVCredentials | null => {
  */
 export const clearCalDAVCredentials = (): void => {
   localStorage.removeItem(CALDAV_CREDENTIALS_KEY)
+}
+
+/**
+ * Saves learning reminders to localStorage
+ */
+export const saveRemindersToStorage = (reminders: Array<LearningReminder>): void => {
+  try {
+    localStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(reminders))
+  } catch (error) {
+    console.error('Error saving reminders to localStorage:', error)
+    throw new Error('Unable to save learning reminders. Your browser storage may be full.')
+  }
+}
+
+/**
+ * Loads learning reminders from localStorage
+ */
+export const loadRemindersFromStorage = (): Array<LearningReminder> => {
+  const savedReminders = localStorage.getItem(REMINDERS_STORAGE_KEY)
+  if (!savedReminders) return []
+
+  try {
+    const parsedReminders = JSON.parse(savedReminders).map((reminder: any) => ({
+      ...reminder,
+      dateCreated: new Date(reminder.dateCreated),
+      dateToShow: reminder.dateToShow ? new Date(reminder.dateToShow) : undefined,
+    }))
+    return parsedReminders
+  } catch (error) {
+    console.error('Error loading saved reminders:', error)
+    localStorage.removeItem(REMINDERS_STORAGE_KEY)
+    return []
+  }
+}
+
+/**
+ * Clears all learning reminders from localStorage
+ */
+export const clearRemindersFromStorage = (): void => {
+  localStorage.removeItem(REMINDERS_STORAGE_KEY)
 }
