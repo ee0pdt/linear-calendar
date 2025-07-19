@@ -24,16 +24,7 @@ export const CalendarMonth = memo(function CalendarMonth({
     return { monthName, year, month }
   }, [firstDay])
 
-  // Pre-filter events for this month to reduce prop drilling
-  const monthEvents = useMemo(() => {
-    const monthStart = new Date(monthData.year, monthData.month - 1, 1)
-    const monthEnd = new Date(monthData.year, monthData.month, 0)
-    
-    return events.filter(event => {
-      const eventDate = new Date(event.date)
-      return eventDate >= monthStart && eventDate <= monthEnd
-    })
-  }, [events, monthData.year, monthData.month])
+  // Pass all events to CalendarDay to maintain existing filtering logic
 
   return (
     <div className="month-group">
@@ -50,7 +41,7 @@ export const CalendarMonth = memo(function CalendarMonth({
           <CalendarDay
             key={date.toISOString()}
             date={date}
-            events={monthEvents}
+            events={events}
             isToday={isToday(date)}
             todayRef={isToday(date) ? todayRef : undefined}
           />
