@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 
 const TODAY_OFFSET = 228 // Adjust this value based on your header height or any other offset you need
 
@@ -13,7 +13,26 @@ export function useScrollToToday({
 }: UseScrollToTodayProps) {
   const todayRef = useRef<HTMLDivElement>(null)
 
-  const jumpToToday = (smooth = true) => {
+  const scrollToTodayElement = useCallback((smooth = true) => {
+    if (todayRef.current) {
+      const element = todayRef.current
+
+      // Find the scrollable events panel (works for both mobile and desktop)
+      const eventsPanel = document.querySelector('.events-panel')
+      if (eventsPanel) {
+        const elementPosition = element.offsetTop
+        const offsetPosition = elementPosition - TODAY_OFFSET
+        // Reset to original header height
+
+        eventsPanel.scrollTo({
+          top: offsetPosition,
+          behavior: smooth ? 'smooth' : 'instant',
+        })
+      }
+    }
+  }, [])
+
+  const jumpToToday = useCallback((smooth = true) => {
     const currentYear = new Date().getFullYear()
 
     // Check if current year is in the loaded range
@@ -38,26 +57,7 @@ export function useScrollToToday({
       // Current year is already in range, just scroll
       scrollToTodayElement(smooth)
     }
-  }
-
-  const scrollToTodayElement = (smooth = true) => {
-    if (todayRef.current) {
-      const element = todayRef.current
-
-      // Find the scrollable events panel (works for both mobile and desktop)
-      const eventsPanel = document.querySelector('.events-panel')
-      if (eventsPanel) {
-        const elementPosition = element.offsetTop
-        const offsetPosition = elementPosition - TODAY_OFFSET
-        // Reset to original header height
-
-        eventsPanel.scrollTo({
-          top: offsetPosition,
-          behavior: smooth ? 'smooth' : 'instant',
-        })
-      }
-    }
-  }
+  }, [dateRange, setDateRange, scrollToTodayElement])
 
   // Auto-scroll to today on page load
   useEffect(() => {
@@ -67,7 +67,7 @@ export function useScrollToToday({
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [dateRange]) // Re-run when date range changes
+  }, []) // Only run on initial mount, not when date range changes
 
   return {
     todayRef,
