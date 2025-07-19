@@ -11,6 +11,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run format` - Run Prettier
 - `npm run check` - Auto-fix with Prettier and ESLint
 
+**IMPORTANT: Testing Requirements**
+- **Always run tests before committing**: Use `npm run test` to ensure all tests pass
+- **Add tests for new functionality**: When adding features or fixing bugs, include appropriate test coverage
+- **Update existing tests**: When modifying components or hooks, ensure tests reflect the changes
+- **Test both unit and integration**: Tests are located in `src/__tests__/` with subdirectories for `components/`, `hooks/`, `utils/`, and `integration/`
+
 ## Git Workflow and Branch Management
 
 **IMPORTANT**: When implementing new features or fixing bugs, always use feature branches:
