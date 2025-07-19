@@ -208,7 +208,7 @@ export function LinearCalendar() {
     }
 
     loadingSequence()
-  }, [jumpToToday])
+  }, [jumpToToday]) // Include memoized jumpToToday
 
   const totalDays = getTotalDaysInRange(dateRange.startYear, dateRange.endYear)
 
