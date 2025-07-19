@@ -177,10 +177,15 @@ export function LinearCalendar() {
       // Complete loading
       setIsInitialLoading(false)
       performanceTracking.stopLoading()
+      
+      // Ensure scroll-to-today happens after calendar is fully rendered
+      setTimeout(() => {
+        jumpToToday()
+      }, 200)
     }
 
     loadingSequence()
-  }, [])
+  }, [jumpToToday])
 
   const totalDays = getTotalDaysInRange(dateRange.startYear, dateRange.endYear)
 
