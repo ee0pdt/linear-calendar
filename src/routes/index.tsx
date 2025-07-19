@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState, useCallback } from 'react'
-import { Settings2, X, Calendar } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Calendar, Settings2, X } from 'lucide-react'
 import { AutoRefreshIndicator } from '../components/AutoRefreshIndicator'
 import { CalendarFooter, ThemeToggle } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
@@ -8,10 +8,13 @@ import { ImportControls } from '../components/ImportControls'
 import { DayRing, MonthRing, WeekRing, YearRing } from '../components/TimeRings'
 import { TimezoneSelect } from '../components/TimezoneSelect'
 import { NavigationModal } from '../components/NavigationModal'
+import { PerformanceDashboard } from '../components/PerformanceDashboard'
+import { CalendarLoadingIndicator } from '../components/LoadingIndicator'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
 import { useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { useModalPerformance, usePageLoadTracking, usePerformanceTracking } from '../hooks/usePerformanceTracking'
 import { getTotalDaysInRange } from '../utils/dateUtils'
 import {
   getStoredThemePreference,
@@ -33,6 +36,15 @@ export function LinearCalendar() {
   })
   const [showSettings, setShowSettings] = useState(false)
   const [showNavigation, setShowNavigation] = useState(false)
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false)
+  const [loadingStage, setLoadingStage] = useState(1)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  // Performance tracking hooks
+  const performanceTracking = usePerformanceTracking()
+  const settingsModalPerf = useModalPerformance('Settings')
+  const navigationModalPerf = useModalPerformance('Navigation')
+  usePageLoadTracking() // Track page load metrics in console
 
   // Custom hooks for state management
   const { events, setEvents, lastImportInfo, setLastImportInfo } = useEvents()
@@ -121,7 +133,61 @@ export function LinearCalendar() {
     setTheme(pref)
   }
 
+  // Track modal open completion
+  useEffect(() => {
+    if (showSettings) {
+      // Track when settings modal is fully rendered
+      const timer = setTimeout(() => {
+        settingsModalPerf.trackOpenComplete()
+      }, 100) // Small delay to ensure DOM is updated
+      return () => clearTimeout(timer)
+    }
+  }, [showSettings, settingsModalPerf])
+
+  useEffect(() => {
+    if (showNavigation) {
+      // Track when navigation modal is fully rendered
+      const timer = setTimeout(() => {
+        navigationModalPerf.trackOpenComplete()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [showNavigation, navigationModalPerf])
+
+  // Progressive loading with stages
+  useEffect(() => {
+    performanceTracking.startLoading('Initial Calendar Load')
+    
+    const loadingSequence = async () => {
+      // Stage 1: Initializing (already set)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      setLoadingStage(2) // Loading time rings
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
+      setLoadingStage(3) // Preparing calendar grid
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      setLoadingStage(4) // Loading events
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
+      setLoadingStage(5) // Rendering calendar
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // Complete loading
+      setIsInitialLoading(false)
+      performanceTracking.stopLoading()
+    }
+
+    loadingSequence()
+  }, [])
+
   const totalDays = getTotalDaysInRange(dateRange.startYear, dateRange.endYear)
+
+  // Show loading screen during initial load
+  if (isInitialLoading) {
+    return <CalendarLoadingIndicator stage={loadingStage} totalStages={5} />
+  }
 
   return (
     <>
@@ -161,7 +227,7 @@ export function LinearCalendar() {
                 {/* Jump to Today button (text) */}
                 <button
                   onClick={() => jumpToToday()}
-                  className="px-3 py-2 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg transition-colors font-semibold"
+                  className="px-3 py-2 text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg transition-colors font-semibold cursor-pointer"
                   aria-label="Jump to today"
                   title="Jump to Today"
                 >
@@ -169,8 +235,11 @@ export function LinearCalendar() {
                 </button>
                 {/* Navigation button */}
                 <button
-                  onClick={() => setShowNavigation(true)}
-                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  onClick={() => {
+                    navigationModalPerf.trackOpen()
+                    setShowNavigation(true)
+                  }}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                   aria-label="Open navigation"
                   title="Navigate to different month/year"
                 >
@@ -178,8 +247,11 @@ export function LinearCalendar() {
                 </button>
                 {/* Settings panel toggle (cog icon) */}
                 <button
-                  onClick={() => setShowSettings(true)}
-                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  onClick={() => {
+                    settingsModalPerf.trackOpen()
+                    setShowSettings(true)
+                  }}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                   aria-label="Open settings"
                   title="Settings"
                 >
@@ -221,8 +293,11 @@ export function LinearCalendar() {
           {/* Modal content */}
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md text-gray-900 dark:text-gray-100 z-10">
             <button
-              onClick={() => setShowSettings(false)}
-              className="absolute top-2 right-2 p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              onClick={() => {
+                settingsModalPerf.trackClose()
+                setShowSettings(false)
+              }}
+              className="absolute top-2 right-2 p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
               aria-label="Close settings"
             >
               <X className="w-5 h-5" />
@@ -281,9 +356,18 @@ export function LinearCalendar() {
               endYear: Math.max(dateRange.endYear, year),
             })
           }}
-          onClose={() => setShowNavigation(false)}
+          onClose={() => {
+            navigationModalPerf.trackClose()
+            setShowNavigation(false)
+          }}
         />
       )}
+      
+      {/* Performance Dashboard */}
+      <PerformanceDashboard
+        isVisible={showPerformanceDashboard}
+        onToggle={() => setShowPerformanceDashboard(!showPerformanceDashboard)}
+      />
     </>
   )
 }
