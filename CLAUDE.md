@@ -46,6 +46,18 @@ The router is configured with:
 - Test files organized in `src/__tests__/` with subdirectories for components, utils, and integration tests
 - Mock fixtures in `src/__tests__/fixtures/` for testing with sample data
 
+### Performance Architecture
+
+This application features comprehensive performance optimization and monitoring:
+
+- **Web Vitals monitoring** with real-time console logging (FCP, LCP, CLS, INP, TTFB)
+- **Performance dashboard** accessible via blue activity icon (top-right corner)
+- **React.memo optimization** for CalendarMonth and CalendarDay components
+- **useMemo optimization** for expensive date calculations and event processing
+- **Progressive loading system** with branded 5-stage initialization
+- **Custom performance timers** for modal interactions and page load tracking
+- **Memoized component architecture** prevents unnecessary re-renders
+
 ## CalDAV Integration Architecture
 
 This application features a sophisticated CalDAV integration for live Apple Calendar synchronization:
@@ -90,13 +102,15 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 
 ### Key Components
 
-- `src/components/CalendarGrid.tsx` - Main calendar component with infinite scroll and multi-year support
-- `src/components/CalendarDay.tsx` - Individual day component with events
-- `src/components/CalendarMonth.tsx` - Month separator with headers
+- `src/components/CalendarGrid.tsx` - Main calendar component with infinite scroll and multi-year support (memoized)
+- `src/components/CalendarDay.tsx` - Individual day component with events (memoized with performance optimizations)
+- `src/components/CalendarMonth.tsx` - Month separator with headers (memoized)
 - `src/components/Header.tsx` - Top navigation with import controls
 - `src/components/ImportControls.tsx` - File upload and CalDAV connection UI (supports multi-year imports)
 - `src/components/AutoRefreshIndicator.tsx` - Shows live refresh status
 - `src/components/TimeRings/` - Time visualization components (day, week, month, year rings)
+- `src/components/PerformanceDashboard.tsx` - Real-time performance metrics display
+- `src/components/LoadingIndicator.tsx` - Progressive loading with branded experience
 
 ### Key Utilities
 
@@ -106,6 +120,7 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 - `src/utils/recurrenceUtils.ts` - Recurring event expansion across multiple years
 - `src/utils/holidayUtils.ts` - UK school holiday data (2024, 2025, 2026+)
 - `src/utils/storageUtils.ts` - Local storage management
+- `src/reportWebVitals.ts` - Enhanced Web Vitals monitoring with performance tracking
 
 ### Key Hooks
 
@@ -114,6 +129,8 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 - `src/hooks/useAutoRefresh.ts` - Automatic refresh functionality (supports multi-year range)
 - `src/hooks/useScrollToToday.ts` - Navigation to current date across any year
 - `src/hooks/useInfiniteScroll.ts` - Infinite scroll functionality for multi-year support
+- `src/hooks/usePerformanceTracking.ts` - Performance monitoring and timing utilities
+- `src/hooks/useModalPerformance.ts` - Modal interaction performance tracking
 
 ## Application Features
 

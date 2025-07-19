@@ -45,6 +45,16 @@ A specialized calendar application designed for visual time management and ADHD 
 - **Visual time orientation** helps with time blindness
 - **Progress tracking** through completed (past) days
 - **Clear visual hierarchy** reduces cognitive load
+- **Fast performance** with optimized loading and interactions
+
+### ⚡ **Performance & Monitoring**
+
+- **Progressive loading** with branded 5-stage initialization
+- **Real-time Web Vitals monitoring** (FCP, LCP, CLS, INP, TTFB)
+- **Performance dashboard** accessible via blue activity icon (top-right)
+- **Optimized React components** with memoization for smooth scrolling
+- **Modal performance tracking** for responsive interactions
+- **Custom performance timers** for development insights
 
 ## 🚀 Getting Started
 
@@ -117,7 +127,14 @@ npm run serve
 - Smooth scroll keeps you oriented in time
 - Calendar automatically expands to show future years as you scroll
 
-### 5. **Multi-Year Planning**
+### 5. **Monitor Performance** (Development)
+
+- Click the blue activity icon (top-right) to open the performance dashboard
+- View real-time Web Vitals metrics (FCP, LCP, CLS, INP, TTFB)
+- Check DevTools Console for detailed performance logs
+- Modal interaction timing is automatically tracked
+
+### 6. **Multi-Year Planning**
 
 - **Infinite scroll** - calendar expands as you scroll up or down
 - **Future events** - plan events in 2025, 2026, and beyond
