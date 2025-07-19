@@ -6,6 +6,13 @@ export interface CalendarEvent {
   allDay: boolean
   isRecurring?: boolean
   rrule?: string
+  description?: string
+  location?: string
+  url?: string
+  organizer?: string
+  attendees?: string[]
+  calendar?: string
+  uid?: string
 }
 
 // Import Information

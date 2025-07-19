@@ -47,6 +47,13 @@ export const importFromCalDAV = async (
           end: parseEventDateWithTimezone(event.end),
           allDay: event.allDay || false,
           isRecurring: event.isRecurring || false,
+          description: event.description,
+          location: event.location,
+          url: event.url,
+          organizer: event.organizer,
+          attendees: event.attendees,
+          calendar: event.calendar,
+          uid: event.uid,
         }
 
         // Handle recurring events by expanding them

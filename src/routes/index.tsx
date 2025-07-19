@@ -10,17 +10,23 @@ import { TimezoneSelect } from '../components/TimezoneSelect'
 import { NavigationModal } from '../components/NavigationModal'
 import { PerformanceDashboard } from '../components/PerformanceDashboard'
 import { CalendarLoadingIndicator } from '../components/LoadingIndicator'
+import { EventDetailsModal } from '../components/EventDetailsModal'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
 import { useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
-import { useModalPerformance, usePageLoadTracking, usePerformanceTracking } from '../hooks/usePerformanceTracking'
+import {
+  useModalPerformance,
+  usePageLoadTracking,
+  usePerformanceTracking,
+} from '../hooks/usePerformanceTracking'
 import { getTotalDaysInRange } from '../utils/dateUtils'
 import {
   getStoredThemePreference,
   setStoredThemePreference,
 } from '../utils/storageUtils'
 import type { ThemePreference } from '../utils/storageUtils'
+import type { CalendarEvent } from '../types'
 
 export const Route = createFileRoute('/')({
   component: LinearCalendar,
@@ -36,9 +42,12 @@ export function LinearCalendar() {
   })
   const [showSettings, setShowSettings] = useState(false)
   const [showNavigation, setShowNavigation] = useState(false)
-  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false)
+  const [showPerformanceDashboard, setShowPerformanceDashboard] =
+    useState(false)
   const [loadingStage, setLoadingStage] = useState(1)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [showEventDetails, setShowEventDetails] = useState(false)
 
   // Performance tracking hooks
   const performanceTracking = usePerformanceTracking()
@@ -54,7 +63,11 @@ export function LinearCalendar() {
   })
 
   // Auto-refresh hook
-  const autoRefresh = useAutoRefresh(setEvents, dateRange.startYear, dateRange.endYear)
+  const autoRefresh = useAutoRefresh(
+    setEvents,
+    dateRange.startYear,
+    dateRange.endYear,
+  )
 
   // Infinite scroll hook
   const handleScrollNearTop = useCallback(() => {
@@ -133,6 +146,16 @@ export function LinearCalendar() {
     setTheme(pref)
   }
 
+  const handleEventClick = useCallback((event: CalendarEvent) => {
+    setSelectedEvent(event)
+    setShowEventDetails(true)
+  }, [])
+
+  const handleCloseEventDetails = useCallback(() => {
+    setShowEventDetails(false)
+    setSelectedEvent(null)
+  }, [])
+
   // Track modal open completion
   useEffect(() => {
     if (showSettings) {
@@ -157,27 +180,27 @@ export function LinearCalendar() {
   // Optimized progressive loading
   useEffect(() => {
     performanceTracking.startLoading('Initial Calendar Load')
-    
+
     const loadingSequence = async () => {
       // Stage 1: Initializing (already set)
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       setLoadingStage(2) // Loading time rings
-      await new Promise(resolve => setTimeout(resolve, 50))
-      
-      setLoadingStage(3) // Preparing calendar grid  
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
+      setLoadingStage(3) // Preparing calendar grid
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       setLoadingStage(4) // Loading events
-      await new Promise(resolve => setTimeout(resolve, 50))
-      
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
       setLoadingStage(5) // Rendering calendar
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       // Complete loading
       setIsInitialLoading(false)
       performanceTracking.stopLoading()
-      
+
       // Ensure scroll-to-today happens after calendar is fully rendered
       setTimeout(() => {
         jumpToToday()
@@ -274,6 +297,7 @@ export function LinearCalendar() {
               dateRange={dateRange}
               events={events}
               todayRef={todayRef}
+              onEventClick={handleEventClick}
             />
 
             <CalendarFooter
@@ -367,11 +391,18 @@ export function LinearCalendar() {
           }}
         />
       )}
-      
+
       {/* Performance Dashboard */}
       <PerformanceDashboard
         isVisible={showPerformanceDashboard}
         onToggle={() => setShowPerformanceDashboard(!showPerformanceDashboard)}
+      />
+
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        event={selectedEvent}
+        isOpen={showEventDetails}
+        onClose={handleCloseEventDetails}
       />
     </>
   )

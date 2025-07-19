@@ -17,49 +17,65 @@ export function NavigationModal({
 }: NavigationModalProps) {
   const [selectedYear, setSelectedYear] = useState(currentYear)
 
-  const scrollToMonth = useCallback((monthIndex: number) => {
-    const monthElement = document.querySelector(
-      `[data-month="${selectedYear}-${monthIndex + 1}"]`,
-    )
-    if (monthElement) {
-      const eventsPanel = document.querySelector('.events-panel')
-      if (eventsPanel) {
-        const elementPosition =
-          monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
-        const offsetPosition = elementPosition - 216
+  const scrollToMonth = useCallback(
+    (monthIndex: number) => {
+      const monthElement = document.querySelector(
+        `[data-month="${selectedYear}-${monthIndex + 1}"]`,
+      )
+      if (monthElement) {
+        const eventsPanel = document.querySelector('.events-panel')
+        if (eventsPanel) {
+          const elementPosition =
+            monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
+          const offsetPosition = elementPosition - 216
 
-        eventsPanel.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        })
+          eventsPanel.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          })
+        }
       }
-    }
-  }, [selectedYear])
+    },
+    [selectedYear],
+  )
 
-  const handleMonthClick = useCallback((monthIndex: number) => {
-    // Check if the selected year is in the current date range
-    const isYearInRange =
-      selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
+  const handleMonthClick = useCallback(
+    (monthIndex: number) => {
+      // Check if the selected year is in the current date range
+      const isYearInRange =
+        selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
 
-    if (!isYearInRange) {
-      // If the year is not in range, expand the range to include it
-      onYearChange(selectedYear)
+      if (!isYearInRange) {
+        // If the year is not in range, expand the range to include it
+        onYearChange(selectedYear)
 
-      // Wait for the component to re-render, then scroll
-      setTimeout(() => {
+        // Wait for the component to re-render, then scroll
+        setTimeout(() => {
+          scrollToMonth(monthIndex)
+        }, 100)
+      } else {
+        // Year is already in range, just scroll
         scrollToMonth(monthIndex)
-      }, 100)
-    } else {
-      // Year is already in range, just scroll
-      scrollToMonth(monthIndex)
-    }
-    onClose()
-  }, [selectedYear, dateRange.startYear, dateRange.endYear, onYearChange, onClose, scrollToMonth])
+      }
+      onClose()
+    },
+    [
+      selectedYear,
+      dateRange.startYear,
+      dateRange.endYear,
+      onYearChange,
+      onClose,
+      scrollToMonth,
+    ],
+  )
 
-  const handleYearChange = useCallback((year: number) => {
-    setSelectedYear(year)
-    onYearChange(year)
-  }, [onYearChange])
+  const handleYearChange = useCallback(
+    (year: number) => {
+      setSelectedYear(year)
+      onYearChange(year)
+    },
+    [onYearChange],
+  )
 
   return (
     <div

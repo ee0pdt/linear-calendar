@@ -7,15 +7,17 @@ interface CalendarMonthProps {
   daysInMonth: Array<Date>
   events: Array<CalendarEvent>
   todayRef?: React.RefObject<HTMLDivElement | null>
+  onEventClick?: (event: CalendarEvent) => void
 }
 
 export const CalendarMonth = memo(function CalendarMonth({
   daysInMonth,
   events,
   todayRef,
+  onEventClick,
 }: CalendarMonthProps) {
   const firstDay = daysInMonth[0]
-  
+
   // Memoize month metadata to prevent recalculation
   const monthData = useMemo(() => {
     const monthName = firstDay.toLocaleString('default', { month: 'long' })
@@ -44,6 +46,7 @@ export const CalendarMonth = memo(function CalendarMonth({
             events={events}
             isToday={isToday(date)}
             todayRef={isToday(date) ? todayRef : undefined}
+            onEventClick={onEventClick}
           />
         ))}
       </div>
