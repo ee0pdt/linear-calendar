@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import { formatDate, isPastDay, isWeekend } from '../utils/dateUtils'
 import { getSchoolHolidayInfo, isSchoolHoliday } from '../utils/holidayUtils'
 import { getEventEmoji } from '../utils/emojiUtils'
@@ -12,41 +13,58 @@ interface CalendarDayProps {
   todayRef?: React.RefObject<HTMLDivElement | null>
 }
 
-export function CalendarDay({
+export const CalendarDay = memo(function CalendarDay({
   date,
   events,
   isToday: isTodayProp,
   todayRef,
 }: CalendarDayProps) {
-  const { dayName, dayNumberOrdinal, monthName } = formatDate(date)
-  const isPast = isPastDay(date)
-  const isWeekendDay = isWeekend(date)
-  const isHoliday = isSchoolHoliday(date)
-  const holidayInfo = getSchoolHolidayInfo(date)
-  const { verse, loading: verseLoading, error: verseError } = useVerseOfTheDay()
-
-  const dayEvents = getEventsForDate(events, date)
-  // Sort events by time (all-day events first, then by start time)
-  const sortedEvents = dayEvents.sort((a, b) => {
-    // All-day events come first
-    if (a.allDay !== b.allDay) {
-      return a.allDay ? -1 : 1
-    }
-    // Both are timed events - sort by start time
-    if (!a.allDay && !b.allDay) {
-      return a.start.getTime() - b.start.getTime()
-    }
-    // Both are all-day events - sort by title
-    return a.title.localeCompare(b.title)
-  })
-  const displayedEvents = sortedEvents
-  const globalIndex = (() => {
-    // Used for "Day X of Y" counter
+  // Memoize day metadata to prevent recalculation
+  const dayData = useMemo(() => {
+    const { dayName, dayNumberOrdinal, monthName } = formatDate(date)
+    const isPast = isPastDay(date)
+    const isWeekendDay = isWeekend(date)
+    const isHoliday = isSchoolHoliday(date)
+    const holidayInfo = getSchoolHolidayInfo(date)
+    
+    // Calculate global index for "Day X of Y" counter
     const yearStart = new Date(date.getFullYear(), 0, 1)
-    return Math.floor(
+    const globalIndex = Math.floor(
       (date.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
     )
-  })()
+    
+    return {
+      dayName,
+      dayNumberOrdinal,
+      monthName,
+      isPast,
+      isWeekendDay,
+      isHoliday,
+      holidayInfo,
+      globalIndex,
+    }
+  }, [date])
+
+  const { verse, loading: verseLoading, error: verseError } = useVerseOfTheDay()
+
+  // Memoize event processing to prevent re-sorting on every render
+  const dayEventData = useMemo(() => {
+    const dayEvents = getEventsForDate(events, date)
+    // Sort events by time (all-day events first, then by start time)
+    const sortedEvents = dayEvents.sort((a, b) => {
+      // All-day events come first
+      if (a.allDay !== b.allDay) {
+        return a.allDay ? -1 : 1
+      }
+      // Both are timed events - sort by start time
+      if (!a.allDay && !b.allDay) {
+        return a.start.getTime() - b.start.getTime()
+      }
+      // Both are all-day events - sort by title
+      return a.title.localeCompare(b.title)
+    })
+    return sortedEvents
+  }, [events, date])
 
   // Main row: responsive layout
   return (
@@ -54,10 +72,10 @@ export function CalendarDay({
       ref={isTodayProp ? todayRef : undefined}
       className={`day-entry border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors relative
         ${isTodayProp ? 'today-highlight bg-blue-50 dark:bg-blue-900 font-bold z-0' : ''}
-        ${isWeekendDay && !isHoliday ? 'weekend-highlight bg-gray-100 dark:bg-gray-800' : ''}
-        ${isHoliday && isWeekendDay ? 'holiday-weekend-highlight bg-blue-50 dark:bg-gray-800' : ''}
-        ${isHoliday && !isWeekendDay ? 'holiday-highlight bg-green-50 dark:bg-gray-800' : ''}
-        ${isPast ? 'past-day dark:opacity-70' : ''}
+        ${dayData.isWeekendDay && !dayData.isHoliday ? 'weekend-highlight bg-gray-100 dark:bg-gray-800' : ''}
+        ${dayData.isHoliday && dayData.isWeekendDay ? 'holiday-weekend-highlight bg-blue-50 dark:bg-gray-800' : ''}
+        ${dayData.isHoliday && !dayData.isWeekendDay ? 'holiday-highlight bg-green-50 dark:bg-gray-800' : ''}
+        ${dayData.isPast ? 'past-day dark:opacity-70' : ''}
         p-3 sm:p-4 min-h-[3rem] sm:min-h-[4rem] ${isTodayProp ? 'text-lg sm:text-xl' : ''}`}
       style={isTodayProp ? { position: 'relative' } : {}}
     >
@@ -72,29 +90,29 @@ export function CalendarDay({
               className={`inline-block w-12 text-center rounded-full px-2 py-1 mr-2 text-sm font-normal ${isTodayProp ? 'bg-blue-700 text-white dark:bg-blue-600 dark:text-white' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
               style={{ minWidth: '48px' }}
             >
-              {dayName}
+              {dayData.dayName}
             </span>
             <span
               className={`font-bold ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-2xl' : 'text-gray-800 dark:text-gray-100 text-lg'}`}
             >
-              {dayNumberOrdinal}
+              {dayData.dayNumberOrdinal}
             </span>
             <span
               className={`font-medium ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-lg' : 'text-gray-700 dark:text-gray-100'}`}
             >
-              {monthName}
+              {dayData.monthName}
             </span>
-            {holidayInfo && (
+            {dayData.holidayInfo && (
               <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs font-medium px-2.5 py-0.5 rounded-full no-print">
-                {holidayInfo.name} Day {holidayInfo.dayNumber}/
-                {holidayInfo.totalDays}
+                {dayData.holidayInfo.name} Day {dayData.holidayInfo.dayNumber}/
+                {dayData.holidayInfo.totalDays}
               </span>
             )}
           </div>
         </div>
         <div className="text-right">
           <div className="text-gray-400 text-sm day-counter">
-            Day {globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
+            Day {dayData.globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
           </div>
           {/* Verse of the Day - Desktop */}
           {isTodayProp && (
@@ -116,9 +134,9 @@ export function CalendarDay({
               )}
             </div>
           )}
-          {dayEvents.length > 0 && (
+          {dayEventData.length > 0 && (
             <div className="mt-1 text-xs space-y-1 events-list">
-              {sortedEvents.map((event, i) => {
+              {dayEventData.map((event, i) => {
                 const timeDisplay = getEventDisplayForDate(event, date)
                 return (
                   <div key={i}>
@@ -206,32 +224,32 @@ export function CalendarDay({
             <span
               className={`inline-block w-10 text-center rounded-full px-1.5 py-0.5 text-xs font-normal ${isTodayProp ? 'bg-blue-700 text-white dark:bg-blue-600 dark:text-white' : 'bg-gray-100 text-gray-600 dark:bg-black dark:text-gray-100'}`}
             >
-              {dayName}
+              {dayData.dayName}
             </span>
             <span
               className={`font-bold ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-xl' : 'text-gray-800 dark:text-gray-100 text-base'}`}
             >
-              {dayNumberOrdinal}
+              {dayData.dayNumberOrdinal}
             </span>
             <span
               className={`font-medium ${isTodayProp ? 'text-blue-700 dark:text-blue-200 text-lg' : 'text-gray-700 dark:text-gray-100 text-sm'}`}
             >
-              {monthName}
+              {dayData.monthName}
             </span>
           </div>
           <div
             className={`text-xs ${isTodayProp ? 'text-blue-700 dark:text-blue-200 font-bold text-base' : 'text-gray-400'}`}
           >
-            Day {globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
+            Day {dayData.globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
           </div>
         </div>
 
         {/* Holiday badge - full width on mobile */}
-        {holidayInfo && (
+        {dayData.holidayInfo && (
           <div className="w-full">
             <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 text-xs font-medium px-2 py-1 rounded-full block text-center">
-              {holidayInfo.name} Day {holidayInfo.dayNumber}/
-              {holidayInfo.totalDays}
+              {dayData.holidayInfo.name} Day {dayData.holidayInfo.dayNumber}/
+              {dayData.holidayInfo.totalDays}
             </span>
           </div>
         )}
@@ -257,9 +275,9 @@ export function CalendarDay({
           </div>
         )}
         {/* Events - full width on mobile */}
-        {dayEvents.length > 0 && (
+        {dayEventData.length > 0 && (
           <div className="space-y-1">
-            {sortedEvents.map((event, i) => {
+            {dayEventData.map((event, i) => {
               const timeDisplay = getEventDisplayForDate(event, date)
               return (
                 <div key={i} className="w-full">
@@ -322,4 +340,4 @@ export function CalendarDay({
       </div>
     </div>
   )
-}
+})

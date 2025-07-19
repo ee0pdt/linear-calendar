@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { MONTH_ABBREVIATIONS } from '../constants'
 
 interface NavigationModalProps {
@@ -17,7 +17,26 @@ export function NavigationModal({
 }: NavigationModalProps) {
   const [selectedYear, setSelectedYear] = useState(currentYear)
 
-  const handleMonthClick = (monthIndex: number) => {
+  const scrollToMonth = useCallback((monthIndex: number) => {
+    const monthElement = document.querySelector(
+      `[data-month="${selectedYear}-${monthIndex + 1}"]`,
+    )
+    if (monthElement) {
+      const eventsPanel = document.querySelector('.events-panel')
+      if (eventsPanel) {
+        const elementPosition =
+          monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
+        const offsetPosition = elementPosition - 216
+
+        eventsPanel.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        })
+      }
+    }
+  }, [selectedYear])
+
+  const handleMonthClick = useCallback((monthIndex: number) => {
     // Check if the selected year is in the current date range
     const isYearInRange =
       selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
@@ -35,31 +54,12 @@ export function NavigationModal({
       scrollToMonth(monthIndex)
     }
     onClose()
-  }
+  }, [selectedYear, dateRange.startYear, dateRange.endYear, onYearChange, onClose, scrollToMonth])
 
-  const scrollToMonth = (monthIndex: number) => {
-    const monthElement = document.querySelector(
-      `[data-month="${selectedYear}-${monthIndex + 1}"]`,
-    )
-    if (monthElement) {
-      const eventsPanel = document.querySelector('.events-panel')
-      if (eventsPanel) {
-        const elementPosition =
-          monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
-        const offsetPosition = elementPosition - 216
-
-        eventsPanel.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        })
-      }
-    }
-  }
-
-  const handleYearChange = (year: number) => {
+  const handleYearChange = useCallback((year: number) => {
     setSelectedYear(year)
     onYearChange(year)
-  }
+  }, [onYearChange])
 
   return (
     <div

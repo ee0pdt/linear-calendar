@@ -154,25 +154,25 @@ export function LinearCalendar() {
     }
   }, [showNavigation, navigationModalPerf])
 
-  // Progressive loading with stages
+  // Optimized progressive loading
   useEffect(() => {
     performanceTracking.startLoading('Initial Calendar Load')
     
     const loadingSequence = async () => {
       // Stage 1: Initializing (already set)
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       setLoadingStage(2) // Loading time rings
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise(resolve => setTimeout(resolve, 50))
       
-      setLoadingStage(3) // Preparing calendar grid
-      await new Promise(resolve => setTimeout(resolve, 300))
+      setLoadingStage(3) // Preparing calendar grid  
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       setLoadingStage(4) // Loading events
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise(resolve => setTimeout(resolve, 50))
       
       setLoadingStage(5) // Rendering calendar
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       // Complete loading
       setIsInitialLoading(false)
@@ -291,7 +291,7 @@ export function LinearCalendar() {
           {/* Overlay */}
           <div className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" />
           {/* Modal content */}
-          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md text-gray-900 dark:text-gray-100 z-10">
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto text-gray-900 dark:text-gray-100 z-10">
             <button
               onClick={() => {
                 settingsModalPerf.trackClose()
