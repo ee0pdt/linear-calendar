@@ -11,6 +11,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run format` - Run Prettier
 - `npm run check` - Auto-fix with Prettier and ESLint
 
+## Git Workflow and Branch Management
+
+**IMPORTANT**: When implementing new features or fixing bugs, always use feature branches:
+
+1. **Check Current Branch**: Before starting work, verify you're not on `main`
+   ```bash
+   git branch --show-current
+   ```
+
+2. **Create Feature Branch**: If on `main` or need a new branch for your work
+   ```bash
+   git checkout -b feature-name  # e.g., feature-name, fix-bug-name, etc.
+   ```
+
+3. **Work and Commit**: Make your changes and commit to the feature branch
+   ```bash
+   git add .
+   git commit -m "Description of changes"
+   ```
+
+4. **Push and Create PR**: Push the branch and create a pull request
+   ```bash
+   git push origin feature-name
+   ```
+
+5. **Merge**: Only merge to `main` after code review via pull request
+
+**Branch Naming Convention**:
+- `feature-*` for new features (e.g., `feature-event-details`)
+- `fix-*` for bug fixes (e.g., `fix-calendar-scroll`)
+- `update-*` for updates/improvements (e.g., `update-performance`)
+
+**Never commit directly to `main`** - always use feature branches for development work.
+
 ## Architecture
 
 This is a React application built with:
