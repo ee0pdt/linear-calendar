@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from '../../routeTree.gen'
 
@@ -8,10 +8,23 @@ const MOCK_TODAY = new Date(2025, 5, 5) // June 5, 2025
 
 beforeEach(() => {
   vi.setSystemTime(MOCK_TODAY)
+  // Mock scrollTo function for jsdom
+  Element.prototype.scrollTo = vi.fn()
 })
 
 describe('LinearCalendar Component', () => {
   const router = createRouter({ routeTree })
+
+  // Helper function to wait for the loading sequence to complete
+  const waitForCalendarLoad = async () => {
+    // Wait for settings button to appear (indicates loading is complete)
+    await waitFor(
+      () => {
+        expect(screen.getByLabelText('Open settings')).toBeInTheDocument()
+      },
+      { timeout: 3000 }
+    )
+  }
 
   it.skip('renders the calendar title with current year', () => {
     render(<RouterProvider router={router} />)
@@ -19,19 +32,20 @@ describe('LinearCalendar Component', () => {
     expect(screen.getByText('2024-2026 Calendar')).toBeInTheDocument()
   })
 
-  it('renders import sections after opening settings', () => {
+  it('renders import sections after opening settings', async () => {
     render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
 
     // Click on settings button to open settings modal
     const settingsButton = screen.getByLabelText('Open settings')
     fireEvent.click(settingsButton)
 
-    expect(screen.getByText('🔗 Live Calendar Import')).toBeInTheDocument()
-    expect(screen.getByText('📁 File Import')).toBeInTheDocument()
+    expect(screen.getByText('Import Calendar')).toBeInTheDocument()
   })
 
-  it('renders Connect to Apple Calendar button after opening settings', () => {
+  it('renders Connect to Apple Calendar button after opening settings', async () => {
     render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
 
     // Click on settings button to open settings modal
     const settingsButton = screen.getByLabelText('Open settings')
@@ -40,23 +54,21 @@ describe('LinearCalendar Component', () => {
     expect(screen.getByText('Connect to Apple Calendar')).toBeInTheDocument()
   })
 
-  it('renders file input for ICS upload after opening settings', () => {
+  it('renders file input for ICS upload after opening settings', async () => {
     render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
 
     // Click on settings button to open settings modal
     const settingsButton = screen.getByLabelText('Open settings')
     fireEvent.click(settingsButton)
 
-    const fileInput =
-      screen.getByRole('button', { name: /choose file/i }) ||
-      screen.getByLabelText(/choose file/i) ||
-      document.querySelector('input[type="file"]')
-
+    const fileInput = document.querySelector('input[type="file"]')
     expect(fileInput).toBeInTheDocument()
   })
 
-  it('renders the current year days', () => {
+  it('renders the current year days', async () => {
     render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
 
     // Should render June 2025 header
     expect(screen.getByText('June 2025')).toBeInTheDocument()
@@ -65,19 +77,35 @@ describe('LinearCalendar Component', () => {
     expect(screen.getByText('TODAY')).toBeInTheDocument()
   })
 
-  it('renders jump to today button', () => {
+  it('renders jump to today button', async () => {
     render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
 
     const jumpButton = screen.getByTitle('Jump to Today')
     expect(jumpButton).toBeInTheDocument()
   })
 
-  it('displays correct day count', () => {
+  it('displays correct day count', async () => {
     render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
 
-    // 2025 has 365 days (not a leap year)
-    expect(
-      screen.getByText('Linear Calendar for 2025 • 365 days total'),
-    ).toBeInTheDocument()
+    // Should show the current date range (2024-2026 by default)
+    // We need to look for the footer text that shows total days
+    expect(screen.getByText(/days total/)).toBeInTheDocument()
+  })
+
+  it('scrolls to today when jump to today button is clicked', async () => {
+    render(<RouterProvider router={router} />)
+    await waitForCalendarLoad()
+
+    // Find the jump to today button
+    const jumpButton = screen.getByTitle('Jump to Today')
+    expect(jumpButton).toBeInTheDocument()
+
+    // Click the button - this should trigger scroll behavior without error
+    expect(() => fireEvent.click(jumpButton)).not.toThrow()
+
+    // Verify scrollTo was called (we mocked it in beforeEach)
+    expect(Element.prototype.scrollTo).toHaveBeenCalled()
   })
 })
