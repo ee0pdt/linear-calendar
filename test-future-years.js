@@ -20,7 +20,9 @@ try {
   const events = parseICSFile(testICS, 2024, 2027)
   console.log(`Found ${events.length} events:`)
   events.forEach((event, index) => {
-    console.log(`${index + 1}. ${event.title} - ${event.start.toISOString().split('T')[0]}`)
+    console.log(
+      `${index + 1}. ${event.title} - ${event.start.toISOString().split('T')[0]}`,
+    )
   })
 } catch (error) {
   console.error('Test failed:', error.message)

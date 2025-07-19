@@ -11,6 +11,7 @@ interface CalendarDayProps {
   events: Array<CalendarEvent>
   isToday: boolean
   todayRef?: React.RefObject<HTMLDivElement | null>
+  onEventClick?: (event: CalendarEvent) => void
 }
 
 export const CalendarDay = memo(function CalendarDay({
@@ -18,6 +19,7 @@ export const CalendarDay = memo(function CalendarDay({
   events,
   isToday: isTodayProp,
   todayRef,
+  onEventClick,
 }: CalendarDayProps) {
   // Memoize day metadata to prevent recalculation
   const dayData = useMemo(() => {
@@ -26,13 +28,13 @@ export const CalendarDay = memo(function CalendarDay({
     const isWeekendDay = isWeekend(date)
     const isHoliday = isSchoolHoliday(date)
     const holidayInfo = getSchoolHolidayInfo(date)
-    
+
     // Calculate global index for "Day X of Y" counter
     const yearStart = new Date(date.getFullYear(), 0, 1)
     const globalIndex = Math.floor(
       (date.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
     )
-    
+
     return {
       dayName,
       dayNumberOrdinal,
@@ -112,7 +114,8 @@ export const CalendarDay = memo(function CalendarDay({
         </div>
         <div className="text-right">
           <div className="text-gray-400 text-sm day-counter">
-            Day {dayData.globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
+            Day {dayData.globalIndex + 1} of{' '}
+            {date.getFullYear() % 4 === 0 ? 366 : 365}
           </div>
           {/* Verse of the Day - Desktop */}
           {isTodayProp && (
@@ -142,7 +145,7 @@ export const CalendarDay = memo(function CalendarDay({
                   <div key={i}>
                     {event.allDay ? (
                       <span
-                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-help ${
+                        className={`text-xs font-medium px-2.5 py-0.5 rounded-full inline-block cursor-pointer hover:opacity-80 transition-opacity ${
                           event.isRecurring
                             ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
                             : 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-2 border-purple-300 dark:border-purple-700'
@@ -150,6 +153,7 @@ export const CalendarDay = memo(function CalendarDay({
                         title={
                           event.title.length > 15 ? event.title : undefined
                         }
+                        onClick={() => onEventClick?.(event)}
                       >
                         {(() => {
                           const dayProgress = getEventDisplayForDate(
@@ -171,7 +175,7 @@ export const CalendarDay = memo(function CalendarDay({
                       </span>
                     ) : (
                       <div
-                        className={`cursor-help ${
+                        className={`cursor-pointer hover:opacity-80 transition-opacity ${
                           event.isRecurring
                             ? 'text-blue-700 dark:text-blue-200'
                             : 'text-purple-700 dark:text-purple-200'
@@ -179,6 +183,7 @@ export const CalendarDay = memo(function CalendarDay({
                         title={
                           event.title.length > 22 ? event.title : undefined
                         }
+                        onClick={() => onEventClick?.(event)}
                       >
                         {!event.isRecurring && (
                           <span className="text-purple-600 font-medium mr-1 dark:text-purple-200">
@@ -240,7 +245,8 @@ export const CalendarDay = memo(function CalendarDay({
           <div
             className={`text-xs ${isTodayProp ? 'text-blue-700 dark:text-blue-200 font-bold text-base' : 'text-gray-400'}`}
           >
-            Day {dayData.globalIndex + 1} of {date.getFullYear() % 4 === 0 ? 366 : 365}
+            Day {dayData.globalIndex + 1} of{' '}
+            {date.getFullYear() % 4 === 0 ? 366 : 365}
           </div>
         </div>
 
@@ -283,12 +289,13 @@ export const CalendarDay = memo(function CalendarDay({
                 <div key={i} className="w-full">
                   {event.allDay ? (
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded-full block text-center cursor-help ${
+                      className={`text-xs font-medium px-2 py-1 rounded-full block text-center cursor-pointer hover:opacity-80 transition-opacity ${
                         event.isRecurring
                           ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
                           : 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-2 border-purple-300 dark:border-purple-700'
                       }`}
                       title={event.title.length > 25 ? event.title : undefined}
+                      onClick={() => onEventClick?.(event)}
                     >
                       {(() => {
                         const dayProgress = getEventDisplayForDate(event, date)
@@ -305,12 +312,13 @@ export const CalendarDay = memo(function CalendarDay({
                     </span>
                   ) : (
                     <div
-                      className={`text-xs cursor-help text-center p-1 rounded ${
+                      className={`text-xs cursor-pointer hover:opacity-80 transition-opacity text-center p-1 rounded ${
                         event.isRecurring
                           ? 'text-blue-700 dark:text-blue-200'
                           : 'text-purple-700 dark:text-purple-200'
                       }`}
                       title={event.title.length > 30 ? event.title : undefined}
+                      onClick={() => onEventClick?.(event)}
                     >
                       {!event.isRecurring && (
                         <span className="text-purple-600 font-medium mr-1 dark:text-purple-200">

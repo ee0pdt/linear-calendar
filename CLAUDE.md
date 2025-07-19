@@ -165,7 +165,7 @@ The calendar supports infinite scroll across multiple years with the following a
 ### Date Range Management
 
 - **Initial Load**: Starts with `currentYear ± 1` (e.g., 2024 shows 2023-2025)
-- **Infinite Scroll**: 
+- **Infinite Scroll**:
   - Scrolling near top adds `startYear - 1`
   - Scrolling near bottom adds `endYear + 1`
 - **Jump to Today**: Expands range to include current year if not already loaded

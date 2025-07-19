@@ -14,8 +14,12 @@ interface PerformanceLog {
 }
 
 export function usePerformanceTracking() {
-  const [loadingState, setLoadingState] = useState<LoadingState>({ isLoading: false })
-  const [performanceLogs, setPerformanceLogs] = useState<Array<PerformanceLog>>([])
+  const [loadingState, setLoadingState] = useState<LoadingState>({
+    isLoading: false,
+  })
+  const [performanceLogs, setPerformanceLogs] = useState<Array<PerformanceLog>>(
+    [],
+  )
   const timersRef = useRef<Map<string, PerformanceTimer>>(new Map())
 
   // Track loading states
@@ -23,27 +27,29 @@ export function usePerformanceTracking() {
     setLoadingState({
       isLoading: true,
       loadingText: text,
-      startTime: performance.now()
+      startTime: performance.now(),
     })
   }, [])
 
   const stopLoading = useCallback(() => {
-    setLoadingState(prev => {
+    setLoadingState((prev) => {
       if (prev.startTime) {
         const duration = performance.now() - prev.startTime
         const log: PerformanceLog = {
           action: prev.loadingText || 'Loading',
           duration,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         }
-        
-        setPerformanceLogs(logs => [...logs.slice(-19), log]) // Keep last 20 logs
-        
+
+        setPerformanceLogs((logs) => [...logs.slice(-19), log]) // Keep last 20 logs
+
         if (import.meta.env.DEV) {
-          console.log(`📊 Loading completed: ${log.action} - ${duration.toFixed(2)}ms`)
+          console.log(
+            `📊 Loading completed: ${log.action} - ${duration.toFixed(2)}ms`,
+          )
         }
       }
-      
+
       return { isLoading: false }
     })
   }, [])
@@ -60,14 +66,14 @@ export function usePerformanceTracking() {
     if (timer) {
       const duration = timer.end()
       timersRef.current.delete(name)
-      
+
       const log: PerformanceLog = {
         action: name,
         duration,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
-      
-      setPerformanceLogs(logs => [...logs.slice(-19), log])
+
+      setPerformanceLogs((logs) => [...logs.slice(-19), log])
       return duration
     }
     return 0
@@ -77,7 +83,9 @@ export function usePerformanceTracking() {
   const trackRender = useCallback((componentName: string) => {
     if (import.meta.env.DEV) {
       const renderTime = performance.now()
-      console.log(`🔄 Component rendered: ${componentName} at ${renderTime.toFixed(2)}ms`)
+      console.log(
+        `🔄 Component rendered: ${componentName} at ${renderTime.toFixed(2)}ms`,
+      )
     }
   }, [])
 
@@ -95,7 +103,7 @@ export function usePerformanceTracking() {
     stopLoading,
     startTimer,
     endTimer,
-    trackRender
+    trackRender,
   }
 }
 
@@ -123,7 +131,7 @@ export function useModalPerformance(modalName: string) {
   return {
     trackOpen,
     trackOpenComplete,
-    trackClose
+    trackClose,
   }
 }
 
@@ -134,20 +142,28 @@ export function usePageLoadTracking() {
     domContentLoaded: 0,
     loadComplete: 0,
     firstPaint: 0,
-    firstContentfulPaint: 0
+    firstContentfulPaint: 0,
   })
 
   useEffect(() => {
     const updateMetrics = () => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+      const navigation = performance.getEntriesByType(
+        'navigation',
+      )[0] as PerformanceNavigationTiming
       const paint = performance.getEntriesByType('paint')
 
       setPageLoadMetrics({
         navigationStart: navigation ? navigation.startTime : 0,
-        domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.startTime : 0,
-        loadComplete: navigation ? navigation.loadEventEnd - navigation.startTime : 0,
-        firstPaint: paint.find(p => p.name === 'first-paint')?.startTime || 0,
-        firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0
+        domContentLoaded: navigation
+          ? navigation.domContentLoadedEventEnd - navigation.startTime
+          : 0,
+        loadComplete: navigation
+          ? navigation.loadEventEnd - navigation.startTime
+          : 0,
+        firstPaint: paint.find((p) => p.name === 'first-paint')?.startTime || 0,
+        firstContentfulPaint:
+          paint.find((p) => p.name === 'first-contentful-paint')?.startTime ||
+          0,
       })
     }
 
@@ -166,10 +182,14 @@ export function usePageLoadTracking() {
   useEffect(() => {
     if (import.meta.env.DEV && pageLoadMetrics.loadComplete > 0) {
       console.group('📈 Page Load Metrics')
-      console.log(`DOM Content Loaded: ${pageLoadMetrics.domContentLoaded.toFixed(2)}ms`)
+      console.log(
+        `DOM Content Loaded: ${pageLoadMetrics.domContentLoaded.toFixed(2)}ms`,
+      )
       console.log(`Load Complete: ${pageLoadMetrics.loadComplete.toFixed(2)}ms`)
       console.log(`First Paint: ${pageLoadMetrics.firstPaint.toFixed(2)}ms`)
-      console.log(`First Contentful Paint: ${pageLoadMetrics.firstContentfulPaint.toFixed(2)}ms`)
+      console.log(
+        `First Contentful Paint: ${pageLoadMetrics.firstContentfulPaint.toFixed(2)}ms`,
+      )
       console.groupEnd()
     }
   }, [pageLoadMetrics])

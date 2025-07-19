@@ -57,6 +57,39 @@ export const parseICSFile = (
     } else if (inEvent) {
       if (line.startsWith('SUMMARY:')) {
         currentEvent.title = line.substring(8)
+      } else if (line.startsWith('DESCRIPTION:')) {
+        currentEvent.description = line.substring(12)
+      } else if (line.startsWith('LOCATION:')) {
+        currentEvent.location = line.substring(9)
+      } else if (line.startsWith('URL:')) {
+        currentEvent.url = line.substring(4)
+      } else if (line.startsWith('ORGANIZER')) {
+        // Extract organizer info, handle both name and email formats
+        const organizer = line.substring(line.indexOf(':') + 1)
+        if (organizer.includes('CN=')) {
+          // Format: ORGANIZER;CN=Name:MAILTO:email@example.com
+          const cnMatch = organizer.match(/CN=([^:;]+)/)
+          if (cnMatch) {
+            currentEvent.organizer = cnMatch[1]
+          }
+        } else {
+          // Simple format: ORGANIZER:email@example.com
+          currentEvent.organizer = organizer.replace('MAILTO:', '')
+        }
+      } else if (line.startsWith('ATTENDEE')) {
+        // Extract attendee info
+        if (!currentEvent.attendees) currentEvent.attendees = []
+        const attendee = line.substring(line.indexOf(':') + 1)
+        if (attendee.includes('CN=')) {
+          const cnMatch = attendee.match(/CN=([^:;]+)/)
+          if (cnMatch) {
+            currentEvent.attendees.push(cnMatch[1])
+          }
+        } else {
+          currentEvent.attendees.push(attendee.replace('MAILTO:', ''))
+        }
+      } else if (line.startsWith('UID:')) {
+        currentEvent.uid = line.substring(4)
       } else if (line.startsWith('DTSTART')) {
         dtStartLine = line
         const dateStr = line.split(':')[1]

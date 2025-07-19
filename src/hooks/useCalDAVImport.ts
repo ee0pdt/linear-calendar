@@ -35,7 +35,11 @@ export function useCalDAVImport() {
 
     setIsCalDAVLoading(true)
     try {
-      const importedEvents = await importFromCalDAV(calDAVCredentials, startYear, endYear)
+      const importedEvents = await importFromCalDAV(
+        calDAVCredentials,
+        startYear,
+        endYear,
+      )
       onSuccess(importedEvents)
       setShowCalDAVForm(false)
       // Keep credentials saved for future imports and refresh functionality
