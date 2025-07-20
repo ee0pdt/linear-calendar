@@ -158,31 +158,6 @@ export function LinearCalendar() {
     setSelectedEvent(null)
   }, [])
 
-  const scrollToEvent = useCallback((event: CalendarEvent) => {
-    const eventDate = event.start
-    const year = eventDate.getFullYear()
-    const month = eventDate.getMonth() + 1
-
-    // Check if the event's year is in the current date range
-    const isYearInRange = year >= dateRange.startYear && year <= dateRange.endYear
-
-    if (!isYearInRange) {
-      // Expand the date range to include the event's year
-      setDateRange({
-        startYear: Math.min(dateRange.startYear, year),
-        endYear: Math.max(dateRange.endYear, year),
-      })
-
-      // Wait for the component to re-render, then scroll
-      setTimeout(() => {
-        scrollToMonth(year, month)
-      }, 100)
-    } else {
-      // Year is already in range, just scroll
-      scrollToMonth(year, month)
-    }
-  }, [dateRange])
-
   const scrollToMonth = useCallback((year: number, month: number) => {
     const monthElement = document.querySelector(`[data-month="${year}-${month}"]`)
     if (monthElement) {
@@ -199,6 +174,55 @@ export function LinearCalendar() {
       }
     }
   }, [])
+
+  const scrollToDay = useCallback((date: Date) => {
+    // Format date as YYYY-MM-DD to match data-date attribute
+    const dateStr = date.toISOString().split('T')[0]
+    const dayElement = document.querySelector(`[data-date="${dateStr}"]`)
+    
+    if (dayElement) {
+      const eventsPanel = document.querySelector('.events-panel')
+      if (eventsPanel) {
+        const elementPosition =
+          dayElement.getBoundingClientRect().top + eventsPanel.scrollTop
+        const offsetPosition = elementPosition - 228 // Slightly higher offset to center the day better
+
+        eventsPanel.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        })
+      }
+    } else {
+      // Fallback to month if specific day not found (might not be loaded yet)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      scrollToMonth(year, month)
+    }
+  }, [scrollToMonth])
+
+  const scrollToEvent = useCallback((event: CalendarEvent) => {
+    const eventDate = event.start
+    const year = eventDate.getFullYear()
+
+    // Check if the event's year is in the current date range
+    const isYearInRange = year >= dateRange.startYear && year <= dateRange.endYear
+
+    if (!isYearInRange) {
+      // Expand the date range to include the event's year
+      setDateRange({
+        startYear: Math.min(dateRange.startYear, year),
+        endYear: Math.max(dateRange.endYear, year),
+      })
+
+      // Wait for the component to re-render, then scroll to specific day
+      setTimeout(() => {
+        scrollToDay(eventDate)
+      }, 100)
+    } else {
+      // Year is already in range, just scroll to specific day
+      scrollToDay(eventDate)
+    }
+  }, [dateRange, scrollToDay])
 
   // Track modal open completion
   useEffect(() => {
