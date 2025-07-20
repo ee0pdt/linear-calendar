@@ -14,7 +14,7 @@ import { EventDetailsModal } from '../components/EventDetailsModal'
 import { EventSearch } from '../components/EventSearch'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
-import { useScrollToToday } from '../hooks/useScrollToToday'
+import { SCROLL_OFFSET, useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import {
   useModalPerformance,
@@ -167,7 +167,7 @@ export function LinearCalendar() {
       if (eventsPanel) {
         const elementPosition =
           monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
-        const offsetPosition = elementPosition - 216
+        const offsetPosition = elementPosition - SCROLL_OFFSET
 
         eventsPanel.scrollTo({
           top: offsetPosition,
@@ -188,7 +188,7 @@ export function LinearCalendar() {
         if (eventsPanel) {
           const elementPosition =
             dayElement.getBoundingClientRect().top + eventsPanel.scrollTop
-          const offsetPosition = elementPosition - 228 // Slightly higher offset to center the day better
+          const offsetPosition = elementPosition - SCROLL_OFFSET
 
           eventsPanel.scrollTo({
             top: offsetPosition,
@@ -287,7 +287,6 @@ export function LinearCalendar() {
     loadingSequence()
   }, [jumpToToday]) // Include memoized jumpToToday
 
-
   const totalDays = getTotalDaysInRange(dateRange.startYear, dateRange.endYear)
 
   // Show loading screen during initial load
@@ -305,7 +304,7 @@ export function LinearCalendar() {
         {/* Panel 1a: Fixed rings header */}
         <div className="fixed top-0 left-0 right-0 z-60 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
           {/* Time rings */}
-          <div className="flex justify-center gap-6 p-3 sm:p-4 pb-4 sm:pb-4">
+          <div className="flex justify-center gap-6 p-3 pb-4">
             <DayRing size={56} />
             <WeekRing size={56} />
             <MonthRing size={56} />
@@ -314,7 +313,7 @@ export function LinearCalendar() {
         </div>
 
         {/* Panel 1b: Fixed nav controls header */}
-        <div className="fixed top-28 sm:top-32 left-0 right-0 z-60">
+        <div className="fixed top-28 left-0 right-0 z-60">
           {/* Calendar header and settings toggle */}
           <div className="px-4 py-2 sm:px-6 sm:py-3">
             <div className="flex items-center justify-end">
@@ -374,7 +373,7 @@ export function LinearCalendar() {
         </div>
 
         {/* Panel 2: Scrollable calendar content */}
-        <div className={`flex-1 overflow-y-auto events-panel pt-48 sm:pt-40`}>
+        <div className={`flex-1 overflow-y-auto events-panel pt-48`}>
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
             <CalendarGrid
               dateRange={dateRange}

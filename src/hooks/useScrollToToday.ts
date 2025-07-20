@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
 
-const TODAY_OFFSET = 228 // Adjust this value based on your header height or any other offset you need
+export const SCROLL_OFFSET = 160 // Adjust this value based on your header height or any other offset you need
 
 interface UseScrollToTodayProps {
   dateRange: { startYear: number; endYear: number }
@@ -21,7 +21,7 @@ export function useScrollToToday({
       const eventsPanel = document.querySelector('.events-panel')
       if (eventsPanel) {
         const elementPosition = element.offsetTop
-        const offsetPosition = elementPosition - TODAY_OFFSET
+        const offsetPosition = elementPosition - SCROLL_OFFSET
         // Reset to original header height
 
         eventsPanel.scrollTo({
