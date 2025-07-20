@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
-import { Calendar, Settings2, X } from 'lucide-react'
+import { Calendar, Search, Settings2, X } from 'lucide-react'
 import { AutoRefreshIndicator } from '../components/AutoRefreshIndicator'
 import { CalendarFooter, ThemeToggle } from '../components/CalendarFooter'
 import { CalendarGrid } from '../components/CalendarGrid'
@@ -11,6 +11,7 @@ import { NavigationModal } from '../components/NavigationModal'
 import { PerformanceDashboard } from '../components/PerformanceDashboard'
 import { CalendarLoadingIndicator } from '../components/LoadingIndicator'
 import { EventDetailsModal } from '../components/EventDetailsModal'
+import { EventSearch } from '../components/EventSearch'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
 import { useScrollToToday } from '../hooks/useScrollToToday'
@@ -42,6 +43,7 @@ export function LinearCalendar() {
   })
   const [showSettings, setShowSettings] = useState(false)
   const [showNavigation, setShowNavigation] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
   const [showPerformanceDashboard, setShowPerformanceDashboard] =
     useState(false)
   const [loadingStage, setLoadingStage] = useState(1)
@@ -156,6 +158,72 @@ export function LinearCalendar() {
     setSelectedEvent(null)
   }, [])
 
+  const scrollToMonth = useCallback((year: number, month: number) => {
+    const monthElement = document.querySelector(`[data-month="${year}-${month}"]`)
+    if (monthElement) {
+      const eventsPanel = document.querySelector('.events-panel')
+      if (eventsPanel) {
+        const elementPosition =
+          monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
+        const offsetPosition = elementPosition - 216
+
+        eventsPanel.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        })
+      }
+    }
+  }, [])
+
+  const scrollToDay = useCallback((date: Date) => {
+    // Format date as YYYY-MM-DD to match data-date attribute
+    const dateStr = date.toISOString().split('T')[0]
+    const dayElement = document.querySelector(`[data-date="${dateStr}"]`)
+    
+    if (dayElement) {
+      const eventsPanel = document.querySelector('.events-panel')
+      if (eventsPanel) {
+        const elementPosition =
+          dayElement.getBoundingClientRect().top + eventsPanel.scrollTop
+        const offsetPosition = elementPosition - 228 // Slightly higher offset to center the day better
+
+        eventsPanel.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        })
+      }
+    } else {
+      // Fallback to month if specific day not found (might not be loaded yet)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      scrollToMonth(year, month)
+    }
+  }, [scrollToMonth])
+
+  const scrollToEvent = useCallback((event: CalendarEvent) => {
+    const eventDate = event.start
+    const year = eventDate.getFullYear()
+
+    // Check if the event's year is in the current date range
+    const isYearInRange = year >= dateRange.startYear && year <= dateRange.endYear
+
+    if (!isYearInRange) {
+      // Expand the date range to include the event's year
+      setDateRange({
+        startYear: Math.min(dateRange.startYear, year),
+        endYear: Math.max(dateRange.endYear, year),
+      })
+
+      // Wait for the component to re-render, then scroll to specific day
+      setTimeout(() => {
+        scrollToDay(eventDate)
+      }, 100)
+    } else {
+      // Year is already in range, just scroll to specific day
+      scrollToDay(eventDate)
+    }
+  }, [dateRange, scrollToDay])
+
   // Track modal open completion
   useEffect(() => {
     if (showSettings) {
@@ -260,6 +328,15 @@ export function LinearCalendar() {
                   title="Jump to Today"
                 >
                   Today
+                </button>
+                {/* Search button */}
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Search events"
+                  title="Search events"
+                >
+                  <Search className="w-5 h-5" />
                 </button>
                 {/* Navigation button */}
                 <button
@@ -403,6 +480,15 @@ export function LinearCalendar() {
         event={selectedEvent}
         isOpen={showEventDetails}
         onClose={handleCloseEventDetails}
+      />
+
+      {/* Event Search Modal */}
+      <EventSearch
+        events={events}
+        onEventClick={handleEventClick}
+        onScrollToEvent={scrollToEvent}
+        isVisible={showSearch}
+        onClose={() => setShowSearch(false)}
       />
     </>
   )

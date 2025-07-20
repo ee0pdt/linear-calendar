@@ -176,6 +176,16 @@ app.get('/api/calendar', async (req, res) => {
                     startType: typeof event.start,
                     hasDateTime: event.start.hasOwnProperty('dateTime'),
                     rrule: event.rrule,
+                    location: event.location,
+                    locationType: typeof event.location,
+                    description: event.description,
+                    organizer: event.organizer,
+                    organizerType: typeof event.organizer,
+                    attendee: event.attendee,
+                    url: event.url,
+                    urlType: typeof event.url,
+                    urlStructure: event.url ? Object.keys(event.url) : 'null',
+                    uid: event.uid,
                   })
 
                   // Correctly detect all-day events by examining the event data
@@ -215,6 +225,28 @@ app.get('/api/calendar', async (req, res) => {
                     }
                   }
 
+                  // Helper function to extract string value from iCal object
+                  const extractStringValue = (value) => {
+                    if (!value) return undefined
+                    if (typeof value === 'string') return value
+                    if (typeof value === 'object') {
+                      // Try various common properties from iCal objects
+                      const extracted = value.val || value.value || value.name || value.href || value.url || 
+                             (value.params && value.params.value) || 
+                             Object.values(value).find(v => typeof v === 'string' && v.length > 0)
+                      
+                      // If we found a valid string, return it, otherwise return undefined to exclude the field
+                      if (typeof extracted === 'string' && extracted.length > 0) {
+                        console.log(`Extracted string "${extracted}" from object:`, value)
+                        return extracted
+                      }
+                      
+                      console.log(`Could not extract string from object:`, value, 'Keys:', Object.keys(value))
+                      return undefined
+                    }
+                    return String(value)
+                  }
+
                   // Create calendar event with proper format
                   // Now that floating times are preprocessed, Date objects should be consistent
                   const calendarEvent = {
@@ -234,10 +266,17 @@ app.get('/api/calendar', async (req, res) => {
                     rrule: event.rrule ? event.rrule.toString() : undefined,
                     isRecurring: !!event.rrule,
                     calendarName: calendar.displayName,
+                    description: extractStringValue(event.description),
+                    location: extractStringValue(event.location),
+                    organizer: extractStringValue(event.organizer),
+                    url: extractStringValue(event.url),
+                    uid: extractStringValue(event.uid),
+                    // Parse attendees if present
+                    attendees: event.attendee ? (Array.isArray(event.attendee) ? event.attendee.map(a => extractStringValue(a)).filter(Boolean) : [extractStringValue(event.attendee)].filter(Boolean)) : undefined,
                   }
 
                   console.log(
-                    `Processed event "${calendarEvent.title}": allDay=${calendarEvent.allDay}, start=${calendarEvent.start}`,
+                    `Processed event "${calendarEvent.title}": allDay=${calendarEvent.allDay}, start=${calendarEvent.start}, location=${calendarEvent.location}, url=${calendarEvent.url}`,
                   )
 
                   // Include all events - let client handle recurring event expansion and year filtering

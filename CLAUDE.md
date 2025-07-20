@@ -85,6 +85,7 @@ The router is configured with:
 - Global test configuration in `vite.config.js`
 - Test files organized in `src/__tests__/` with subdirectories for components, utils, and integration tests
 - Mock fixtures in `src/__tests__/fixtures/` for testing with sample data
+- Component tests include EventSearch and EventDetailsModal with map link functionality
 
 ### Performance Architecture
 
@@ -147,6 +148,8 @@ This application features a sophisticated CalDAV integration for live Apple Cale
 - `src/components/CalendarMonth.tsx` - Month separator with headers (memoized)
 - `src/components/Header.tsx` - Top navigation with import controls
 - `src/components/ImportControls.tsx` - File upload and CalDAV connection UI (supports multi-year imports)
+- `src/components/EventSearch.tsx` - Event search modal with filtering and scroll-to-event functionality
+- `src/components/EventDetailsModal.tsx` - Event details display with location map links
 - `src/components/AutoRefreshIndicator.tsx` - Shows live refresh status
 - `src/components/TimeRings/` - Time visualization components (day, week, month, year rings)
 - `src/components/PerformanceDashboard.tsx` - Real-time performance metrics display
@@ -179,6 +182,8 @@ This is a specialized calendar application for ADHD-friendly time management:
 ### Core Features
 
 - **Multi-year linear view** - Infinite scroll through 2024, 2025, 2026+ with all days displayed vertically
+- **Event search** - Fast search across all events by title, description, or location with scroll-to-date functionality
+- **Smart location links** - Automatic Apple Maps and Google Maps links generated from event locations
 - **Print optimization** - Formats to 4 A4 pages for wall mounting
 - **Live Apple Calendar integration** - Real-time event synchronization across all years
 - **ICS file import** - Alternative to live calendar connection (supports multi-year processing)
