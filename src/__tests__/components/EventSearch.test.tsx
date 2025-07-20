@@ -50,10 +50,12 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
-    expect(screen.getByPlaceholderText(/search by event title/i)).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText(/search by event title/i),
+    ).toBeInTheDocument()
     expect(screen.getByText('Search Events')).toBeInTheDocument()
   })
 
@@ -65,7 +67,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={false}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     expect(screen.queryByText('Search Events')).not.toBeInTheDocument()
@@ -79,7 +81,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)
@@ -99,7 +101,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)
@@ -119,7 +121,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)
@@ -140,7 +142,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)
@@ -161,7 +163,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)
@@ -178,7 +180,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)
@@ -195,7 +197,7 @@ describe('EventSearch Component', () => {
         onScrollToEvent={mockOnScrollToEvent}
         isVisible={true}
         onClose={mockOnClose}
-      />
+      />,
     )
 
     const searchInput = screen.getByPlaceholderText(/search by event title/i)

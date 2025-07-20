@@ -231,17 +231,35 @@ app.get('/api/calendar', async (req, res) => {
                     if (typeof value === 'string') return value
                     if (typeof value === 'object') {
                       // Try various common properties from iCal objects
-                      const extracted = value.val || value.value || value.name || value.href || value.url || 
-                             (value.params && value.params.value) || 
-                             Object.values(value).find(v => typeof v === 'string' && v.length > 0)
-                      
+                      const extracted =
+                        value.val ||
+                        value.value ||
+                        value.name ||
+                        value.href ||
+                        value.url ||
+                        (value.params && value.params.value) ||
+                        Object.values(value).find(
+                          (v) => typeof v === 'string' && v.length > 0,
+                        )
+
                       // If we found a valid string, return it, otherwise return undefined to exclude the field
-                      if (typeof extracted === 'string' && extracted.length > 0) {
-                        console.log(`Extracted string "${extracted}" from object:`, value)
+                      if (
+                        typeof extracted === 'string' &&
+                        extracted.length > 0
+                      ) {
+                        console.log(
+                          `Extracted string "${extracted}" from object:`,
+                          value,
+                        )
                         return extracted
                       }
-                      
-                      console.log(`Could not extract string from object:`, value, 'Keys:', Object.keys(value))
+
+                      console.log(
+                        `Could not extract string from object:`,
+                        value,
+                        'Keys:',
+                        Object.keys(value),
+                      )
                       return undefined
                     }
                     return String(value)
@@ -272,7 +290,13 @@ app.get('/api/calendar', async (req, res) => {
                     url: extractStringValue(event.url),
                     uid: extractStringValue(event.uid),
                     // Parse attendees if present
-                    attendees: event.attendee ? (Array.isArray(event.attendee) ? event.attendee.map(a => extractStringValue(a)).filter(Boolean) : [extractStringValue(event.attendee)].filter(Boolean)) : undefined,
+                    attendees: event.attendee
+                      ? Array.isArray(event.attendee)
+                        ? event.attendee
+                            .map((a) => extractStringValue(a))
+                            .filter(Boolean)
+                        : [extractStringValue(event.attendee)].filter(Boolean)
+                      : undefined,
                   }
 
                   console.log(

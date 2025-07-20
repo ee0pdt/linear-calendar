@@ -38,7 +38,7 @@ describe('useScrollToToday', () => {
       useScrollToToday({
         dateRange: mockDateRange,
         setDateRange: mockSetDateRange,
-      })
+      }),
     )
 
     expect(result.current.todayRef).toBeDefined()
@@ -50,7 +50,7 @@ describe('useScrollToToday', () => {
       useScrollToToday({
         dateRange: mockDateRange, // 2024-2026 includes current year 2025
         setDateRange: mockSetDateRange,
-      })
+      }),
     )
 
     // Mock todayRef.current
@@ -74,7 +74,7 @@ describe('useScrollToToday', () => {
       useScrollToToday({
         dateRange: { startYear: 2020, endYear: 2022 }, // 2025 not in range
         setDateRange: mockSetDateRange,
-      })
+      }),
     )
 
     act(() => {
@@ -92,7 +92,7 @@ describe('useScrollToToday', () => {
       useScrollToToday({
         dateRange: mockDateRange,
         setDateRange: mockSetDateRange,
-      })
+      }),
     )
 
     // Mock todayRef.current
@@ -114,7 +114,7 @@ describe('useScrollToToday', () => {
       useScrollToToday({
         dateRange: mockDateRange,
         setDateRange: mockSetDateRange,
-      })
+      }),
     )
 
     // Don't set todayRef.current
@@ -131,7 +131,7 @@ describe('useScrollToToday', () => {
       useScrollToToday({
         dateRange: mockDateRange,
         setDateRange: mockSetDateRange,
-      })
+      }),
     )
 
     // Mock todayRef.current but return null for querySelector

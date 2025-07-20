@@ -22,10 +22,9 @@ describe('LinearCalendar Component', () => {
       () => {
         expect(screen.getByLabelText('Open settings')).toBeInTheDocument()
       },
-      { timeout: 3000 }
+      { timeout: 3000 },
     )
   }
-
 
   it('renders import sections after opening settings', async () => {
     render(<RouterProvider router={router} />)

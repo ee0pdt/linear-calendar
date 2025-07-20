@@ -32,32 +32,35 @@ export function useScrollToToday({
     }
   }, [])
 
-  const jumpToToday = useCallback((smooth = true) => {
-    const currentYear = new Date().getFullYear()
+  const jumpToToday = useCallback(
+    (smooth = true) => {
+      const currentYear = new Date().getFullYear()
 
-    // Check if current year is in the loaded range
-    const isCurrentYearInRange =
-      currentYear >= dateRange.startYear && currentYear <= dateRange.endYear
+      // Check if current year is in the loaded range
+      const isCurrentYearInRange =
+        currentYear >= dateRange.startYear && currentYear <= dateRange.endYear
 
-    if (!isCurrentYearInRange) {
-      // Expand the date range to include the current year
-      const newStartYear = Math.min(dateRange.startYear, currentYear)
-      const newEndYear = Math.max(dateRange.endYear, currentYear)
+      if (!isCurrentYearInRange) {
+        // Expand the date range to include the current year
+        const newStartYear = Math.min(dateRange.startYear, currentYear)
+        const newEndYear = Math.max(dateRange.endYear, currentYear)
 
-      setDateRange({
-        startYear: newStartYear,
-        endYear: newEndYear,
-      })
+        setDateRange({
+          startYear: newStartYear,
+          endYear: newEndYear,
+        })
 
-      // Wait for the component to re-render with the new range, then scroll
-      setTimeout(() => {
+        // Wait for the component to re-render with the new range, then scroll
+        setTimeout(() => {
+          scrollToTodayElement(smooth)
+        }, 100)
+      } else {
+        // Current year is already in range, just scroll
         scrollToTodayElement(smooth)
-      }, 100)
-    } else {
-      // Current year is already in range, just scroll
-      scrollToTodayElement(smooth)
-    }
-  }, [dateRange, setDateRange, scrollToTodayElement])
+      }
+    },
+    [dateRange, setDateRange, scrollToTodayElement],
+  )
 
   // Auto-scroll to today on page load
   useEffect(() => {

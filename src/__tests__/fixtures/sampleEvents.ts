@@ -22,7 +22,8 @@ export const SAMPLE_EVENTS: Array<CalendarEvent> = [
     allDay: false,
     isRecurring: false,
     location: 'Conference Room A, Building 2',
-    description: 'Weekly team sync to discuss project progress and upcoming deadlines.',
+    description:
+      'Weekly team sync to discuss project progress and upcoming deadlines.',
     organizer: 'team-lead@company.com',
   },
   {
