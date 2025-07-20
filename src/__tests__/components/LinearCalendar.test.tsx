@@ -22,15 +22,9 @@ describe('LinearCalendar Component', () => {
       () => {
         expect(screen.getByLabelText('Open settings')).toBeInTheDocument()
       },
-      { timeout: 3000 }
+      { timeout: 3000 },
     )
   }
-
-  it.skip('renders the calendar title with current year', () => {
-    render(<RouterProvider router={router} />)
-
-    expect(screen.getByText('2024-2026 Calendar')).toBeInTheDocument()
-  })
 
   it('renders import sections after opening settings', async () => {
     render(<RouterProvider router={router} />)

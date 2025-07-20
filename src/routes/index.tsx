@@ -14,7 +14,7 @@ import { EventDetailsModal } from '../components/EventDetailsModal'
 import { EventSearch } from '../components/EventSearch'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
-import { useScrollToToday } from '../hooks/useScrollToToday'
+import { SCROLL_OFFSET, useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import {
   useModalPerformance,
@@ -159,13 +159,15 @@ export function LinearCalendar() {
   }, [])
 
   const scrollToMonth = useCallback((year: number, month: number) => {
-    const monthElement = document.querySelector(`[data-month="${year}-${month}"]`)
+    const monthElement = document.querySelector(
+      `[data-month="${year}-${month}"]`,
+    )
     if (monthElement) {
       const eventsPanel = document.querySelector('.events-panel')
       if (eventsPanel) {
         const elementPosition =
           monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
-        const offsetPosition = elementPosition - 216
+        const offsetPosition = elementPosition - SCROLL_OFFSET
 
         eventsPanel.scrollTo({
           top: offsetPosition,
@@ -175,54 +177,61 @@ export function LinearCalendar() {
     }
   }, [])
 
-  const scrollToDay = useCallback((date: Date) => {
-    // Format date as YYYY-MM-DD to match data-date attribute
-    const dateStr = date.toISOString().split('T')[0]
-    const dayElement = document.querySelector(`[data-date="${dateStr}"]`)
-    
-    if (dayElement) {
-      const eventsPanel = document.querySelector('.events-panel')
-      if (eventsPanel) {
-        const elementPosition =
-          dayElement.getBoundingClientRect().top + eventsPanel.scrollTop
-        const offsetPosition = elementPosition - 228 // Slightly higher offset to center the day better
+  const scrollToDay = useCallback(
+    (date: Date) => {
+      // Format date as YYYY-MM-DD to match data-date attribute
+      const dateStr = date.toISOString().split('T')[0]
+      const dayElement = document.querySelector(`[data-date="${dateStr}"]`)
 
-        eventsPanel.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        })
+      if (dayElement) {
+        const eventsPanel = document.querySelector('.events-panel')
+        if (eventsPanel) {
+          const elementPosition =
+            dayElement.getBoundingClientRect().top + eventsPanel.scrollTop
+          const offsetPosition = elementPosition - SCROLL_OFFSET
+
+          eventsPanel.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          })
+        }
+      } else {
+        // Fallback to month if specific day not found (might not be loaded yet)
+        const year = date.getFullYear()
+        const month = date.getMonth() + 1
+        scrollToMonth(year, month)
       }
-    } else {
-      // Fallback to month if specific day not found (might not be loaded yet)
-      const year = date.getFullYear()
-      const month = date.getMonth() + 1
-      scrollToMonth(year, month)
-    }
-  }, [scrollToMonth])
+    },
+    [scrollToMonth],
+  )
 
-  const scrollToEvent = useCallback((event: CalendarEvent) => {
-    const eventDate = event.start
-    const year = eventDate.getFullYear()
+  const scrollToEvent = useCallback(
+    (event: CalendarEvent) => {
+      const eventDate = event.start
+      const year = eventDate.getFullYear()
 
-    // Check if the event's year is in the current date range
-    const isYearInRange = year >= dateRange.startYear && year <= dateRange.endYear
+      // Check if the event's year is in the current date range
+      const isYearInRange =
+        year >= dateRange.startYear && year <= dateRange.endYear
 
-    if (!isYearInRange) {
-      // Expand the date range to include the event's year
-      setDateRange({
-        startYear: Math.min(dateRange.startYear, year),
-        endYear: Math.max(dateRange.endYear, year),
-      })
+      if (!isYearInRange) {
+        // Expand the date range to include the event's year
+        setDateRange({
+          startYear: Math.min(dateRange.startYear, year),
+          endYear: Math.max(dateRange.endYear, year),
+        })
 
-      // Wait for the component to re-render, then scroll to specific day
-      setTimeout(() => {
+        // Wait for the component to re-render, then scroll to specific day
+        setTimeout(() => {
+          scrollToDay(eventDate)
+        }, 100)
+      } else {
+        // Year is already in range, just scroll to specific day
         scrollToDay(eventDate)
-      }, 100)
-    } else {
-      // Year is already in range, just scroll to specific day
-      scrollToDay(eventDate)
-    }
-  }, [dateRange, scrollToDay])
+      }
+    },
+    [dateRange, scrollToDay],
+  )
 
   // Track modal open completion
   useEffect(() => {
@@ -292,26 +301,22 @@ export function LinearCalendar() {
         className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${showSettings ? 'filter blur-sm brightness-75' : ''}`}
         aria-hidden={showSettings ? 'true' : undefined}
       >
-        {/* Panel 1: Fixed header with rings and controls */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        {/* Panel 1a: Fixed rings header */}
+        <div className="fixed top-0 left-0 right-0 z-60 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
           {/* Time rings */}
-          <div className="flex justify-center gap-6 p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex justify-center gap-6 p-3 pb-4">
             <DayRing size={56} />
             <WeekRing size={56} />
             <MonthRing size={56} />
             <YearRing size={56} />
           </div>
+        </div>
 
+        {/* Panel 1b: Fixed nav controls header */}
+        <div className="fixed top-28 left-0 right-0 z-60">
           {/* Calendar header and settings toggle */}
           <div className="px-4 py-2 sm:px-6 sm:py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {dateRange.startYear === dateRange.endYear
-                    ? `${dateRange.startYear} Calendar`
-                    : `${dateRange.startYear}-${dateRange.endYear} Calendar`}
-                </h1>
-              </div>
+            <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
                 {/* Auto-refresh indicator */}
                 <AutoRefreshIndicator
@@ -368,7 +373,7 @@ export function LinearCalendar() {
         </div>
 
         {/* Panel 2: Scrollable calendar content */}
-        <div className={`flex-1 overflow-y-auto events-panel pt-40 sm:pt-32`}>
+        <div className={`flex-1 overflow-y-auto events-panel pt-48`}>
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
             <CalendarGrid
               dateRange={dateRange}

@@ -27,7 +27,7 @@ export function NavigationModal({
         if (eventsPanel) {
           const elementPosition =
             monthElement.getBoundingClientRect().top + eventsPanel.scrollTop
-          const offsetPosition = elementPosition - 216
+          const offsetPosition = elementPosition - 166
 
           eventsPanel.scrollTo({
             top: offsetPosition,

@@ -6,15 +6,20 @@ const renderStringValue = (value: any): string => {
   if (typeof value === 'string') return value
   if (value && typeof value === 'object') {
     // Try various common properties from iCal objects
-    const extracted = value.val || value.value || value.name || value.href || value.url || 
-           (value.params && value.params.value) || 
-           Object.values(value).find(v => typeof v === 'string' && v.length > 0)
-    
+    const extracted =
+      value.val ||
+      value.value ||
+      value.name ||
+      value.href ||
+      value.url ||
+      (value.params && value.params.value) ||
+      Object.values(value).find((v) => typeof v === 'string' && v.length > 0)
+
     // If we got a string that looks like a URL or valid content, return it
     if (typeof extracted === 'string' && extracted.length > 0) {
       return extracted
     }
-    
+
     // If nothing worked and it's still an object, return empty string to hide the field
     return ''
   }
@@ -24,15 +29,18 @@ const renderStringValue = (value: any): string => {
 // Helper function to generate map links from location
 const generateMapLinks = (location: string) => {
   const encodedLocation = encodeURIComponent(location.replace(/\n/g, ' '))
-  
+
   // Detect user agent for better map app selection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   const isMac = /Macintosh/.test(navigator.userAgent)
-  
+
   return {
     apple: `http://maps.apple.com/?q=${encodedLocation}`,
     google: `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`,
-    defaultMap: isIOS || isMac ? `http://maps.apple.com/?q=${encodedLocation}` : `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`
+    defaultMap:
+      isIOS || isMac
+        ? `http://maps.apple.com/?q=${encodedLocation}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`,
   }
 }
 
@@ -225,8 +233,18 @@ export const EventDetailsModal = memo(function EventDetailsModal({
                     rel="noopener noreferrer"
                     className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
                   >
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <svg
+                      className="w-3 h-3 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
                     </svg>
                     Apple Maps
                   </a>
@@ -236,8 +254,18 @@ export const EventDetailsModal = memo(function EventDetailsModal({
                     rel="noopener noreferrer"
                     className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
                   >
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <svg
+                      className="w-3 h-3 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
                     </svg>
                     Google Maps
                   </a>

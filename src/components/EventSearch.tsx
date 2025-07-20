@@ -21,13 +21,14 @@ export const EventSearch = memo(function EventSearch({
 
   const filteredEvents = useMemo(() => {
     if (!searchTerm.trim()) return []
-    
+
     const term = searchTerm.toLowerCase()
     return events
-      .filter(event => 
-        event.title.toLowerCase().includes(term) ||
-        event.description?.toLowerCase().includes(term) ||
-        event.location?.toLowerCase().includes(term)
+      .filter(
+        (event) =>
+          event.title.toLowerCase().includes(term) ||
+          event.description?.toLowerCase().includes(term) ||
+          event.location?.toLowerCase().includes(term),
       )
       .sort((a, b) => a.start.getTime() - b.start.getTime())
       .slice(0, 50) // Limit to 50 results for performance
@@ -54,16 +55,24 @@ export const EventSearch = memo(function EventSearch({
 
   const highlightSearchTerm = (text: string) => {
     if (!searchTerm.trim()) return text
-    
-    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+
+    const regex = new RegExp(
+      `(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+      'gi',
+    )
     const parts = text.split(regex)
-    
-    return parts.map((part, index) => 
+
+    return parts.map((part, index) =>
       regex.test(part) ? (
-        <mark key={index} className="bg-yellow-200 dark:bg-yellow-800 rounded px-1">
+        <mark
+          key={index}
+          className="bg-yellow-200 dark:bg-yellow-800 rounded px-1"
+        >
           {part}
         </mark>
-      ) : part
+      ) : (
+        part
+      ),
     )
   }
 
@@ -76,11 +85,11 @@ export const EventSearch = memo(function EventSearch({
       aria-modal="true"
     >
       {/* Overlay */}
-      <div 
-        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+      <div
+        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50"
         onClick={onClose}
       />
-      
+
       {/* Modal content */}
       <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden text-gray-900 dark:text-gray-100 z-10 mx-4">
         {/* Header */}
@@ -116,16 +125,18 @@ export const EventSearch = memo(function EventSearch({
         </div>
 
         {/* Results */}
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(80vh - 140px)' }}>
+        <div
+          className="overflow-y-auto"
+          style={{ maxHeight: 'calc(80vh - 140px)' }}
+        >
           {searchTerm.trim() && (
             <div className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
-              {filteredEvents.length === 0 
+              {filteredEvents.length === 0
                 ? 'No events found'
-                : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'} found${filteredEvents.length === 50 ? ' (showing first 50)' : ''}`
-              }
+                : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'} found${filteredEvents.length === 50 ? ' (showing first 50)' : ''}`}
             </div>
           )}
-          
+
           {filteredEvents.length > 0 && (
             <div className="divide-y divide-gray-100 dark:divide-gray-800">
               {filteredEvents.map((event, index) => (
@@ -152,7 +163,9 @@ export const EventSearch = memo(function EventSearch({
                       )}
                       {event.description && (
                         <p className="text-sm text-gray-500 dark:text-gray-500 mt-1 line-clamp-2">
-                          {highlightSearchTerm(event.description.substring(0, 100))}
+                          {highlightSearchTerm(
+                            event.description.substring(0, 100),
+                          )}
                           {event.description.length > 100 && '...'}
                         </p>
                       )}
@@ -185,12 +198,14 @@ export const EventSearch = memo(function EventSearch({
               ))}
             </div>
           )}
-          
+
           {searchTerm.trim() === '' && (
             <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
               <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Start typing to search through your events</p>
-              <p className="text-sm mt-2">Search by title, description, or location</p>
+              <p className="text-sm mt-2">
+                Search by title, description, or location
+              </p>
             </div>
           )}
         </div>
