@@ -304,14 +304,7 @@ export function LinearCalendar() {
 
           {/* Calendar header and settings toggle */}
           <div className="px-4 py-2 sm:px-6 sm:py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {dateRange.startYear === dateRange.endYear
-                    ? `${dateRange.startYear} Calendar`
-                    : `${dateRange.startYear}-${dateRange.endYear} Calendar`}
-                </h1>
-              </div>
+            <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
                 {/* Auto-refresh indicator */}
                 <AutoRefreshIndicator
