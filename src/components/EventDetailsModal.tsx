@@ -1,6 +1,41 @@
 import { memo } from 'react'
 import type { CalendarEvent } from '../types'
 
+// Helper function to safely render string values that might be objects
+const renderStringValue = (value: any): string => {
+  if (typeof value === 'string') return value
+  if (value && typeof value === 'object') {
+    // Try various common properties from iCal objects
+    const extracted = value.val || value.value || value.name || value.href || value.url || 
+           (value.params && value.params.value) || 
+           Object.values(value).find(v => typeof v === 'string' && v.length > 0)
+    
+    // If we got a string that looks like a URL or valid content, return it
+    if (typeof extracted === 'string' && extracted.length > 0) {
+      return extracted
+    }
+    
+    // If nothing worked and it's still an object, return empty string to hide the field
+    return ''
+  }
+  return String(value || '')
+}
+
+// Helper function to generate map links from location
+const generateMapLinks = (location: string) => {
+  const encodedLocation = encodeURIComponent(location.replace(/\n/g, ' '))
+  
+  // Detect user agent for better map app selection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const isMac = /Macintosh/.test(navigator.userAgent)
+  
+  return {
+    apple: `http://maps.apple.com/?q=${encodedLocation}`,
+    google: `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`,
+    defaultMap: isIOS || isMac ? `http://maps.apple.com/?q=${encodedLocation}` : `https://www.google.com/maps/search/?api=1&query=${encodedLocation}`
+  }
+}
+
 interface EventDetailsModalProps {
   event: CalendarEvent | null
   isOpen: boolean
@@ -157,29 +192,56 @@ export const EventDetailsModal = memo(function EventDetailsModal({
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Location
               </h3>
-              <div className="flex items-start space-x-2">
-                <svg
-                  className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span className="text-gray-900 dark:text-gray-100">
-                  {event.location}
-                </span>
+              <div className="space-y-2">
+                <div className="flex items-start space-x-2">
+                  <svg
+                    className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span className="text-gray-900 dark:text-gray-100">
+                    {event.location}
+                  </span>
+                </div>
+                {/* Map Links */}
+                <div className="flex items-center space-x-4 ml-6">
+                  <a
+                    href={generateMapLinks(event.location).apple}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Apple Maps
+                  </a>
+                  <a
+                    href={generateMapLinks(event.location).google}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Google Maps
+                  </a>
+                </div>
               </div>
             </div>
           )}
@@ -197,7 +259,7 @@ export const EventDetailsModal = memo(function EventDetailsModal({
           )}
 
           {/* URL */}
-          {event.url && (
+          {event.url && renderStringValue(event.url) && (
             <div>
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Link
@@ -217,12 +279,12 @@ export const EventDetailsModal = memo(function EventDetailsModal({
                   />
                 </svg>
                 <a
-                  href={event.url}
+                  href={renderStringValue(event.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline break-all"
                 >
-                  {event.url}
+                  {renderStringValue(event.url)}
                 </a>
               </div>
             </div>
@@ -249,7 +311,7 @@ export const EventDetailsModal = memo(function EventDetailsModal({
                   />
                 </svg>
                 <span className="text-gray-900 dark:text-gray-100">
-                  {event.organizer}
+                  {renderStringValue(event.organizer)}
                 </span>
               </div>
             </div>
@@ -278,7 +340,7 @@ export const EventDetailsModal = memo(function EventDetailsModal({
                       />
                     </svg>
                     <span className="text-gray-900 dark:text-gray-100 text-sm">
-                      {attendee}
+                      {renderStringValue(attendee)}
                     </span>
                   </div>
                 ))}
@@ -293,7 +355,7 @@ export const EventDetailsModal = memo(function EventDetailsModal({
                 Event ID
               </h3>
               <span className="text-xs text-gray-400 dark:text-gray-500 font-mono break-all">
-                {event.uid}
+                {renderStringValue(event.uid)}
               </span>
             </div>
           )}

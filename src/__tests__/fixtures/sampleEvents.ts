@@ -6,6 +6,12 @@ interface CalendarEvent {
   allDay: boolean
   rrule?: string
   isRecurring?: boolean
+  location?: string
+  description?: string
+  organizer?: string
+  attendees?: string[]
+  url?: string
+  uid?: string
 }
 
 export const SAMPLE_EVENTS: Array<CalendarEvent> = [
@@ -15,6 +21,9 @@ export const SAMPLE_EVENTS: Array<CalendarEvent> = [
     end: new Date(2025, 5, 10, 10, 0), // June 10, 2025, 10:00 AM
     allDay: false,
     isRecurring: false,
+    location: 'Conference Room A, Building 2',
+    description: 'Weekly team sync to discuss project progress and upcoming deadlines.',
+    organizer: 'team-lead@company.com',
   },
   {
     title: 'Birthday Party',
@@ -53,6 +62,9 @@ export const SAMPLE_ALL_DAY_EVENT: CalendarEvent = {
   end: new Date(2025, 5, 21), // June 21, 2025
   allDay: true,
   isRecurring: false,
+  location: 'ExCeL London, Royal Victoria Dock',
+  description: 'Annual tech conference with keynote speakers and workshops.',
+  url: 'https://example-conference.com',
 }
 
 export const SAMPLE_MULTI_DAY_EVENT: CalendarEvent = {
