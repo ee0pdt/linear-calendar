@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react'
+import { isTestMode, getCurrentDateForTesting } from '../utils/testDateUtils'
 
 export const SCROLL_OFFSET = 160 // Adjust this value based on your header height or any other offset you need
 
@@ -34,7 +35,9 @@ export function useScrollToToday({
 
   const jumpToToday = useCallback(
     (smooth = true) => {
-      const currentYear = new Date().getFullYear()
+      // Use test date if in test mode
+      const currentDate = isTestMode() ? getCurrentDateForTesting() : new Date()
+      const currentYear = currentDate.getFullYear()
 
       // Check if current year is in the loaded range
       const isCurrentYearInRange =

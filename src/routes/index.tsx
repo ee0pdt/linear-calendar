@@ -14,6 +14,7 @@ import { EventDetailsModal } from '../components/EventDetailsModal'
 import { EventSearch } from '../components/EventSearch'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useEvents } from '../hooks/useEvents'
+import { usePageRefresh } from '../hooks/usePageRefresh'
 import { SCROLL_OFFSET, useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import {
@@ -26,6 +27,7 @@ import {
   getStoredThemePreference,
   setStoredThemePreference,
 } from '../utils/storageUtils'
+import { isTestMode, getCurrentDateForTesting } from '../utils/testDateUtils'
 import type { ThemePreference } from '../utils/storageUtils'
 import type { CalendarEvent } from '../types'
 
@@ -34,6 +36,9 @@ export const Route = createFileRoute('/')({
 })
 
 export function LinearCalendar() {
+  // Use page refresh hook to force re-renders when date changes
+  const refreshKey = usePageRefresh()
+  
   const currentYear = new Date().getFullYear()
   const [dateRange, setDateRange] = useState(() => {
     // Start with current year ± 1 year for initial load
@@ -296,9 +301,16 @@ export function LinearCalendar() {
 
   return (
     <>
+      {/* Test Mode Indicator */}
+      {isTestMode() && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-black text-center py-2 z-[100] font-bold">
+          ⚠️ TEST MODE: Current date is {getCurrentDateForTesting().toLocaleDateString()} (use ?testDate=YYYY-MM-DD to change)
+        </div>
+      )}
+      
       {/* Unified layout: Mobile-first with responsive styling */}
       <div
-        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${showSettings ? 'filter blur-sm brightness-75' : ''}`}
+        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${showSettings ? 'filter blur-sm brightness-75' : ''} ${isTestMode() ? 'mt-10' : ''}`}
         aria-hidden={showSettings ? 'true' : undefined}
       >
         {/* Panel 1a: Fixed rings header */}
@@ -376,6 +388,7 @@ export function LinearCalendar() {
         <div className={`flex-1 overflow-y-auto events-panel pt-48`}>
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
             <CalendarGrid
+              key={refreshKey}
               dateRange={dateRange}
               events={events}
               todayRef={todayRef}

@@ -4,6 +4,7 @@ import {
   getUserTimezone,
   parseICSDateWithTimezone,
 } from './timezoneUtils'
+import { getCurrentDateForTesting, isTestMode } from './testDateUtils'
 
 /**
  * Generates an array of all days in a given year
@@ -87,7 +88,8 @@ export const formatDate = (date: Date) => {
  * Checks if a date is today (timezone-aware)
  */
 export const isToday = (date: Date): boolean => {
-  const today = getCurrentDateInTimezone()
+  // Use test date if in test mode
+  const today = isTestMode() ? getCurrentDateForTesting() : getCurrentDateInTimezone()
   const userTimezone = getUserTimezone()
 
   // Format both dates in the user's timezone for comparison
@@ -101,7 +103,8 @@ export const isToday = (date: Date): boolean => {
  * Checks if a date is in the past
  */
 export const isPastDay = (date: Date): boolean => {
-  const today = new Date()
+  // Use test date if in test mode
+  const today = isTestMode() ? getCurrentDateForTesting() : new Date()
   const checkDate = new Date(
     date.getFullYear(),
     date.getMonth(),
