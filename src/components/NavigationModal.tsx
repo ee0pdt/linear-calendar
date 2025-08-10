@@ -84,7 +84,10 @@ export function NavigationModal({
       aria-modal="true"
     >
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" />
+      <div 
+        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+        onClick={onClose}
+      />
 
       {/* Modal content */}
       <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-lg text-gray-900 dark:text-gray-100 z-10">

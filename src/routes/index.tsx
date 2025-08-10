@@ -46,15 +46,13 @@ export function LinearCalendar() {
     const endYear = currentYear + 1
     return { startYear, endYear }
   })
-  const [showSettings, setShowSettings] = useState(false)
-  const [showNavigation, setShowNavigation] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
+  // Modal state management - only one modal can be open at a time
+  const [activeModal, setActiveModal] = useState<'settings' | 'navigation' | 'search' | 'event-details' | null>(null)
   const [showPerformanceDashboard, setShowPerformanceDashboard] =
     useState(false)
   const [loadingStage, setLoadingStage] = useState(1)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const [showEventDetails, setShowEventDetails] = useState(false)
 
   // Performance tracking hooks
   const performanceTracking = usePerformanceTracking()
@@ -155,11 +153,11 @@ export function LinearCalendar() {
 
   const handleEventClick = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event)
-    setShowEventDetails(true)
+    setActiveModal('event-details')
   }, [])
 
   const handleCloseEventDetails = useCallback(() => {
-    setShowEventDetails(false)
+    setActiveModal(null)
     setSelectedEvent(null)
   }, [])
 
@@ -240,24 +238,24 @@ export function LinearCalendar() {
 
   // Track modal open completion
   useEffect(() => {
-    if (showSettings) {
+    if (activeModal === 'settings') {
       // Track when settings modal is fully rendered
       const timer = setTimeout(() => {
         settingsModalPerf.trackOpenComplete()
       }, 100) // Small delay to ensure DOM is updated
       return () => clearTimeout(timer)
     }
-  }, [showSettings, settingsModalPerf])
+  }, [activeModal, settingsModalPerf])
 
   useEffect(() => {
-    if (showNavigation) {
+    if (activeModal === 'navigation') {
       // Track when navigation modal is fully rendered
       const timer = setTimeout(() => {
         navigationModalPerf.trackOpenComplete()
       }, 100)
       return () => clearTimeout(timer)
     }
-  }, [showNavigation, navigationModalPerf])
+  }, [activeModal, navigationModalPerf])
 
   // Optimized progressive loading
   useEffect(() => {
@@ -310,8 +308,8 @@ export function LinearCalendar() {
       
       {/* Unified layout: Mobile-first with responsive styling */}
       <div
-        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${showSettings ? 'filter blur-sm brightness-75' : ''} ${isTestMode() ? 'mt-10' : ''}`}
-        aria-hidden={showSettings ? 'true' : undefined}
+        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${activeModal ? 'filter blur-sm brightness-75' : ''} ${isTestMode() ? 'mt-10' : ''}`}
+        aria-hidden={activeModal ? 'true' : undefined}
       >
         {/* Panel 1a: Fixed rings header */}
         <div className="fixed top-0 left-0 right-0 z-60 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
@@ -348,7 +346,7 @@ export function LinearCalendar() {
                 </button>
                 {/* Search button */}
                 <button
-                  onClick={() => setShowSearch(true)}
+                  onClick={() => setActiveModal('search')}
                   className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                   aria-label="Search events"
                   title="Search events"
@@ -359,7 +357,7 @@ export function LinearCalendar() {
                 <button
                   onClick={() => {
                     navigationModalPerf.trackOpen()
-                    setShowNavigation(true)
+                    setActiveModal('navigation')
                   }}
                   className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                   aria-label="Open navigation"
@@ -371,7 +369,7 @@ export function LinearCalendar() {
                 <button
                   onClick={() => {
                     settingsModalPerf.trackOpen()
-                    setShowSettings(true)
+                    setActiveModal('settings')
                   }}
                   className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                   aria-label="Open settings"
@@ -406,20 +404,26 @@ export function LinearCalendar() {
         </div>
       </div>
       {/* Settings Panel Modal (always rendered as sibling, never inside calendar) */}
-      {showSettings && (
+      {activeModal === 'settings' && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
         >
           {/* Overlay */}
-          <div className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" />
+          <div 
+            className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+            onClick={() => {
+              settingsModalPerf.trackClose()
+              setActiveModal(null)
+            }}
+          />
           {/* Modal content */}
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto text-gray-900 dark:text-gray-100 z-10">
             <button
               onClick={() => {
                 settingsModalPerf.trackClose()
-                setShowSettings(false)
+                setActiveModal(null)
               }}
               className="absolute top-2 right-2 p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
               aria-label="Close settings"
@@ -469,7 +473,7 @@ export function LinearCalendar() {
         </div>
       )}
       {/* Navigation Modal */}
-      {showNavigation && (
+      {activeModal === 'navigation' && (
         <NavigationModal
           currentYear={currentYear}
           dateRange={dateRange}
@@ -482,7 +486,7 @@ export function LinearCalendar() {
           }}
           onClose={() => {
             navigationModalPerf.trackClose()
-            setShowNavigation(false)
+            setActiveModal(null)
           }}
         />
       )}
@@ -496,7 +500,7 @@ export function LinearCalendar() {
       {/* Event Details Modal */}
       <EventDetailsModal
         event={selectedEvent}
-        isOpen={showEventDetails}
+        isOpen={activeModal === 'event-details'}
         onClose={handleCloseEventDetails}
       />
 
@@ -505,8 +509,8 @@ export function LinearCalendar() {
         events={events}
         onEventClick={handleEventClick}
         onScrollToEvent={scrollToEvent}
-        isVisible={showSearch}
-        onClose={() => setShowSearch(false)}
+        isVisible={activeModal === 'search'}
+        onClose={() => setActiveModal(null)}
       />
     </>
   )
