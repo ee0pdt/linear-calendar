@@ -1,17 +1,16 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { CalendarGrid } from './CalendarGrid'
-import { Header } from './Header'
 import { DayRing, WeekRing, MonthRing, YearRing } from './TimeRings'
 import { PerformanceDashboard } from './PerformanceDashboard'
 import { LoadingIndicator } from './LoadingIndicator'
+import { AutoRefreshIndicator } from './AutoRefreshIndicator'
 import { useEvents } from '../hooks/useEvents'
 import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 import type { CalendarEvent } from '../types'
-import { saveEventsToStorage } from '../utils/storageUtils'
 
 const isTestMode = () => false // Simplified for now
 
@@ -39,7 +38,10 @@ export function LinearCalendarView() {
 
   // Scroll and navigation hooks
   const calendarRef = React.useRef<HTMLDivElement>(null)
-  const { scrollToToday } = useScrollToToday(calendarRef, dateRange)
+  const { todayRef, jumpToToday } = useScrollToToday({
+    dateRange,
+    setDateRange,
+  })
   const { expandDateRange } = useInfiniteScroll(
     calendarRef,
     dateRange,
@@ -63,33 +65,6 @@ export function LinearCalendarView() {
     console.log('Component mounted')
   }, [])
 
-  const handleImportICS = useCallback(
-    (newEvents: CalendarEvent[], importDetails?: { filename?: string }) => {
-      clearEvents()
-      addEvents(newEvents)
-      // Save events to storage
-      saveEventsToStorage(newEvents, importDetails?.filename || 'imported.ics')
-    },
-    [clearEvents, addEvents],
-  )
-
-  const handleCalDAVConnect = useCallback(
-    async (credentials: {
-      appleId: string
-      appPassword: string
-      timezone?: string
-    }) => {
-      await importFromCalDAV(credentials, dateRange.startYear, dateRange.endYear)
-      // CalDAV connection handled
-    },
-    [importFromCalDAV, dateRange.startYear, dateRange.endYear],
-  )
-
-  const handleClearData = useCallback(() => {
-    clearEvents()
-    localStorage.removeItem('calendarEvents')
-    setAutoRefreshEnabled(false)
-  }, [clearEvents])
 
   const scrollToEvent = useCallback(
     (event: CalendarEvent) => {
@@ -154,7 +129,13 @@ export function LinearCalendarView() {
         const timer = setTimeout(() => {
           setLoadingStage(stage)
           if (stage === 5) {
-            setTimeout(() => setIsInitialLoading(false), 300)
+            setTimeout(() => {
+              setIsInitialLoading(false)
+              // Ensure scroll-to-today happens after calendar is fully rendered
+              setTimeout(() => {
+                jumpToToday()
+              }, 200)
+            }, 300)
           }
         }, delay)
         timers.push(timer)
@@ -162,7 +143,7 @@ export function LinearCalendarView() {
 
       return () => timers.forEach(clearTimeout)
     }
-  }, [isInitialLoading])
+  }, [isInitialLoading, jumpToToday])
 
   if (isInitialLoading) {
     return <LoadingIndicator stage={loadingStage} />
@@ -183,14 +164,40 @@ export function LinearCalendarView() {
       >
         {/* Panel 1a: Fixed rings header */}
         <div className="fixed top-0 left-0 right-0 z-60 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
-          <div className="flex items-center justify-between px-4 py-2">
-            <div className="flex items-center gap-2">
-              <DayRing size={40} />
-              <WeekRing size={40} />
-              <MonthRing size={40} />
-              <YearRing size={40} />
-            </div>
-            <div className="flex items-center gap-2">
+          {/* Time rings - centered and larger */}
+          <div className="flex justify-center gap-6 p-3 pb-4">
+            <DayRing size={56} />
+            <WeekRing size={56} />
+            <MonthRing size={56} />
+            <YearRing size={56} />
+          </div>
+        </div>
+
+        {/* Panel 1b: Fixed nav controls header */}
+        <div className="fixed top-28 left-0 right-0 z-60">
+          <div className="px-4 py-2 sm:px-6 sm:py-3">
+            <div className="flex items-center justify-end">
+              <div className="flex items-center gap-2">
+              {/* Auto-refresh indicator */}
+              <AutoRefreshIndicator
+                enabled={autoRefreshEnabled}
+                onToggle={setAutoRefreshEnabled}
+                interval={autoRefreshInterval}
+                onIntervalChange={setAutoRefreshInterval}
+                lastRefreshTime={lastRefreshTime}
+                isRefreshing={false}
+              />
+              
+              {/* Today button */}
+              <button
+                onClick={() => jumpToToday()}
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                aria-label="Jump to Today"
+                title="Jump to Today"
+              >
+                Today
+              </button>
+              
               {/* Performance Dashboard button */}
               <button
                 onClick={() => setShowPerformanceDashboard(!showPerformanceDashboard)}
@@ -256,37 +263,29 @@ export function LinearCalendarView() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Panel 1b: Import controls */}
-        <div className="mt-[52px]">
-          <Header
-            onImportICS={handleImportICS}
-            onCalDAVConnect={handleCalDAVConnect}
-            onClearData={handleClearData}
-            events={memoizedEvents}
-            isCalDAVLoading={isCalDAVLoading}
-            autoRefreshEnabled={autoRefreshEnabled}
-            setAutoRefreshEnabled={setAutoRefreshEnabled}
-            autoRefreshInterval={autoRefreshInterval}
-            setAutoRefreshInterval={setAutoRefreshInterval}
-            lastRefreshTime={lastRefreshTime}
-          />
-        </div>
 
-        {/* Panel 2: Calendar grid */}
-        <CalendarGrid
+        {/* Panel 2: Calendar grid - Scrollable container */}
+        <div 
           ref={calendarRef}
-          events={memoizedEvents}
-          scrollToToday={scrollToToday}
-          dateRange={dateRange}
-          onEventClick={(event) => {
-            // Navigate to event details route with event data
-            window.location.href = `/event/${encodeURIComponent(event.id)}?data=${encodeURIComponent(JSON.stringify(event))}`
-          }}
-        />
+          className="flex-1 overflow-y-auto events-panel pt-28"
+        >
+          <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
+            <CalendarGrid
+              events={memoizedEvents}
+              dateRange={dateRange}
+              todayRef={todayRef}
+              onEventClick={(event) => {
+                // Navigate to event details route with event data
+                window.location.href = `/event/${encodeURIComponent(event.id)}?data=${encodeURIComponent(JSON.stringify(event))}`
+              }}
+            />
+          </div>
+        </div>
       </div>
     </>
   )

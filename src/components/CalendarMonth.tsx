@@ -31,7 +31,7 @@ export const CalendarMonth = memo(function CalendarMonth({
   return (
     <div className="month-group">
       <div
-        className="sticky -top-18 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 py-2 mb-4 z-50 px-4 sm:px-6"
+        className="sticky top-[112px] bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 py-2 mb-4 z-50 px-4 sm:px-6"
         data-month={`${monthData.year}-${monthData.month}`}
       >
         <h2 className="text-xl font-bold text-gray-800 dark:text-white">
