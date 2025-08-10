@@ -1,10 +1,13 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { Link } from '@tanstack/react-router'
 import { CalendarGrid } from './CalendarGrid'
 import { DayRing, WeekRing, MonthRing, YearRing } from './TimeRings'
 import { PerformanceDashboard } from './PerformanceDashboard'
 import { LoadingIndicator } from './LoadingIndicator'
 import { AutoRefreshIndicator } from './AutoRefreshIndicator'
+import { SettingsPanel } from './SettingsPanel'
+import { NavigationModal } from './NavigationModal'
+import { EventSearch } from './EventSearch'
+import { EventDetailsModal } from './EventDetailsModal'
 import { useEvents } from '../hooks/useEvents'
 import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
@@ -24,6 +27,13 @@ export function LinearCalendarView() {
   const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false)
   const [loadingStage, setLoadingStage] = useState(1)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+  
+  // Modal states
+  const [showSettings, setShowSettings] = useState(false)
+  const [showNavigation, setShowNavigation] = useState(false) 
+  const [showSearch, setShowSearch] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [showEventDetails, setShowEventDetails] = useState(false)
 
   // Main data hooks
   const { events, addEvents, clearEvents } = useEvents()
@@ -65,6 +75,16 @@ export function LinearCalendarView() {
     console.log('Component mounted')
   }, [])
 
+  // Event handlers for modals
+  const handleEventClick = useCallback((event: CalendarEvent) => {
+    setSelectedEvent(event)
+    setShowEventDetails(true)
+  }, [])
+
+  const handleCloseEventDetails = useCallback(() => {
+    setShowEventDetails(false)
+    setSelectedEvent(null)
+  }, [])
 
   const scrollToEvent = useCallback(
     (event: CalendarEvent) => {
@@ -160,7 +180,8 @@ export function LinearCalendarView() {
       
       {/* Unified layout: Mobile-first with responsive styling */}
       <div
-        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${isTestMode() ? 'mt-10' : ''}`}
+        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${(showSettings || showNavigation || showSearch || showEventDetails) ? 'filter blur-sm brightness-75' : ''} ${isTestMode() ? 'mt-10' : ''}`}
+        aria-hidden={(showSettings || showNavigation || showSearch || showEventDetails) ? 'true' : undefined}
       >
         {/* Panel 1a: Fixed rings header */}
         <div className="fixed top-0 left-0 right-0 z-60 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
@@ -225,9 +246,8 @@ export function LinearCalendarView() {
               </button>
               
               {/* Search button */}
-              <Link
-                to="/search"
-                search={{ from: window.location.pathname }}
+              <button
+                onClick={() => setShowSearch(true)}
                 className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                 aria-label="Search events"
                 title="Search events"
@@ -235,12 +255,11 @@ export function LinearCalendarView() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-              </Link>
+              </button>
               
               {/* Navigation button */}
-              <Link
-                to="/navigation"
-                search={{ from: window.location.pathname }}
+              <button
+                onClick={() => setShowNavigation(true)}
                 className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                 aria-label="Open navigation"
                 title="Navigation"
@@ -248,12 +267,11 @@ export function LinearCalendarView() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-              </Link>
+              </button>
               
               {/* Settings button */}
-              <Link
-                to="/settings"
-                search={{ from: window.location.pathname }}
+              <button
+                onClick={() => setShowSettings(true)}
                 className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                 aria-label="Open settings"
                 title="Settings"
@@ -262,7 +280,7 @@ export function LinearCalendarView() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-              </Link>
+              </button>
               </div>
             </div>
           </div>
@@ -272,21 +290,114 @@ export function LinearCalendarView() {
         {/* Panel 2: Calendar grid - Scrollable container */}
         <div 
           ref={calendarRef}
-          className="flex-1 overflow-y-auto events-panel pt-28"
+          className="flex-1 overflow-y-auto events-panel pt-32"
         >
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
             <CalendarGrid
               events={memoizedEvents}
               dateRange={dateRange}
               todayRef={todayRef}
-              onEventClick={(event) => {
-                // Navigate to event details route with event data
-                window.location.href = `/event/${encodeURIComponent(event.id)}?data=${encodeURIComponent(JSON.stringify(event))}`
-              }}
+              onEventClick={handleEventClick}
             />
           </div>
         </div>
       </div>
+      
+      {/* Settings Modal */}
+      {showSettings && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+            onClick={() => setShowSettings(false)}
+          />
+          
+          {/* Modal content */}
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto text-gray-900 dark:text-gray-100 z-10">
+            <button
+              onClick={() => setShowSettings(false)}
+              className="absolute top-2 right-2 p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+              aria-label="Close settings"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <SettingsPanel />
+          </div>
+        </div>
+      )}
+      
+      {/* Navigation Modal */}
+      {showNavigation && (
+        <NavigationModal
+          currentYear={currentYear}
+          dateRange={dateRange}
+          onNavigateToYear={(year: number) => {
+            // Expand date range to include the target year if needed
+            if (year < dateRange.startYear || year > dateRange.endYear) {
+              setDateRange(prev => ({
+                startYear: Math.min(prev.startYear, year),
+                endYear: Math.max(prev.endYear, year)
+              }))
+            }
+            
+            // Close modal and scroll to January 1st of that year
+            setShowNavigation(false)
+            
+            // Wait for re-render then scroll to the year
+            setTimeout(() => {
+              const targetDate = new Date(year, 0, 1) // January 1st
+              const targetId = `day-${targetDate.toISOString().split('T')[0]}`
+              const element = document.getElementById(targetId)
+              if (element && calendarRef.current) {
+                const container = calendarRef.current
+                const containerRect = container.getBoundingClientRect()
+                const elementRect = element.getBoundingClientRect()
+                const offset = elementRect.top - containerRect.top + container.scrollTop
+                container.scrollTo({
+                  top: offset - 100,
+                  behavior: 'smooth',
+                })
+              }
+            }, 100)
+          }}
+          onClose={() => setShowNavigation(false)}
+        />
+      )}
+      
+      {/* Event Search Modal */}
+      <EventSearch
+        events={memoizedEvents}
+        onEventClick={handleEventClick}
+        onScrollToEvent={(event) => {
+          setShowSearch(false)
+          scrollToEvent(event)
+        }}
+        isVisible={showSearch}
+        onClose={() => setShowSearch(false)}
+      />
+      
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        event={selectedEvent}
+        isOpen={showEventDetails}
+        onClose={handleCloseEventDetails}
+      />
     </>
   )
 }
