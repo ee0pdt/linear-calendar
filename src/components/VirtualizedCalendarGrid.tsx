@@ -64,14 +64,20 @@ export const VirtualizedCalendarGrid = forwardRef<
 
   // Auto-scroll to today on mount
   useEffect(() => {
-    const today = new Date()
-    const todayString = today.toDateString()
-    const index = allDays.findIndex(d => d.toDateString() === todayString)
-    if (index !== -1) {
-      // Use instant scroll on mount for better UX
-      virtualizer.scrollToIndex(index, { align: 'start', behavior: 'auto' })
-    }
-  }, []) // Only on mount
+    // Add a small delay to ensure virtualizer is fully ready
+    const timer = setTimeout(() => {
+      const today = new Date()
+      const todayString = today.toDateString()
+      const index = allDays.findIndex(d => d.toDateString() === todayString)
+      
+      if (index !== -1 && allDays.length > 0) {
+        // Use instant scroll on mount for better UX
+        virtualizer.scrollToIndex(index, { align: 'start', behavior: 'auto' })
+      }
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [allDays, virtualizer]) // Depend on allDays and virtualizer to ensure it runs when they're ready
 
   // Get virtual items
   const virtualItems = virtualizer.getVirtualItems()

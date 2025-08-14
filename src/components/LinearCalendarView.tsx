@@ -55,10 +55,10 @@ export function LinearCalendarView() {
       // Events loaded from localStorage, hide loading immediately
       setIsLoadingEvents(false)
     } else {
-      // No events yet, show loading for max 500ms then show empty calendar
+      // No events yet, show loading for max 200ms then show empty calendar so user can see today
       const timer = setTimeout(() => {
         setIsLoadingEvents(false)
-      }, 500)
+      }, 200)
       return () => clearTimeout(timer)
     }
   }, [events.length])
