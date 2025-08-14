@@ -96,30 +96,31 @@ export function LinearCalendarView() {
 
       // Expand date range if needed
       if (eventYear < dateRange.startYear || eventYear > dateRange.endYear) {
-        expandDateRange(eventYear)
+        setDateRange(prev => ({
+          startYear: Math.min(prev.startYear, eventYear),
+          endYear: Math.max(prev.endYear, eventYear)
+        }))
         // Wait for re-render before scrolling
         setTimeout(() => {
           const eventId = `day-${eventDate.toISOString().split('T')[0]}`
           const element = document.getElementById(eventId)
-          if (element) {
+          if (element && calendarRef.current) {
             const container = calendarRef.current
-            if (container) {
-              const containerRect = container.getBoundingClientRect()
-              const elementRect = element.getBoundingClientRect()
-              const offset =
-                elementRect.top - containerRect.top + container.scrollTop
-              container.scrollTo({
-                top: offset - 100,
-                behavior: 'smooth',
-              })
-            }
+            const containerRect = container.getBoundingClientRect()
+            const elementRect = element.getBoundingClientRect()
+            const offset =
+              elementRect.top - containerRect.top + container.scrollTop
+            container.scrollTo({
+              top: offset - 100,
+              behavior: 'smooth',
+            })
           }
         }, 100)
       } else {
         // Year is already in range, scroll immediately
         const eventId = `day-${eventDate.toISOString().split('T')[0]}`
         const element = document.getElementById(eventId)
-        if (element) {
+        if (element && calendarRef.current) {
           const container = calendarRef.current
           const containerRect = container.getBoundingClientRect()
           const elementRect = element.getBoundingClientRect()
@@ -132,7 +133,7 @@ export function LinearCalendarView() {
         }
       }
     },
-    [calendarRef, dateRange, expandDateRange],
+    [calendarRef, dateRange, setDateRange],
   )
 
   const memoizedEvents = useMemo(() => events, [events])
