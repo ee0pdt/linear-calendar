@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { CalendarGrid } from './CalendarGrid'
+import { VirtualizedCalendarGrid, type VirtualizedCalendarGridHandle } from './VirtualizedCalendarGrid'
 import { DayRing, WeekRing, MonthRing, YearRing } from './TimeRings'
 import { PerformanceDashboard } from './PerformanceDashboard'
 import { LoadingIndicator } from './LoadingIndicator'
@@ -65,10 +65,16 @@ export function LinearCalendarView() {
 
   // Scroll and navigation hooks
   const calendarRef = React.useRef<HTMLDivElement>(null)
-  const { todayRef, jumpToToday } = useScrollToToday({
+  const virtualizedGridRef = React.useRef<VirtualizedCalendarGridHandle>(null)
+  const { todayRef } = useScrollToToday({
     dateRange,
     setDateRange,
   })
+  
+  // Override jumpToToday to use virtualized grid
+  const jumpToToday = useCallback(() => {
+    virtualizedGridRef.current?.scrollToToday()
+  }, [])
   useInfiniteScroll({
     onScrollNearTop: () => {
       setDateRange(prev => ({
@@ -114,8 +120,6 @@ export function LinearCalendarView() {
 
   const scrollToEvent = useCallback(
     (event: CalendarEvent) => {
-      if (!calendarRef.current) return
-
       const eventDate = new Date(event.start)
       const eventYear = eventDate.getFullYear()
 
@@ -127,51 +131,19 @@ export function LinearCalendarView() {
         }))
         // Wait for re-render before scrolling
         setTimeout(() => {
-          const eventId = `day-${eventDate.toISOString().split('T')[0]}`
-          const element = document.getElementById(eventId)
-          if (element && calendarRef.current) {
-            const container = calendarRef.current
-            const containerRect = container.getBoundingClientRect()
-            const elementRect = element.getBoundingClientRect()
-            const offset =
-              elementRect.top - containerRect.top + container.scrollTop
-            container.scrollTo({
-              top: offset - 100,
-              behavior: 'smooth',
-            })
-          }
+          virtualizedGridRef.current?.scrollToDate(eventDate)
         }, 100)
       } else {
         // Year is already in range, scroll immediately
-        const eventId = `day-${eventDate.toISOString().split('T')[0]}`
-        const element = document.getElementById(eventId)
-        if (element && calendarRef.current) {
-          const container = calendarRef.current
-          const containerRect = container.getBoundingClientRect()
-          const elementRect = element.getBoundingClientRect()
-          const offset =
-            elementRect.top - containerRect.top + container.scrollTop
-          container.scrollTo({
-            top: offset - 100,
-            behavior: 'smooth',
-          })
-        }
+        virtualizedGridRef.current?.scrollToDate(eventDate)
       }
     },
-    [calendarRef, dateRange, setDateRange],
+    [dateRange, setDateRange],
   )
 
   const memoizedEvents = useMemo(() => events, [events])
 
-  // Auto-scroll to today when calendar is ready
-  useEffect(() => {
-    // Small delay to ensure calendar is fully rendered
-    const timer = setTimeout(() => {
-      jumpToToday()
-    }, 100)
-
-    return () => clearTimeout(timer)
-  }, [jumpToToday])
+  // No need for auto-scroll here - VirtualizedCalendarGrid handles it on mount
 
 
   // Remove this blocking return - let the UI render with loading state in calendar area instead
@@ -347,11 +319,13 @@ export function LinearCalendarView() {
                 />
               </div>
             ) : (
-              <CalendarGrid
+              <VirtualizedCalendarGrid
+                ref={virtualizedGridRef}
                 events={memoizedEvents}
                 dateRange={dateRange}
                 todayRef={todayRef}
                 onEventClick={handleEventClick}
+                scrollContainerRef={calendarRef}
               />
             )}
           </div>
@@ -417,19 +391,7 @@ export function LinearCalendarView() {
             // Wait for re-render then scroll to the year
             setTimeout(() => {
               const targetDate = new Date(year, 0, 1) // January 1st
-              const targetId = `day-${targetDate.toISOString().split('T')[0]}`
-              const element = document.getElementById(targetId)
-              if (element && calendarRef.current) {
-                const container = calendarRef.current
-                const containerRect = container.getBoundingClientRect()
-                const elementRect = element.getBoundingClientRect()
-                const offset =
-                  elementRect.top - containerRect.top + container.scrollTop
-                container.scrollTo({
-                  top: offset - 100,
-                  behavior: 'smooth',
-                })
-              }
+              virtualizedGridRef.current?.scrollToDate(targetDate)
             }, 100)
           }}
           onClose={() => setShowNavigation(false)}
