@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useMemo, useRef, useEffect, useImperativeHandle, forwardRef, useState } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { generateDateRangeDays } from '../utils/dateUtils'
 import { CalendarDay } from './CalendarDay'
@@ -76,40 +76,54 @@ export const VirtualizedCalendarGrid = forwardRef<
   // Get virtual items
   const virtualItems = virtualizer.getVirtualItems()
 
-  // Track month headers that should be sticky
-  const monthHeaders = useMemo(() => {
-    const headers: Array<{ index: number; month: string; year: number }> = []
-    let lastMonth = -1
-    
-    allDays.forEach((date, index) => {
-      const month = date.getMonth()
-      const year = date.getFullYear()
-      if (month !== lastMonth || (index === 0)) {
-        headers.push({
-          index,
-          month: date.toLocaleString('default', { month: 'long' }),
-          year
-        })
-        lastMonth = month
-      }
-    })
-    
-    return headers
-  }, [allDays])
+  // State for current month header
+  const [currentMonthHeader, setCurrentMonthHeader] = useState<{
+    month: string
+    year: number
+  } | null>(null)
 
-  // Find current month for sticky header
-  const currentMonthHeader = useMemo(() => {
-    if (virtualItems.length === 0) return null
+  // Update header based on scroll position
+  useEffect(() => {
+    const scrollElement = scrollContainerRef?.current || parentRef.current
+    if (!scrollElement) return
+
+    const updateHeader = () => {
+      const scrollTop = scrollElement.scrollTop
+      const headerOffset = 128 // Height of rings + nav (pt-32 = 8rem = 128px)
+      
+      // Find the day that would be at the sticky header position
+      const targetScrollPos = scrollTop + headerOffset
+      
+      // Simple approximation: divide by estimated day height
+      const estimatedDayHeight = 60
+      const estimatedDayIndex = Math.floor(targetScrollPos / estimatedDayHeight)
+      
+      // Clamp to valid range
+      const dayIndex = Math.max(0, Math.min(estimatedDayIndex, allDays.length - 1))
+      const targetDate = allDays[dayIndex]
+      
+      if (targetDate) {
+        setCurrentMonthHeader({
+          month: targetDate.toLocaleString('default', { month: 'long' }),
+          year: targetDate.getFullYear()
+        })
+      }
+    }
+
+    // Initial update
+    updateHeader()
+
+    // Listen for scroll events
+    scrollElement.addEventListener('scroll', updateHeader, { passive: true })
     
-    const firstVisibleIndex = virtualItems[0].index
-    const currentHeader = monthHeaders.findLast(h => h.index <= firstVisibleIndex)
-    
-    return currentHeader
-  }, [virtualItems, monthHeaders])
+    return () => {
+      scrollElement.removeEventListener('scroll', updateHeader)
+    }
+  }, [allDays, scrollContainerRef])
 
   return (
     <div className="relative" style={{ height: '100%' }}>
-      {/* Sticky month header */}
+      {/* Sticky month header - positioned outside virtual container */}
       {currentMonthHeader && (
         <div className="sticky top-[-8px] bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 py-2 mb-0 z-50 px-4">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white">
@@ -117,7 +131,7 @@ export const VirtualizedCalendarGrid = forwardRef<
           </h2>
         </div>
       )}
-
+      
       {/* Virtual list container */}
       <div
         ref={parentRef}
@@ -127,7 +141,7 @@ export const VirtualizedCalendarGrid = forwardRef<
           position: 'relative',
         }}
       >
-        {/* Only render visible items */}
+        {/* Only render visible days */}
         {virtualItems.map((virtualRow) => {
           const date = allDays[virtualRow.index]
           const isToday = 
