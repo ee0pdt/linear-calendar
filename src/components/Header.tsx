@@ -1,13 +1,13 @@
 import { useRef } from 'react'
-import { AutoRefreshIndicator } from './AutoRefreshIndicator'
-import { parseICSFile } from '../utils/icsParser'
 import type { CalendarEvent } from '../types'
+import { parseICSFile } from '../utils/icsParser'
+import { AutoRefreshIndicator } from './AutoRefreshIndicator'
 
 interface HeaderProps {
-  onImportICS: (events: CalendarEvent[], importDetails?: { filename?: string }) => void
+  onImportICS: (events: Array<CalendarEvent>, importDetails?: { filename?: string }) => void
   onCalDAVConnect: (credentials: { appleId: string; appPassword: string; timezone?: string }) => Promise<void>
   onClearData: () => void
-  events: CalendarEvent[]
+  events: Array<CalendarEvent>
   isCalDAVLoading: boolean
   autoRefreshEnabled: boolean
   setAutoRefreshEnabled: (enabled: boolean) => void

@@ -14,7 +14,7 @@ SUMMARY:Test Meeting
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(1)
       expect(events[0].title).toBe('Test Meeting')
@@ -34,7 +34,7 @@ RRULE:FREQ=DAILY;COUNT=5
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(5)
 
@@ -65,7 +65,7 @@ RRULE:FREQ=WEEKLY;COUNT=3
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(3)
 
@@ -91,7 +91,7 @@ SUMMARY:All Day Event
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(1)
       expect(events[0].allDay).toBe(true)
@@ -109,7 +109,7 @@ SUMMARY:Midnight Event
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(1)
       expect(events[0].allDay).toBe(true)
@@ -127,7 +127,7 @@ RRULE:FREQ=DAILY;COUNT=3
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(3)
 
@@ -159,7 +159,7 @@ SUMMARY:2026 Event
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(1)
       expect(events[0].title).toBe('2025 Event')
@@ -188,7 +188,7 @@ SUMMARY:All Day Event
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       // Should have: 1 one-time + 2 recurring + 1 all-day = 4 events
       expect(events).toHaveLength(4)
@@ -218,7 +218,7 @@ SUMMARY:No End Date Event
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(1)
       expect(events[0].title).toBe('No End Date Event')
@@ -237,7 +237,7 @@ RRULE:FREQ=DAILY;COUNT=2
 END:VEVENT
 END:VCALENDAR`
 
-      const events = parseICSFile(icsContent, 2025)
+      const events = parseICSFile(icsContent, 2025, 2025)
 
       expect(events).toHaveLength(2)
 

@@ -1,7 +1,6 @@
 import { PROXY_URL } from '../constants'
 import { expandRecurringEvent } from './recurrenceUtils'
 import {
-  getCurrentDateInTimezone,
   parseEventDateWithTimezone,
 } from './timezoneUtils'
 import type { CalDAVCredentials, CalendarEvent } from '../types'

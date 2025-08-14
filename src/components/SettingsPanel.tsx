@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Settings2 } from 'lucide-react'
 import { useEvents } from '../hooks/useEvents'
 import { ImportControls } from './ImportControls'

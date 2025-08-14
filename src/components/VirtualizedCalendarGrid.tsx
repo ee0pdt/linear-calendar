@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect, useImperativeHandle, forwardRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { generateDateRangeDays } from '../utils/dateUtils'
 import { CalendarDay } from './CalendarDay'

@@ -10,7 +10,7 @@ export interface CalendarEvent {
   location?: string
   url?: string
   organizer?: string
-  attendees?: string[]
+  attendees?: Array<string>
   calendar?: string
   uid?: string
 }
@@ -47,3 +47,6 @@ export interface CalDAVCredentials {
   password: string
   serverUrl: string
 }
+
+// Theme Types
+export type ThemePreference = 'light' | 'dark' | 'system'

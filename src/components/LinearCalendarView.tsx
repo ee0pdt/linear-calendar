@@ -1,19 +1,19 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { VirtualizedCalendarGrid, type VirtualizedCalendarGridHandle } from './VirtualizedCalendarGrid'
-import { DayRing, WeekRing, MonthRing, YearRing } from './TimeRings'
-import { PerformanceDashboard } from './PerformanceDashboard'
-import { LoadingIndicator } from './LoadingIndicator'
-import { AutoRefreshIndicator } from './AutoRefreshIndicator'
-import { SettingsPanel } from './SettingsPanel'
-import { NavigationModal } from './NavigationModal'
-import { EventSearch } from './EventSearch'
-import { EventDetailsModal } from './EventDetailsModal'
-import { useEvents } from '../hooks/useEvents'
-import { useCalDAVImport } from '../hooks/useCalDAVImport'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
-import { useScrollToToday } from '../hooks/useScrollToToday'
+import { useCalDAVImport } from '../hooks/useCalDAVImport'
+import { useEvents } from '../hooks/useEvents'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
-import { loadEventsFromStorage } from '../utils/storageUtils'
+import { useScrollToToday } from '../hooks/useScrollToToday'
+import { AutoRefreshIndicator } from './AutoRefreshIndicator'
+import { DayRing, MonthRing, WeekRing, YearRing } from './TimeRings'
+import { EventDetailsModal } from './EventDetailsModal'
+import { EventSearch } from './EventSearch'
+import { LoadingIndicator } from './LoadingIndicator'
+import { NavigationModal } from './NavigationModal'
+import { PerformanceDashboard } from './PerformanceDashboard'
+import { SettingsPanel } from './SettingsPanel'
+import { VirtualizedCalendarGrid } from './VirtualizedCalendarGrid'
+import type { VirtualizedCalendarGridHandle } from './VirtualizedCalendarGrid'
 import type { CalendarEvent } from '../types'
 
 const isTestMode = () => false // Simplified for now
@@ -27,7 +27,7 @@ export function LinearCalendarView() {
   })
   const [showPerformanceDashboard, setShowPerformanceDashboard] =
     useState(false)
-  
+
   // Always render UI immediately - never block on localStorage
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
 
@@ -39,15 +39,8 @@ export function LinearCalendarView() {
   const [showEventDetails, setShowEventDetails] = useState(false)
 
   // Main data hooks
-  const { events, addEvents, clearEvents } = useEvents()
-  const { importFromCalDAV, isLoading: isCalDAVLoading } = useCalDAVImport(
-    (newEvents) => {
-      clearEvents()
-      addEvents(newEvents)
-    },
-    dateRange.startYear,
-    dateRange.endYear,
-  )
+  const { events } = useEvents()
+  const { isCalDAVLoading } = useCalDAVImport()
 
   // When events load or after short delay, turn off loading
   useEffect(() => {
@@ -70,33 +63,33 @@ export function LinearCalendarView() {
     dateRange,
     setDateRange,
   })
-  
+
   // Override jumpToToday to use virtualized grid
   const jumpToToday = useCallback(() => {
     virtualizedGridRef.current?.scrollToToday()
   }, [])
   useInfiniteScroll({
     onScrollNearTop: () => {
-      setDateRange(prev => ({
+      setDateRange((prev) => ({
         ...prev,
-        startYear: prev.startYear - 1
+        startYear: prev.startYear - 1,
       }))
     },
     onScrollNearBottom: () => {
-      setDateRange(prev => ({
+      setDateRange((prev) => ({
         ...prev,
-        endYear: prev.endYear + 1
+        endYear: prev.endYear + 1,
       }))
-    }
+    },
   })
 
   // Auto-refresh functionality
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false)
-  const [autoRefreshInterval, setAutoRefreshInterval] = useState(10)
+  const [autoRefreshEnabled] = useState(false)
+  const [autoRefreshInterval] = useState(10)
   const { lastRefreshTime } = useAutoRefresh(
     autoRefreshEnabled,
     autoRefreshInterval,
-    async () => {
+    () => {
       // Auto-refresh logic would go here
       console.log('Auto-refresh triggered')
     },
@@ -125,9 +118,9 @@ export function LinearCalendarView() {
 
       // Expand date range if needed
       if (eventYear < dateRange.startYear || eventYear > dateRange.endYear) {
-        setDateRange(prev => ({
+        setDateRange((prev) => ({
           startYear: Math.min(prev.startYear, eventYear),
-          endYear: Math.max(prev.endYear, eventYear)
+          endYear: Math.max(prev.endYear, eventYear),
         }))
         // Wait for re-render before scrolling
         setTimeout(() => {
@@ -145,17 +138,15 @@ export function LinearCalendarView() {
 
   // No need for auto-scroll here - VirtualizedCalendarGrid handles it on mount
 
-
   // Remove this blocking return - let the UI render with loading state in calendar area instead
 
   return (
     <>
       {/* Performance Dashboard (floating overlay) */}
-      {showPerformanceDashboard && (
-        <PerformanceDashboard
-          onClose={() => setShowPerformanceDashboard(false)}
-        />
-      )}
+      <PerformanceDashboard
+        isVisible={showPerformanceDashboard}
+        onToggle={() => setShowPerformanceDashboard(!showPerformanceDashboard)}
+      />
 
       {/* Unified layout: Mobile-first with responsive styling */}
       <div
@@ -185,7 +176,13 @@ export function LinearCalendarView() {
                 {/* Auto-refresh indicator */}
                 <AutoRefreshIndicator
                   isRefreshing={isCalDAVLoading}
-                  refreshStatus={isCalDAVLoading ? 'refreshing' : lastRefreshTime ? 'success' : 'idle'}
+                  refreshStatus={
+                    isCalDAVLoading
+                      ? 'refreshing'
+                      : lastRefreshTime
+                        ? 'success'
+                        : 'idle'
+                  }
                   lastRefreshTime={lastRefreshTime}
                   error={null}
                 />
