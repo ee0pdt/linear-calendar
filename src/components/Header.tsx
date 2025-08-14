@@ -1,11 +1,18 @@
 import { useRef } from 'react'
-import type { CalendarEvent } from '../types'
 import { parseICSFile } from '../utils/icsParser'
 import { AutoRefreshIndicator } from './AutoRefreshIndicator'
+import type { CalendarEvent } from '../types'
 
 interface HeaderProps {
-  onImportICS: (events: Array<CalendarEvent>, importDetails?: { filename?: string }) => void
-  onCalDAVConnect: (credentials: { appleId: string; appPassword: string; timezone?: string }) => Promise<void>
+  onImportICS: (
+    events: Array<CalendarEvent>,
+    importDetails?: { filename?: string },
+  ) => void
+  onCalDAVConnect: (credentials: {
+    appleId: string
+    appPassword: string
+    timezone?: string
+  }) => Promise<void>
   onClearData: () => void
   events: Array<CalendarEvent>
   isCalDAVLoading: boolean
@@ -26,7 +33,9 @@ export function Header({
 }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileImport = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (!file) return
 

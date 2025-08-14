@@ -1,10 +1,10 @@
 import { memo, useMemo } from 'react'
-import type { CalendarEvent } from '../types'
 import { useVerseOfTheDay } from '../hooks/useVerseOfTheDay'
 import { formatDate, isPastDay, isWeekend } from '../utils/dateUtils'
 import { getEventEmoji } from '../utils/emojiUtils'
 import { getEventDisplayForDate, getEventsForDate } from '../utils/eventUtils'
 import { getSchoolHolidayInfo, isSchoolHoliday } from '../utils/holidayUtils'
+import type { CalendarEvent } from '../types'
 
 interface CalendarDayProps {
   date: Date

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { MONTH_ABBREVIATIONS } from '../constants'
 
@@ -47,20 +47,22 @@ export function NavigationModal({
       if (onNavigateToMonth) {
         // Check if the selected year is in the current date range
         const isYearInRange =
-          selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
+          selectedYear >= dateRange.startYear &&
+          selectedYear <= dateRange.endYear
 
         if (!isYearInRange) {
           // If the year is not in range, expand the range to include it
           onYearChange(selectedYear)
         }
-        
+
         // Use the callback to navigate to the specific month
         onNavigateToMonth(selectedYear, monthIndex)
         onClose()
       } else {
         // Fallback to DOM-based scrolling (for non-virtualized calendar)
         const isYearInRange =
-          selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
+          selectedYear >= dateRange.startYear &&
+          selectedYear <= dateRange.endYear
 
         if (!isYearInRange) {
           onYearChange(selectedYear)
@@ -99,8 +101,8 @@ export function NavigationModal({
       aria-modal="true"
     >
       {/* Overlay */}
-      <div 
-        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+      <div
+        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50"
         onClick={onClose}
       />
 
