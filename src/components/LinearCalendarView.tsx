@@ -13,6 +13,7 @@ import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useScrollToToday } from '../hooks/useScrollToToday'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { loadEventsFromStorage } from '../utils/storageUtils'
 import type { CalendarEvent } from '../types'
 
 const isTestMode = () => false // Simplified for now
@@ -26,8 +27,9 @@ export function LinearCalendarView() {
   })
   const [showPerformanceDashboard, setShowPerformanceDashboard] =
     useState(false)
-  const [loadingStage, setLoadingStage] = useState(1)
-  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  
+  // Always render UI immediately - never block on localStorage
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true)
 
   // Modal states
   const [showSettings, setShowSettings] = useState(false)
@@ -46,6 +48,20 @@ export function LinearCalendarView() {
     dateRange.startYear,
     dateRange.endYear,
   )
+
+  // When events load or after short delay, turn off loading
+  useEffect(() => {
+    if (events.length > 0) {
+      // Events loaded from localStorage, hide loading immediately
+      setIsLoadingEvents(false)
+    } else {
+      // No events yet, show loading for max 500ms then show empty calendar
+      const timer = setTimeout(() => {
+        setIsLoadingEvents(false)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [events.length])
 
   // Scroll and navigation hooks
   const calendarRef = React.useRef<HTMLDivElement>(null)
@@ -147,40 +163,18 @@ export function LinearCalendarView() {
 
   const memoizedEvents = useMemo(() => events, [events])
 
-  // Optimized progressive loading
+  // Auto-scroll to today when calendar is ready
   useEffect(() => {
-    if (isInitialLoading) {
-      const timers: NodeJS.Timeout[] = []
-      const stages = [
-        { stage: 2, delay: 300 },
-        { stage: 3, delay: 600 },
-        { stage: 4, delay: 900 },
-        { stage: 5, delay: 1200 },
-      ]
+    // Small delay to ensure calendar is fully rendered
+    const timer = setTimeout(() => {
+      jumpToToday()
+    }, 100)
 
-      stages.forEach(({ stage, delay }) => {
-        const timer = setTimeout(() => {
-          setLoadingStage(stage)
-          if (stage === 5) {
-            setTimeout(() => {
-              setIsInitialLoading(false)
-              // Ensure scroll-to-today happens after calendar is fully rendered
-              setTimeout(() => {
-                jumpToToday()
-              }, 200)
-            }, 300)
-          }
-        }, delay)
-        timers.push(timer)
-      })
+    return () => clearTimeout(timer)
+  }, [jumpToToday])
 
-      return () => timers.forEach(clearTimeout)
-    }
-  }, [isInitialLoading, jumpToToday])
 
-  if (isInitialLoading) {
-    return <LoadingIndicator stage={loadingStage} />
-  }
+  // Remove this blocking return - let the UI render with loading state in calendar area instead
 
   return (
     <>
@@ -218,12 +212,10 @@ export function LinearCalendarView() {
               <div className="flex items-center gap-2">
                 {/* Auto-refresh indicator */}
                 <AutoRefreshIndicator
-                  enabled={autoRefreshEnabled}
-                  onToggle={setAutoRefreshEnabled}
-                  interval={autoRefreshInterval}
-                  onIntervalChange={setAutoRefreshInterval}
+                  isRefreshing={isCalDAVLoading}
+                  refreshStatus={isCalDAVLoading ? 'refreshing' : lastRefreshTime ? 'success' : 'idle'}
                   lastRefreshTime={lastRefreshTime}
-                  isRefreshing={false}
+                  error={null}
                 />
 
                 {/* Today button */}
@@ -346,12 +338,22 @@ export function LinearCalendarView() {
           className="flex-1 overflow-y-auto events-panel pt-32"
         >
           <div className="px-2 sm:px-6 sm:max-w-4xl sm:mx-auto">
-            <CalendarGrid
-              events={memoizedEvents}
-              dateRange={dateRange}
-              todayRef={todayRef}
-              onEventClick={handleEventClick}
-            />
+            {isLoadingEvents ? (
+              <div className="flex items-center justify-center py-20">
+                <LoadingIndicator
+                  isLoading={true}
+                  loadingText="Loading calendar..."
+                  showSpinner={true}
+                />
+              </div>
+            ) : (
+              <CalendarGrid
+                events={memoizedEvents}
+                dateRange={dateRange}
+                todayRef={todayRef}
+                onEventClick={handleEventClick}
+              />
+            )}
           </div>
         </div>
       </div>
