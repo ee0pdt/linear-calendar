@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { MONTH_ABBREVIATIONS } from '../constants'
 
@@ -7,6 +7,7 @@ interface NavigationModalProps {
   onYearChange: (year: number) => void
   onClose: () => void
   dateRange: { startYear: number; endYear: number }
+  onNavigateToMonth?: (year: number, month: number) => void
 }
 
 export function NavigationModal({
@@ -14,6 +15,7 @@ export function NavigationModal({
   onYearChange,
   onClose,
   dateRange,
+  onNavigateToMonth,
 }: NavigationModalProps) {
   const [selectedYear, setSelectedYear] = useState(currentYear)
 
@@ -41,23 +43,37 @@ export function NavigationModal({
 
   const handleMonthClick = useCallback(
     (monthIndex: number) => {
-      // Check if the selected year is in the current date range
-      const isYearInRange =
-        selectedYear >= dateRange.startYear && selectedYear <= dateRange.endYear
+      // Use the navigation callback if provided (for virtualized calendar)
+      if (onNavigateToMonth) {
+        // Check if the selected year is in the current date range
+        const isYearInRange =
+          selectedYear >= dateRange.startYear &&
+          selectedYear <= dateRange.endYear
 
-      if (!isYearInRange) {
-        // If the year is not in range, expand the range to include it
-        onYearChange(selectedYear)
+        if (!isYearInRange) {
+          // If the year is not in range, expand the range to include it
+          onYearChange(selectedYear)
+        }
 
-        // Wait for the component to re-render, then scroll
-        setTimeout(() => {
-          scrollToMonth(monthIndex)
-        }, 100)
+        // Use the callback to navigate to the specific month
+        onNavigateToMonth(selectedYear, monthIndex)
+        onClose()
       } else {
-        // Year is already in range, just scroll
-        scrollToMonth(monthIndex)
+        // Fallback to DOM-based scrolling (for non-virtualized calendar)
+        const isYearInRange =
+          selectedYear >= dateRange.startYear &&
+          selectedYear <= dateRange.endYear
+
+        if (!isYearInRange) {
+          onYearChange(selectedYear)
+          setTimeout(() => {
+            scrollToMonth(monthIndex)
+          }, 100)
+        } else {
+          scrollToMonth(monthIndex)
+        }
+        onClose()
       }
-      onClose()
     },
     [
       selectedYear,
@@ -66,6 +82,7 @@ export function NavigationModal({
       onYearChange,
       onClose,
       scrollToMonth,
+      onNavigateToMonth,
     ],
   )
 
@@ -84,8 +101,8 @@ export function NavigationModal({
       aria-modal="true"
     >
       {/* Overlay */}
-      <div 
-        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+      <div
+        className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50"
         onClick={onClose}
       />
 

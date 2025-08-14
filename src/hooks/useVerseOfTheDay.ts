@@ -36,7 +36,7 @@ export function useVerseOfTheDay() {
           JSON.stringify({ date: today, verse: newVerse }),
         )
       })
-      .catch((err) => {
+      .catch(() => {
         setError('Failed to load verse of the day.')
       })
       .finally(() => setLoading(false))

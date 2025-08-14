@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { EventSearch } from '../../components/EventSearch'
 import type { CalendarEvent } from '../../types'
 
-const mockEvents: CalendarEvent[] = [
+const mockEvents: Array<CalendarEvent> = [
   {
     title: 'Quarterly Planning Session',
     start: new Date(2025, 5, 10, 9, 0),

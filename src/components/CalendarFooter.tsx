@@ -1,10 +1,5 @@
-import { useState, useEffect } from 'react'
-import {
-  getStoredThemePreference,
-  setStoredThemePreference,
-} from '../utils/storageUtils'
-import type { ThemePreference } from '../utils/storageUtils'
 import type { ReactNode } from 'react'
+import type { ThemePreference } from '../types'
 
 interface CalendarFooterProps {
   currentYear: number

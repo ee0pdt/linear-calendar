@@ -9,7 +9,6 @@ interface AutoRefreshIndicatorProps {
 }
 
 export function AutoRefreshIndicator({
-  isRefreshing,
   refreshStatus,
   lastRefreshTime,
   error,

@@ -1,10 +1,10 @@
 import { memo, useMemo } from 'react'
+import { useVerseOfTheDay } from '../hooks/useVerseOfTheDay'
 import { formatDate, isPastDay, isWeekend } from '../utils/dateUtils'
-import { getSchoolHolidayInfo, isSchoolHoliday } from '../utils/holidayUtils'
 import { getEventEmoji } from '../utils/emojiUtils'
 import { getEventDisplayForDate, getEventsForDate } from '../utils/eventUtils'
+import { getSchoolHolidayInfo, isSchoolHoliday } from '../utils/holidayUtils'
 import type { CalendarEvent } from '../types'
-import { useVerseOfTheDay } from '../hooks/useVerseOfTheDay'
 
 interface CalendarDayProps {
   date: Date
@@ -72,6 +72,7 @@ export const CalendarDay = memo(function CalendarDay({
   return (
     <div
       ref={isTodayProp ? todayRef : undefined}
+      id={`day-${date.toISOString().split('T')[0]}`} // ID for scroll targeting
       data-date={date.toISOString().split('T')[0]} // YYYY-MM-DD format for easy targeting
       className={`day-entry border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors relative
         ${isTodayProp ? 'today-highlight bg-blue-50 dark:bg-blue-900 font-bold z-0' : ''}

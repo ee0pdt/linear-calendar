@@ -9,7 +9,7 @@ interface CalendarEvent {
   location?: string
   description?: string
   organizer?: string
-  attendees?: string[]
+  attendees?: Array<string>
   url?: string
   uid?: string
 }
