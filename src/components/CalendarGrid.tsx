@@ -40,7 +40,7 @@ export function CalendarGrid({
   )
 
   return (
-    <div className="day-list">
+    <div className="space-y-0">
       {Object.entries(monthGroups).map(([monthKey, daysInMonth]) => (
         <CalendarMonth
           key={monthKey}

@@ -24,13 +24,14 @@ export function LinearCalendarView() {
     const endYear = currentYear + 1
     return { startYear, endYear }
   })
-  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false)
+  const [showPerformanceDashboard, setShowPerformanceDashboard] =
+    useState(false)
   const [loadingStage, setLoadingStage] = useState(1)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
-  
+
   // Modal states
   const [showSettings, setShowSettings] = useState(false)
-  const [showNavigation, setShowNavigation] = useState(false) 
+  const [showNavigation, setShowNavigation] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [showEventDetails, setShowEventDetails] = useState(false)
@@ -105,7 +106,8 @@ export function LinearCalendarView() {
             if (container) {
               const containerRect = container.getBoundingClientRect()
               const elementRect = element.getBoundingClientRect()
-              const offset = elementRect.top - containerRect.top + container.scrollTop
+              const offset =
+                elementRect.top - containerRect.top + container.scrollTop
               container.scrollTo({
                 top: offset - 100,
                 behavior: 'smooth',
@@ -121,7 +123,8 @@ export function LinearCalendarView() {
           const container = calendarRef.current
           const containerRect = container.getBoundingClientRect()
           const elementRect = element.getBoundingClientRect()
-          const offset = elementRect.top - containerRect.top + container.scrollTop
+          const offset =
+            elementRect.top - containerRect.top + container.scrollTop
           container.scrollTo({
             top: offset - 100,
             behavior: 'smooth',
@@ -177,11 +180,15 @@ export function LinearCalendarView() {
           onClose={() => setShowPerformanceDashboard(false)}
         />
       )}
-      
+
       {/* Unified layout: Mobile-first with responsive styling */}
       <div
-        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${(showSettings || showNavigation || showSearch || showEventDetails) ? 'filter blur-sm brightness-75' : ''} ${isTestMode() ? 'mt-10' : ''}`}
-        aria-hidden={(showSettings || showNavigation || showSearch || showEventDetails) ? 'true' : undefined}
+        className={`h-screen flex flex-col bg-white dark:bg-gray-900 transition-filter duration-300 ${showSettings || showNavigation || showSearch || showEventDetails ? 'filter blur-sm brightness-75' : ''} ${isTestMode() ? 'mt-10' : ''}`}
+        aria-hidden={
+          showSettings || showNavigation || showSearch || showEventDetails
+            ? 'true'
+            : undefined
+        }
       >
         {/* Panel 1a: Fixed rings header */}
         <div className="fixed top-0 left-0 right-0 z-60 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
@@ -196,99 +203,135 @@ export function LinearCalendarView() {
 
         {/* Panel 1b: Fixed nav controls header */}
         <div className="fixed top-28 left-0 right-0 z-60">
-          <div className="px-4 py-2 sm:px-6 sm:py-3">
+          <div className="px-6 py-3">
             <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
-              {/* Auto-refresh indicator */}
-              <AutoRefreshIndicator
-                enabled={autoRefreshEnabled}
-                onToggle={setAutoRefreshEnabled}
-                interval={autoRefreshInterval}
-                onIntervalChange={setAutoRefreshInterval}
-                lastRefreshTime={lastRefreshTime}
-                isRefreshing={false}
-              />
-              
-              {/* Today button */}
-              <button
-                onClick={() => jumpToToday()}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
-                aria-label="Jump to Today"
-                title="Jump to Today"
-              >
-                Today
-              </button>
-              
-              {/* Performance Dashboard button */}
-              <button
-                onClick={() => setShowPerformanceDashboard(!showPerformanceDashboard)}
-                className={`p-2 rounded-lg transition-colors ${
-                  showPerformanceDashboard
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
-                } cursor-pointer`}
-                aria-label="Toggle performance dashboard"
-                title="Performance Dashboard"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                {/* Auto-refresh indicator */}
+                <AutoRefreshIndicator
+                  enabled={autoRefreshEnabled}
+                  onToggle={setAutoRefreshEnabled}
+                  interval={autoRefreshInterval}
+                  onIntervalChange={setAutoRefreshInterval}
+                  lastRefreshTime={lastRefreshTime}
+                  isRefreshing={false}
+                />
+
+                {/* Today button */}
+                <button
+                  onClick={() => jumpToToday()}
+                  className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Jump to Today"
+                  title="Jump to Today"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </button>
-              
-              {/* Search button */}
-              <button
-                onClick={() => setShowSearch(true)}
-                className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
-                aria-label="Search events"
-                title="Search events"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-              
-              {/* Navigation button */}
-              <button
-                onClick={() => setShowNavigation(true)}
-                className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
-                aria-label="Open navigation"
-                title="Navigation"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </button>
-              
-              {/* Settings button */}
-              <button
-                onClick={() => setShowSettings(true)}
-                className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
-                aria-label="Open settings"
-                title="Settings"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
+                  Today
+                </button>
+
+                {/* Performance Dashboard button */}
+                {/* <button
+                  onClick={() =>
+                    setShowPerformanceDashboard(!showPerformanceDashboard)
+                  }
+                  className={`p-2 rounded-lg transition-colors ${
+                    showPerformanceDashboard
+                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  } cursor-pointer`}
+                  aria-label="Toggle performance dashboard"
+                  title="Performance Dashboard"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                </button> */}
+
+                {/* Search button */}
+                <button
+                  onClick={() => setShowSearch(true)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Search events"
+                  title="Search events"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
+
+                {/* Navigation button */}
+                <button
+                  onClick={() => setShowNavigation(true)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Open navigation"
+                  title="Navigation"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </button>
+
+                {/* Settings button */}
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Open settings"
+                  title="Settings"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-
         {/* Panel 2: Calendar grid - Scrollable container */}
-        <div 
+        <div
           ref={calendarRef}
           className="flex-1 overflow-y-auto events-panel pt-32"
         >
@@ -302,7 +345,7 @@ export function LinearCalendarView() {
           </div>
         </div>
       </div>
-      
+
       {/* Settings Modal */}
       {showSettings && (
         <div
@@ -311,11 +354,11 @@ export function LinearCalendarView() {
           aria-modal="true"
         >
           {/* Overlay */}
-          <div 
-            className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50" 
+          <div
+            className="absolute inset-0 bg-black opacity-30 dark:bg-black dark:opacity-50"
             onClick={() => setShowSettings(false)}
           />
-          
+
           {/* Modal content */}
           <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto text-gray-900 dark:text-gray-100 z-10">
             <button
@@ -341,7 +384,7 @@ export function LinearCalendarView() {
           </div>
         </div>
       )}
-      
+
       {/* Navigation Modal */}
       {showNavigation && (
         <NavigationModal
@@ -350,15 +393,15 @@ export function LinearCalendarView() {
           onNavigateToYear={(year: number) => {
             // Expand date range to include the target year if needed
             if (year < dateRange.startYear || year > dateRange.endYear) {
-              setDateRange(prev => ({
+              setDateRange((prev) => ({
                 startYear: Math.min(prev.startYear, year),
-                endYear: Math.max(prev.endYear, year)
+                endYear: Math.max(prev.endYear, year),
               }))
             }
-            
+
             // Close modal and scroll to January 1st of that year
             setShowNavigation(false)
-            
+
             // Wait for re-render then scroll to the year
             setTimeout(() => {
               const targetDate = new Date(year, 0, 1) // January 1st
@@ -368,7 +411,8 @@ export function LinearCalendarView() {
                 const container = calendarRef.current
                 const containerRect = container.getBoundingClientRect()
                 const elementRect = element.getBoundingClientRect()
-                const offset = elementRect.top - containerRect.top + container.scrollTop
+                const offset =
+                  elementRect.top - containerRect.top + container.scrollTop
                 container.scrollTo({
                   top: offset - 100,
                   behavior: 'smooth',
@@ -379,7 +423,7 @@ export function LinearCalendarView() {
           onClose={() => setShowNavigation(false)}
         />
       )}
-      
+
       {/* Event Search Modal */}
       <EventSearch
         events={memoizedEvents}
@@ -391,7 +435,7 @@ export function LinearCalendarView() {
         isVisible={showSearch}
         onClose={() => setShowSearch(false)}
       />
-      
+
       {/* Event Details Modal */}
       <EventDetailsModal
         event={selectedEvent}
