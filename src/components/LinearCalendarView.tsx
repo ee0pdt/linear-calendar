@@ -376,7 +376,7 @@ export function LinearCalendarView() {
         <NavigationModal
           currentYear={currentYear}
           dateRange={dateRange}
-          onNavigateToYear={(year: number) => {
+          onYearChange={(year: number) => {
             // Expand date range to include the target year if needed
             if (year < dateRange.startYear || year > dateRange.endYear) {
               setDateRange((prev) => ({
@@ -384,15 +384,24 @@ export function LinearCalendarView() {
                 endYear: Math.max(prev.endYear, year),
               }))
             }
-
-            // Close modal and scroll to January 1st of that year
-            setShowNavigation(false)
-
-            // Wait for re-render then scroll to the year
-            setTimeout(() => {
-              const targetDate = new Date(year, 0, 1) // January 1st
+          }}
+          onNavigateToMonth={(year: number, monthIndex: number) => {
+            // Expand date range if needed
+            if (year < dateRange.startYear || year > dateRange.endYear) {
+              setDateRange((prev) => ({
+                startYear: Math.min(prev.startYear, year),
+                endYear: Math.max(prev.endYear, year),
+              }))
+              // Wait for re-render
+              setTimeout(() => {
+                const targetDate = new Date(year, monthIndex, 1)
+                virtualizedGridRef.current?.scrollToDate(targetDate)
+              }, 100)
+            } else {
+              // Year is in range, scroll immediately
+              const targetDate = new Date(year, monthIndex, 1)
               virtualizedGridRef.current?.scrollToDate(targetDate)
-            }, 100)
+            }
           }}
           onClose={() => setShowNavigation(false)}
         />
