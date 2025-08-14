@@ -72,6 +72,7 @@ export const CalendarDay = memo(function CalendarDay({
   return (
     <div
       ref={isTodayProp ? todayRef : undefined}
+      id={`day-${date.toISOString().split('T')[0]}`} // ID for scroll targeting
       data-date={date.toISOString().split('T')[0]} // YYYY-MM-DD format for easy targeting
       className={`day-entry border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors relative
         ${isTodayProp ? 'today-highlight bg-blue-50 dark:bg-blue-900 font-bold z-0' : ''}

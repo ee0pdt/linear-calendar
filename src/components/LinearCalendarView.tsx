@@ -53,11 +53,20 @@ export function LinearCalendarView() {
     dateRange,
     setDateRange,
   })
-  const { expandDateRange } = useInfiniteScroll(
-    calendarRef,
-    dateRange,
-    setDateRange,
-  )
+  useInfiniteScroll({
+    onScrollNearTop: () => {
+      setDateRange(prev => ({
+        ...prev,
+        startYear: prev.startYear - 1
+      }))
+    },
+    onScrollNearBottom: () => {
+      setDateRange(prev => ({
+        ...prev,
+        endYear: prev.endYear + 1
+      }))
+    }
+  })
 
   // Auto-refresh functionality
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false)
