@@ -76,50 +76,23 @@ export const VirtualizedCalendarGrid = forwardRef<
   // Get virtual items
   const virtualItems = virtualizer.getVirtualItems()
 
-  // State for current month header
-  const [currentMonthHeader, setCurrentMonthHeader] = useState<{
-    month: string
-    year: number
-  } | null>(null)
-
-  // Update header based on scroll position
-  useEffect(() => {
-    const scrollElement = scrollContainerRef?.current || parentRef.current
-    if (!scrollElement) return
-
-    const updateHeader = () => {
-      const scrollTop = scrollElement.scrollTop
-      const headerOffset = 128 // Height of rings + nav (pt-32 = 8rem = 128px)
-      
-      // Find the day that would be at the sticky header position
-      const targetScrollPos = scrollTop + headerOffset
-      
-      // Simple approximation: divide by estimated day height
-      const estimatedDayHeight = 60
-      const estimatedDayIndex = Math.floor(targetScrollPos / estimatedDayHeight)
-      
-      // Clamp to valid range
-      const dayIndex = Math.max(0, Math.min(estimatedDayIndex, allDays.length - 1))
-      const targetDate = allDays[dayIndex]
-      
-      if (targetDate) {
-        setCurrentMonthHeader({
-          month: targetDate.toLocaleString('default', { month: 'long' }),
-          year: targetDate.getFullYear()
-        })
-      }
-    }
-
-    // Initial update
-    updateHeader()
-
-    // Listen for scroll events
-    scrollElement.addEventListener('scroll', updateHeader, { passive: true })
+  // Find current month header - look at middle of visible range instead of first item
+  const currentMonthHeader = useMemo(() => {
+    if (virtualItems.length === 0) return null
     
-    return () => {
-      scrollElement.removeEventListener('scroll', updateHeader)
+    // Look at the item that's roughly in the middle of the visible range
+    // This accounts for the header offset better
+    const middleIndex = Math.floor(virtualItems.length / 3) // Use first third instead of very first
+    const targetItem = virtualItems[middleIndex] || virtualItems[0]
+    const targetDate = allDays[targetItem.index]
+    
+    if (!targetDate) return null
+    
+    return {
+      month: targetDate.toLocaleString('default', { month: 'long' }),
+      year: targetDate.getFullYear()
     }
-  }, [allDays, scrollContainerRef])
+  }, [virtualItems, allDays])
 
   return (
     <div className="relative" style={{ height: '100%' }}>
