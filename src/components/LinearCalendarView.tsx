@@ -39,7 +39,7 @@ export function LinearCalendarView() {
   const [showEventDetails, setShowEventDetails] = useState(false)
 
   // Main data hooks
-  const { events } = useEvents()
+  const { events, setEvents } = useEvents()
   const { isCalDAVLoading } = useCalDAVImport()
 
   // When events load or after short delay, turn off loading
@@ -84,15 +84,13 @@ export function LinearCalendarView() {
   })
 
   // Auto-refresh functionality
-  const [autoRefreshEnabled] = useState(false)
-  const [autoRefreshInterval] = useState(10)
-  const { lastRefreshTime } = useAutoRefresh(
-    autoRefreshEnabled,
-    autoRefreshInterval,
-    () => {
-      // Auto-refresh logic would go here
-      console.log('Auto-refresh triggered')
+  const { lastRefreshTime, isRefreshing, refreshStatus, error } = useAutoRefresh(
+    (newEvents, fileName) => {
+      console.log('Auto-refresh triggered:', fileName, newEvents.length, 'events')
+      setEvents(newEvents, fileName)
     },
+    dateRange.startYear,
+    dateRange.endYear,
   )
 
   // Track initial mount timing
@@ -175,16 +173,10 @@ export function LinearCalendarView() {
               <div className="flex items-center gap-2">
                 {/* Auto-refresh indicator */}
                 <AutoRefreshIndicator
-                  isRefreshing={isCalDAVLoading}
-                  refreshStatus={
-                    isCalDAVLoading
-                      ? 'refreshing'
-                      : lastRefreshTime
-                        ? 'success'
-                        : 'idle'
-                  }
+                  isRefreshing={isRefreshing || isCalDAVLoading}
+                  refreshStatus={refreshStatus}
                   lastRefreshTime={lastRefreshTime}
-                  error={null}
+                  error={error}
                 />
 
                 {/* Today button */}

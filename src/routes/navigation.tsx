@@ -48,7 +48,7 @@ function NavigationRoute() {
         <NavigationModal
           currentYear={currentYear}
           dateRange={dateRange}
-          onNavigateToYear={handleNavigateToYear}
+          onYearChange={handleNavigateToYear}
           onClose={handleClose}
         />
       </div>

@@ -26,9 +26,6 @@ interface HeaderProps {
 export function Header({
   onImportICS,
   autoRefreshEnabled,
-  setAutoRefreshEnabled,
-  autoRefreshInterval,
-  setAutoRefreshInterval,
   lastRefreshTime,
 }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -71,10 +68,8 @@ export function Header({
 
         {/* Auto-refresh indicator */}
         <AutoRefreshIndicator
-          enabled={autoRefreshEnabled}
-          onToggle={setAutoRefreshEnabled}
-          interval={autoRefreshInterval}
-          onIntervalChange={setAutoRefreshInterval}
+          isRefreshing={false}
+          refreshStatus={autoRefreshEnabled ? 'success' : 'idle'}
           lastRefreshTime={lastRefreshTime}
         />
       </div>

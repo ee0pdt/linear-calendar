@@ -1,10 +1,5 @@
 import type { Holiday } from './holidayUtils'
 
-interface OxfordshireHolidayPeriod {
-  name: string
-  start: string
-  end: string
-}
 
 /**
  * Fetches school holidays for Oxfordshire from the official website
@@ -74,24 +69,7 @@ export const fetchDynamicOxfordshireHolidays = async (
   }
 }
 
-/**
- * Parses date string from various formats into [month, day] format
- */
-const parseHolidayDate = (dateString: string): [number, number] => {
-  const date = new Date(dateString)
-  return [date.getMonth() + 1, date.getDate()]
-}
 
-/**
- * Converts external holiday format to internal Holiday format
- */
-const convertToHoliday = (period: OxfordshireHolidayPeriod): Holiday => {
-  return {
-    name: period.name,
-    start: parseHolidayDate(period.start),
-    end: parseHolidayDate(period.end),
-  }
-}
 
 export default {
   fetchOxfordshireHolidays,
