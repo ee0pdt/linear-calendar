@@ -6,17 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `npm run dev` - Start development server on port 3000
 - `npm run build` - Build for production (runs Vite build + TypeScript compilation)
-- `npm run test` - Run Vitest tests
+- `npm run test` - Run Vitest unit tests
+- `npm run test:e2e` - Run Playwright end-to-end tests
+- `npm run test:e2e:ui` - Run E2E tests with interactive UI
+- `npm run test:all` - Run both unit and E2E tests
 - `npm run lint` - Run ESLint
 - `npm run format` - Run Prettier
 - `npm run check` - Auto-fix with Prettier and ESLint
 
 **IMPORTANT: Testing Requirements**
 
-- **Always run tests before committing**: Use `npm run test` to ensure all tests pass
+- **Always run tests before committing**: Use `npm run test:all` to ensure both unit and E2E tests pass
 - **Add tests for new functionality**: When adding features or fixing bugs, include appropriate test coverage
 - **Update existing tests**: When modifying components or hooks, ensure tests reflect the changes
-- **Test both unit and integration**: Tests are located in `src/__tests__/` with subdirectories for `components/`, `hooks/`, `utils/`, and `integration/`
+- **Test both unit and E2E**: Unit tests in `src/__tests__/`, E2E tests in `tests/` directory
+- **Critical user journeys**: E2E tests cover navigation, events, performance, mobile, and print workflows
 
 ## Git Workflow and Branch Management
 
