@@ -49,7 +49,17 @@ export const VirtualizedCalendarGrid = forwardRef<
       const dateString = date.toDateString()
       const index = allDays.findIndex(d => d.toDateString() === dateString)
       if (index !== -1) {
-        virtualizer.scrollToIndex(index, { align: 'start', behavior: 'smooth' })
+        console.log(`📍 Scrolling to date: ${dateString}, index: ${index} of ${allDays.length} total days`)
+        console.log(`📅 Target date: ${dateString}, All days start: ${allDays[0]?.toDateString()}, end: ${allDays[allDays.length-1]?.toDateString()}`)
+        
+        // Use TanStack Virtual's scrollToIndex with custom offset
+        // This should handle the virtual positioning correctly
+        virtualizer.scrollToIndex(index, { 
+          align: 'start',
+          behavior: 'smooth'
+        })
+      } else {
+        console.warn(`❌ Date not found in range: ${dateString}`)
       }
     },
     scrollToToday: () => {
@@ -57,7 +67,16 @@ export const VirtualizedCalendarGrid = forwardRef<
       const todayString = today.toDateString()
       const index = allDays.findIndex(d => d.toDateString() === todayString)
       if (index !== -1) {
-        virtualizer.scrollToIndex(index, { align: 'start', behavior: 'smooth' })
+        console.log(`🏠 Scrolling to today: ${todayString}, index: ${index} of ${allDays.length} total days`)
+        console.log(`📅 Today: ${todayString}, All days start: ${allDays[0]?.toDateString()}, end: ${allDays[allDays.length-1]?.toDateString()}`)
+        
+        // Use TanStack Virtual for accurate positioning
+        virtualizer.scrollToIndex(index, { 
+          align: 'start',
+          behavior: 'smooth'
+        })
+      } else {
+        console.warn(`❌ Today not found in range: ${todayString}`)
       }
     }
   }), [allDays, virtualizer])
@@ -71,13 +90,16 @@ export const VirtualizedCalendarGrid = forwardRef<
       const index = allDays.findIndex(d => d.toDateString() === todayString)
       
       if (index !== -1 && allDays.length > 0) {
-        // Use instant scroll on mount for better UX
-        virtualizer.scrollToIndex(index, { align: 'start', behavior: 'auto' })
+        console.log(`🚀 Initial scroll to today: ${todayString}, index: ${index}`)
+        virtualizer.scrollToIndex(index, { 
+          align: 'start', 
+          behavior: 'auto' 
+        })
       }
     }, 100)
     
     return () => clearTimeout(timer)
-  }, [allDays, virtualizer]) // Depend on allDays and virtualizer to ensure it runs when they're ready
+  }, [allDays, virtualizer])
 
   // Get virtual items
   const virtualItems = virtualizer.getVirtualItems()
