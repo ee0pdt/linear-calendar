@@ -49,17 +49,10 @@ export const VirtualizedCalendarGrid = forwardRef<
       const dateString = date.toDateString()
       const index = allDays.findIndex(d => d.toDateString() === dateString)
       if (index !== -1) {
-        console.log(`📍 Scrolling to date: ${dateString}, index: ${index} of ${allDays.length} total days`)
-        console.log(`📅 Target date: ${dateString}, All days start: ${allDays[0]?.toDateString()}, end: ${allDays[allDays.length-1]?.toDateString()}`)
-        
-        // Use TanStack Virtual's scrollToIndex with custom offset
-        // This should handle the virtual positioning correctly
         virtualizer.scrollToIndex(index, { 
           align: 'start',
           behavior: 'smooth'
         })
-      } else {
-        console.warn(`❌ Date not found in range: ${dateString}`)
       }
     },
     scrollToToday: () => {
@@ -67,16 +60,26 @@ export const VirtualizedCalendarGrid = forwardRef<
       const todayString = today.toDateString()
       const index = allDays.findIndex(d => d.toDateString() === todayString)
       if (index !== -1) {
-        console.log(`🏠 Scrolling to today: ${todayString}, index: ${index} of ${allDays.length} total days`)
-        console.log(`📅 Today: ${todayString}, All days start: ${allDays[0]?.toDateString()}, end: ${allDays[allDays.length-1]?.toDateString()}`)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         
-        // Use TanStack Virtual for accurate positioning
         virtualizer.scrollToIndex(index, { 
           align: 'start',
           behavior: 'smooth'
         })
-      } else {
-        console.warn(`❌ Today not found in range: ${todayString}`)
+        
+        // On mobile, add fallback check after scroll attempt
+        if (isMobile) {
+          setTimeout(() => {
+            const actualPosition = virtualizer.scrollElement?.scrollTop || 0
+            const expectedItem = virtualizer.getVirtualItems().find(item => item.index === index)
+            if (!expectedItem || Math.abs(actualPosition - expectedItem.start) > 100) {
+              virtualizer.scrollToIndex(index, { 
+                align: 'start',
+                behavior: 'auto' // Use instant scroll for retry
+              })
+            }
+          }, 500)
+        }
       }
     }
   }), [allDays, virtualizer])
@@ -90,7 +93,6 @@ export const VirtualizedCalendarGrid = forwardRef<
       const index = allDays.findIndex(d => d.toDateString() === todayString)
       
       if (index !== -1 && allDays.length > 0) {
-        console.log(`🚀 Initial scroll to today: ${todayString}, index: ${index}`)
         virtualizer.scrollToIndex(index, { 
           align: 'start', 
           behavior: 'auto' 

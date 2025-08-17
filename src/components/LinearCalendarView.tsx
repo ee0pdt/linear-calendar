@@ -3,7 +3,6 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { useCalDAVImport } from '../hooks/useCalDAVImport'
 import { useEvents } from '../hooks/useEvents'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
-import { useScrollToToday } from '../hooks/useScrollToToday'
 import { AutoRefreshIndicator } from './AutoRefreshIndicator'
 import { DayRing, MonthRing, WeekRing, YearRing } from './TimeRings'
 import { EventDetailsModal } from './EventDetailsModal'
@@ -59,12 +58,9 @@ export function LinearCalendarView() {
   // Scroll and navigation hooks
   const calendarRef = React.useRef<HTMLDivElement>(null)
   const virtualizedGridRef = React.useRef<VirtualizedCalendarGridHandle>(null)
-  const { todayRef } = useScrollToToday({
-    dateRange,
-    setDateRange,
-  })
+  const todayRef = React.useRef<HTMLDivElement>(null) // Direct ref, no legacy hook
 
-  // Override jumpToToday to use virtualized grid
+  // Use virtualized grid for jumping to today
   const jumpToToday = useCallback(() => {
     virtualizedGridRef.current?.scrollToToday()
   }, [])
@@ -86,17 +82,11 @@ export function LinearCalendarView() {
   // Auto-refresh functionality
   const { lastRefreshTime, isRefreshing, refreshStatus, error } = useAutoRefresh(
     (newEvents, fileName) => {
-      console.log('Auto-refresh triggered:', fileName, newEvents.length, 'events')
       setEvents(newEvents, fileName)
     },
     dateRange.startYear,
     dateRange.endYear,
   )
-
-  // Track initial mount timing
-  useEffect(() => {
-    console.log('Component mounted')
-  }, [])
 
   // Event handlers for modals
   const handleEventClick = useCallback((event: CalendarEvent) => {
