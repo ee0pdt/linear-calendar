@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Linear Calendar Mobile",
+    "slug": "linear-calendar-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.linearcalendar.mobile",
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Linear Calendar needs access to your calendar to display and sync your events.",
+        "NSCalendarsFullAccessUsageDescription": "Linear Calendar needs full calendar access to read and display all your events.",
+        "NSRemindersUsageDescription": "Linear Calendar may access reminders associated with your calendar events."
+      }
+    },
+    "android": {
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Linear Calendar needs access to your calendar to display and sync your events."
+        }
+      ]
+    ]
+  }
+}
