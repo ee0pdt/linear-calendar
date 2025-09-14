@@ -5,7 +5,7 @@ import LinearCalendarMobileFeature
 struct LinearCalendarMobileApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LinearCalendarMobileFeature.ContentView()
         }
     }
 }

@@ -2,6 +2,20 @@
 
 ## Project Overview
 
+⚠️ **SUPERSEDED BY MINIMAL ROADMAP** - See `swiftui-minimal-roadmap.md` for actual implementation plan.
+
+This document preserved for reference but represents over-engineered approach for solo evening development.
+
+---
+
+**ACTUAL GOAL:** Replace web app in 2-3 weeks, kill Railway costs, get daily-usable iOS app
+
+**SEE:** `plans/swiftui-minimal-roadmap.md` for realistic implementation plan
+
+---
+
+## Original Enterprise Plan (Reference Only)
+
 Transform the Linear Calendar from web application to premium native iOS app with deep system integration and advanced ADHD-friendly features.
 
 **Target:** iOS 17.0+ SwiftUI app with complete feature parity plus iOS-exclusive enhancements

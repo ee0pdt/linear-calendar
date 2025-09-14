@@ -1,12 +1,19 @@
 import SwiftUI
 
-struct EventListView: View {
-    let events: [CalendarEvent]
-    let isLoading: Bool
-    let onRefresh: () -> Void
-    let onEventTap: (CalendarEvent) -> Void
-    
-    var body: some View {
+public struct EventListView: View {
+    public let events: [CalendarEvent]
+    public let isLoading: Bool
+    public let onRefresh: () -> Void
+    public let onEventTap: (CalendarEvent) -> Void
+
+    public init(events: [CalendarEvent], isLoading: Bool, onRefresh: @escaping () -> Void, onEventTap: @escaping (CalendarEvent) -> Void) {
+        self.events = events
+        self.isLoading = isLoading
+        self.onRefresh = onRefresh
+        self.onEventTap = onEventTap
+    }
+
+    public var body: some View {
         if events.isEmpty && !isLoading {
             // Empty state
             VStack(spacing: 16) {
@@ -47,10 +54,14 @@ struct EventListView: View {
     }
 }
 
-struct EventRowView: View {
-    let event: CalendarEvent
-    
-    var body: some View {
+public struct EventRowView: View {
+    public let event: CalendarEvent
+
+    public init(event: CalendarEvent) {
+        self.event = event
+    }
+
+    public var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Date column
             VStack(alignment: .leading, spacing: 2) {
@@ -116,12 +127,18 @@ struct EventRowView: View {
     }
 }
 
-struct HeaderView: View {
-    let eventCount: String
-    let permissionStatus: String
-    let isLoading: Bool
-    
-    var body: some View {
+public struct HeaderView: View {
+    public let eventCount: String
+    public let permissionStatus: String
+    public let isLoading: Bool
+
+    public init(eventCount: String, permissionStatus: String, isLoading: Bool) {
+        self.eventCount = eventCount
+        self.permissionStatus = permissionStatus
+        self.isLoading = isLoading
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(eventCount)
@@ -152,11 +169,15 @@ struct HeaderView: View {
     }
 }
 
-struct EventDetailView: View {
-    let event: CalendarEvent
+public struct EventDetailView: View {
+    public let event: CalendarEvent
     @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
+
+    public init(event: CalendarEvent) {
+        self.event = event
+    }
+
+    public var body: some View {
         NavigationView {
             List {
                 Section {

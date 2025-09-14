@@ -1,33 +1,33 @@
 import Foundation
-import EventKit
+@preconcurrency import EventKit
 
-struct CalendarEvent: Identifiable, Hashable {
-    let id: String
-    let title: String
-    let startDate: Date
-    let endDate: Date
-    let isAllDay: Bool
-    let location: String?
-    let notes: String?
-    let calendarTitle: String?
-    let calendarColor: String?
+public struct CalendarEvent: Identifiable, Hashable, Sendable {
+    public let id: String
+    public let title: String
+    public let startDate: Date
+    public let endDate: Date
+    public let isAllDay: Bool
+    public let location: String?
+    public let notes: String?
+    public let calendarTitle: String?
+    public let calendarColor: String?
     
     // Computed properties for UI
-    var isToday: Bool {
+    public var isToday: Bool {
         Calendar.current.isDateInToday(startDate)
     }
-    
-    var isPast: Bool {
+
+    public var isPast: Bool {
         endDate < Date()
     }
-    
-    var displayDate: String {
+
+    public var displayDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
         return formatter.string(from: startDate)
     }
-    
-    var displayTime: String? {
+
+    public var displayTime: String? {
         guard !isAllDay else { return nil }
         let formatter = DateFormatter()
         formatter.timeStyle = .short
@@ -35,7 +35,7 @@ struct CalendarEvent: Identifiable, Hashable {
     }
     
     // Initialize from EKEvent
-    init(from ekEvent: EKEvent) {
+    public init(from ekEvent: EKEvent) {
         self.id = ekEvent.eventIdentifier
         self.title = ekEvent.title ?? "Untitled Event"
         self.startDate = ekEvent.startDate
@@ -48,7 +48,7 @@ struct CalendarEvent: Identifiable, Hashable {
     }
     
     // Sample data initializer for previews
-    init(id: String, title: String, startDate: Date, endDate: Date, isAllDay: Bool = false, location: String? = nil, notes: String? = nil, calendarTitle: String? = nil, calendarColor: String? = nil) {
+    public init(id: String, title: String, startDate: Date, endDate: Date, isAllDay: Bool = false, location: String? = nil, notes: String? = nil, calendarTitle: String? = nil, calendarColor: String? = nil) {
         self.id = id
         self.title = title
         self.startDate = startDate
@@ -61,13 +61,13 @@ struct CalendarEvent: Identifiable, Hashable {
     }
 }
 
-enum CalendarPermissionStatus {
+public enum CalendarPermissionStatus: Sendable {
     case notDetermined
     case denied
     case granted
     case restricted
     
-    init(from ekAuthStatus: EKAuthorizationStatus) {
+    public init(from ekAuthStatus: EKAuthorizationStatus) {
         switch ekAuthStatus {
         case .notDetermined:
             self = .notDetermined
@@ -86,7 +86,7 @@ enum CalendarPermissionStatus {
         }
     }
     
-    var displayText: String {
+    public var displayText: String {
         switch self {
         case .notDetermined:
             return "⏳ Calendar permission needed"
@@ -101,7 +101,7 @@ enum CalendarPermissionStatus {
 }
 
 // Sample data for SwiftUI previews
-extension CalendarEvent {
+public extension CalendarEvent {
     static let sampleEvents: [CalendarEvent] = [
         CalendarEvent(
             id: "1",

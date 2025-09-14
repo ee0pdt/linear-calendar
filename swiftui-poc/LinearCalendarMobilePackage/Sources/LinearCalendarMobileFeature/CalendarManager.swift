@@ -1,24 +1,25 @@
 import Foundation
-import EventKit
+@preconcurrency import EventKit
 import SwiftUI
 
 @MainActor
-class CalendarManager: ObservableObject {
-    @Published var events: [CalendarEvent] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
-    @Published var permissionStatus: CalendarPermissionStatus = .notDetermined
-    @Published var availableCalendars: [EKCalendar] = []
+@Observable
+public class CalendarManager {
+    public var events: [CalendarEvent] = []
+    public var isLoading: Bool = false
+    public var errorMessage: String?
+    public var permissionStatus: CalendarPermissionStatus = .notDetermined
+    public var availableCalendars: [EKCalendar] = []
     
     private let eventStore = EKEventStore()
     
-    init() {
+    public init() {
         checkPermissionStatus()
     }
     
     // MARK: - Permission Management
     
-    func checkPermissionStatus() {
+    public func checkPermissionStatus() {
         let currentStatus = EKEventStore.authorizationStatus(for: .event)
         self.permissionStatus = CalendarPermissionStatus(from: currentStatus)
         
@@ -27,7 +28,7 @@ class CalendarManager: ObservableObject {
         }
     }
     
-    func requestPermission() async {
+    nonisolated public func requestPermission() async {
         do {
             // iOS 17+ vs earlier versions compatibility
             let granted: Bool
@@ -62,7 +63,7 @@ class CalendarManager: ObservableObject {
         print("Loaded \(calendars.count) calendars: \(calendars.map { $0.title })")
     }
     
-    func loadEvents() {
+    public func loadEvents() {
         guard permissionStatus == .granted else {
             errorMessage = "Calendar permission required"
             return
@@ -71,9 +72,10 @@ class CalendarManager: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        // Create date range (next 30 days)
-        let startDate = Date()
-        let endDate = Calendar.current.date(byAdding: .day, value: 30, to: startDate) ?? Date()
+        // Create date range (3 years: current year - 1 to current year + 1)
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let startDate = Calendar.current.date(from: DateComponents(year: currentYear - 1, month: 1, day: 1)) ?? Date()
+        let endDate = Calendar.current.date(from: DateComponents(year: currentYear + 2, month: 1, day: 1)) ?? Date()
         
         print("Loading events from \(startDate) to \(endDate)")
         
@@ -123,7 +125,7 @@ class CalendarManager: ObservableObject {
     
     // MARK: - Development Helper
     
-    func loadSampleData() {
+    public func loadSampleData() {
         // For testing when calendar access is not available
         self.events = CalendarEvent.sampleEvents
         self.permissionStatus = .granted
