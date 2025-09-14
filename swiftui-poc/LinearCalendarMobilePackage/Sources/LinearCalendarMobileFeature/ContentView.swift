@@ -58,6 +58,12 @@ struct LinearCalendarView: View {
 
         let currentYear = Calendar.current.component(.year, from: Date())
         self.yearRange = (currentYear - 1)..<(currentYear + 2) // 3 years total
+
+        print("LinearCalendarView: Current year = \(currentYear), Date range = \(yearRange)")
+        print("LinearCalendarView: CalendarManager has \(calendarManager.events.count) events")
+        if !calendarManager.events.isEmpty {
+            print("LinearCalendarView: First few events: \(calendarManager.events.prefix(3).map { "\($0.title) on \($0.startDate)" })")
+        }
     }
 
     var body: some View {
@@ -84,8 +90,13 @@ struct LinearCalendarView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Today") {
+                        let today = Date()
+                        let formatter = DateFormatter()
+                        formatter.dateFormat = "yyyy-MM-dd"
+                        let todayId = formatter.string(from: today)
+
                         withAnimation(.easeInOut(duration: 0.5)) {
-                            proxy.scrollTo("today", anchor: .top)
+                            proxy.scrollTo(todayId, anchor: .top)
                         }
                     }
                     .fontWeight(.medium)
@@ -114,9 +125,15 @@ struct LinearCalendarView: View {
 
     private func eventsForDate(_ date: Date) -> [CalendarEvent] {
         let calendar = Calendar.current
-        return calendarManager.events.filter { event in
+        let events = calendarManager.events.filter { event in
             calendar.isDate(event.startDate, inSameDayAs: date)
         }
+
+        if calendar.isDateInToday(date) && !events.isEmpty {
+            print("Today (\(date)) has \(events.count) events: \(events.map { $0.title })")
+        }
+
+        return events
     }
 
     private func dayId(for date: Date) -> String {
