@@ -139,12 +139,7 @@ struct LinearCalendarView: View {
     private func dayId(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        let dateString = formatter.string(from: date)
-
-        if Calendar.current.isDateInToday(date) {
-            return "today"
-        }
-        return dateString
+        return formatter.string(from: date)
     }
 }
 
