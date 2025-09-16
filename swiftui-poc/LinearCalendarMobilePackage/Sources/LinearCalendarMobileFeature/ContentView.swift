@@ -274,11 +274,18 @@ struct CalendarEventRowView: View {
                 .frame(width: 60, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(event.title)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                    HStack(spacing: 4) {
+                        Text(event.title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+
+                        Spacer()
+
+                        Text(event.emoji)
+                            .font(.subheadline)
+                    }
 
                     if let location = event.location, !location.isEmpty {
                         Label(location, systemImage: "location")
