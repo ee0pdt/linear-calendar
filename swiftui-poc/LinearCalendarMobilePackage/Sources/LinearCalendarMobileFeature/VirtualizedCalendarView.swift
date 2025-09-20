@@ -19,14 +19,15 @@ struct VirtualizedCalendarView: View {
 
         for year in yearRange {
             let startOfYear = calendar.date(from: DateComponents(year: year, month: 1, day: 1))!
-            let startOfNextYear = calendar.date(from: DateComponents(year: year + 1, month: 1, day: 1))!
+            let endOfYear = calendar.date(from: DateComponents(year: year + 1, month: 1, day: 1))!
 
             var currentDate = startOfYear
-            while currentDate < startOfNextYear {
+            while currentDate < endOfYear {
                 days.append(currentDate)
                 currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
             }
         }
+
         return days
     }
 
