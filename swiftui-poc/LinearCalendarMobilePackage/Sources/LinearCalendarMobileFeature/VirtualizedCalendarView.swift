@@ -107,7 +107,7 @@ struct VirtualizedCalendarView: View {
         }
     }
 
-    private func scrollToToday(proxy: ScrollViewReader) {
+    private func scrollToToday(proxy: ScrollViewProxy) {
         let today = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -133,7 +133,7 @@ struct VirtualizedCalendarView: View {
 }
 
 struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+    static let defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }
