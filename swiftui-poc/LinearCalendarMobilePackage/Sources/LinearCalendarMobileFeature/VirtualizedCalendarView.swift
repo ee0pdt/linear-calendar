@@ -7,11 +7,11 @@ struct VirtualizedCalendarView: View {
     let calendarManager: CalendarManager
     let yearRange: Range<Int>
 
-    @State private var visibleRange: Range<Int> = 0..<20
+    @State private var visibleRange: Range<Int> = 0..<50
     @State private var scrollOffset: CGFloat = 0
 
-    private let itemHeight: CGFloat = 120 // Estimated height per day
-    private let overscan: Int = 5 // Extra items to render outside viewport
+    private let itemHeight: CGFloat = 80 // Estimated height per day (more realistic)
+    private let overscan: Int = 10 // Extra items to render outside viewport
 
     private var allDays: [Date] {
         var days: [Date] = []
@@ -48,7 +48,6 @@ struct VirtualizedCalendarView: View {
                                 events: eventsForDate(date),
                                 calendarManager: calendarManager
                             )
-                            .frame(minHeight: itemHeight)
                             .id(dayId(for: date))
                         }
 
@@ -98,8 +97,8 @@ struct VirtualizedCalendarView: View {
     private func updateVisibleRange(for offset: CGFloat, viewportHeight: CGFloat) {
         let scrollPosition = abs(offset)
         let startIndex = max(0, Int(scrollPosition / itemHeight) - overscan)
-        let visibleCount = Int(viewportHeight / itemHeight) + (overscan * 2)
-        let endIndex = min(allDays.count, startIndex + visibleCount)
+        let visibleCount = Int(viewportHeight / itemHeight) + (overscan * 4) // More generous
+        let endIndex = min(allDays.count, startIndex + visibleCount + 20) // Extra buffer
 
         let newRange = startIndex..<endIndex
         if newRange != visibleRange {
