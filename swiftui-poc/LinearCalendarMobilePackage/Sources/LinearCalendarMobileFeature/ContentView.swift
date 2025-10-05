@@ -11,10 +11,7 @@ public struct ContentView: View {
 
     public var body: some View {
         NavigationStack {
-            VirtualizedCalendarView(
-                calendarManager: calendarManager,
-                yearRange: (currentYear - 1)..<(currentYear + 2)
-            )
+            LinearCalendarView(calendarManager: calendarManager)
                 .navigationTitle("Linear Calendar")
                 .navigationBarTitleDisplayMode(.large)
                 .task {
