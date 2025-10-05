@@ -46,7 +46,6 @@ struct VirtualizedCalendarView: View {
                         ForEach(visibleDays, id: \.timeIntervalSince1970) { date in
                             CalendarDayView(
                                 date: date,
-                                events: eventsForDate(date),
                                 calendarManager: calendarManager
                             )
                             .id(dayId(for: date))
@@ -122,13 +121,6 @@ struct VirtualizedCalendarView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: date)
-    }
-
-    private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        let calendar = Calendar.current
-        return calendarManager.events.filter { event in
-            calendar.isDate(event.startDate, inSameDayAs: date)
-        }
     }
 }
 

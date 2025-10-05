@@ -73,7 +73,6 @@ struct LinearCalendarView: View {
                     ForEach(allDaysInRange, id: \.timeIntervalSince1970) { date in
                         CalendarDayView(
                             date: date,
-                            events: eventsForDate(date),
                             calendarManager: calendarManager
                         )
                         .id(dayId(for: date))
@@ -123,19 +122,6 @@ struct LinearCalendarView: View {
         return days
     }
 
-    private func eventsForDate(_ date: Date) -> [CalendarEvent] {
-        let calendar = Calendar.current
-        let events = calendarManager.events.filter { event in
-            calendar.isDate(event.startDate, inSameDayAs: date)
-        }
-
-        if calendar.isDateInToday(date) && !events.isEmpty {
-            print("Today (\(date)) has \(events.count) events: \(events.map { $0.title })")
-        }
-
-        return events
-    }
-
     private func dayId(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -145,11 +131,18 @@ struct LinearCalendarView: View {
 
 struct CalendarDayView: View {
     let date: Date
-    let events: [CalendarEvent]
     let calendarManager: CalendarManager
 
     @State private var showingEventDetail = false
     @State private var selectedEvent: CalendarEvent?
+
+    // Computed property that reacts to calendarManager.events changes
+    private var events: [CalendarEvent] {
+        let calendar = Calendar.current
+        return calendarManager.events.filter { event in
+            calendar.isDate(event.startDate, inSameDayAs: date)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -308,10 +301,11 @@ struct CalendarEventRowView: View {
 }
 
 #Preview("Single Day") {
-    CalendarDayView(
+    let manager = CalendarManager()
+    manager.loadSampleData()
+    return CalendarDayView(
         date: Date(),
-        events: CalendarEvent.sampleEvents,
-        calendarManager: CalendarManager()
+        calendarManager: manager
     )
     .padding()
 }
