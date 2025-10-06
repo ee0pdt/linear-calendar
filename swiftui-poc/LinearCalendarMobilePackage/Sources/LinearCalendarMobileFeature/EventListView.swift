@@ -178,14 +178,14 @@ public struct EventDetailView: View {
     }
 
     public var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(event.title)
                             .font(.title2)
                             .fontWeight(.bold)
-                        
+
                         if event.isAllDay {
                             Label("All Day Event", systemImage: "clock")
                                 .foregroundColor(.blue)
@@ -196,19 +196,19 @@ public struct EventDetailView: View {
                     }
                     .padding(.vertical, 4)
                 }
-                
+
                 if let location = event.location, !location.isEmpty {
                     Section("Location") {
                         Label(location, systemImage: "location")
                     }
                 }
-                
+
                 if let notes = event.notes, !notes.isEmpty {
                     Section("Notes") {
                         Text(notes)
                     }
                 }
-                
+
                 if let calendarTitle = event.calendarTitle {
                     Section("Calendar") {
                         Label(calendarTitle, systemImage: "calendar")

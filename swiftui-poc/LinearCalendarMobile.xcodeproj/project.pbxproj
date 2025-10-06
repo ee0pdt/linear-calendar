@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7886E8E42E79563E00B12032 /* LinearCalendarMobileFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7886E8E32E79563E00B12032 /* LinearCalendarMobileFeature */; };
 		8B41F6832DEDD23B001A66F9 /* LinearCalendarMobileFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 8B41F6822DEDD23B001A66F9 /* LinearCalendarMobileFeature */; };
-		8B41F6852DEDD25C001A66F9 /* LinearCalendarMobileFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 8B41F6842DEDD25C001A66F9 /* LinearCalendarMobileFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,7 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B41F6852DEDD25C001A66F9 /* LinearCalendarMobileFeature in Frameworks */,
+				7886E8E42E79563E00B12032 /* LinearCalendarMobileFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,7 +128,7 @@
 			);
 			name = LinearCalendarMobile;
 			packageProductDependencies = (
-				8B41F6842DEDD25C001A66F9 /* LinearCalendarMobileFeature */,
+				7886E8E32E79563E00B12032 /* LinearCalendarMobileFeature */,
 			);
 			productName = LinearCalendarMobile;
 			productReference = 8B41F6452DEDD0D5001A66F9 /* LinearCalendarMobile.app */;
@@ -186,6 +186,9 @@
 			);
 			mainGroup = 8B41F63C2DEDD0D5001A66F9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7886E8E22E79558A00B12032 /* XCLocalSwiftPackageReference "LinearCalendarMobilePackage" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8B41F6462DEDD0D5001A66F9 /* Products */;
 			projectDirPath = "";
@@ -292,7 +295,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -350,7 +353,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -369,6 +372,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = A74TSF2ERQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_DISPLAY_NAME)";
@@ -392,6 +396,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = A74TSF2ERQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_DISPLAY_NAME)";
@@ -467,12 +472,20 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		7886E8E22E79558A00B12032 /* XCLocalSwiftPackageReference "LinearCalendarMobilePackage" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = LinearCalendarMobilePackage;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		8B41F6822DEDD23B001A66F9 /* LinearCalendarMobileFeature */ = {
+		7886E8E32E79563E00B12032 /* LinearCalendarMobileFeature */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 7886E8E22E79558A00B12032 /* XCLocalSwiftPackageReference "LinearCalendarMobilePackage" */;
 			productName = LinearCalendarMobileFeature;
 		};
-		8B41F6842DEDD25C001A66F9 /* LinearCalendarMobileFeature */ = {
+		8B41F6822DEDD23B001A66F9 /* LinearCalendarMobileFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LinearCalendarMobileFeature;
 		};

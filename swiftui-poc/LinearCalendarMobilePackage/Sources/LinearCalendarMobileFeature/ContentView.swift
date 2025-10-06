@@ -133,7 +133,6 @@ struct CalendarDayView: View {
     let date: Date
     let calendarManager: CalendarManager
 
-    @State private var showingEventDetail = false
     @State private var selectedEvent: CalendarEvent?
 
     // Computed property that reacts to calendarManager.events changes
@@ -179,8 +178,8 @@ struct CalendarDayView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(events) { event in
                         CalendarEventRowView(event: event) {
+                            print("🟢 Setting selectedEvent to: \(event.title)")
                             selectedEvent = event
-                            showingEventDetail = true
                         }
                     }
                 }
@@ -191,10 +190,11 @@ struct CalendarDayView: View {
         }
         .padding(.vertical, 8)
         .background(backgroundColor)
-        .sheet(isPresented: $showingEventDetail) {
-            if let event = selectedEvent {
-                EventDetailView(event: event)
-            }
+        .sheet(item: $selectedEvent) { event in
+            EventDetailView(event: event)
+                .onAppear {
+                    print("🟡 Sheet presenting with event: \(event.title)")
+                }
         }
     }
 
@@ -245,53 +245,57 @@ struct CalendarEventRowView: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(alignment: .top, spacing: 8) {
-                VStack(alignment: .leading, spacing: 2) {
-                    if let timeText = event.displayTime {
-                        Text(timeText)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .fontWeight(.medium)
-                    } else if event.isAllDay {
-                        Text("All Day")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.blue)
-                            .cornerRadius(4)
-                    }
+        HStack(alignment: .top, spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                if let timeText = event.displayTime {
+                    Text(timeText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fontWeight(.medium)
+                } else if event.isAllDay {
+                    Text("All Day")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .fontWeight(.medium)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.blue)
+                        .cornerRadius(4)
                 }
-                .frame(width: 60, alignment: .leading)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Text(event.title)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-
-                        Spacer()
-
-                        Text(event.emoji)
-                            .font(.subheadline)
-                    }
-
-                    if let location = event.location, !location.isEmpty {
-                        Label(location, systemImage: "location")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-
-                Spacer()
             }
+            .frame(width: 60, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(event.title)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+
+                    Spacer()
+
+                    Text(event.emoji)
+                        .font(.subheadline)
+                }
+
+                if let location = event.location, !location.isEmpty {
+                    Label(location, systemImage: "location")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
         }
-        .buttonStyle(PlainButtonStyle())
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .onTapGesture {
+            print("🔵 Event tapped: \(event.title)")
+            onTap()
+        }
     }
 }
 
